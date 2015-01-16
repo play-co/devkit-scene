@@ -5,7 +5,7 @@
   "version": "0.1.0",
   "repository": {},
   "dependencies": {
-    "devkit-entities": "https://github.com/gameclosure/devkit-entities#0.2.4"
+    "devkit-entities": "https://github.com/gameclosure/devkit-entities"
   },
   "scripts": {},
   "devkit": {
