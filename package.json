@@ -2,11 +2,11 @@
   "name": "devkit-scene",
   "author": "Game Closure",
   "description": "The play's scene up on the high stage, the module to play the game.",
-  "version": "0.1.0",
+  "version": "0.1.3",
   "repository": {},
   "dependencies": {
-    "devkit-entities": "https://github.com/gameclosure/devkit-entities",
-    "devkit-parallax": "https://github.com/gameclosure/devkit-parallax"
+    "devkit-entities": "git://github.com/gameclosure/devkit-entities.git",
+    "devkit-parallax": "git://github.com/gameclosure/devkit-parallax.git"
   },
   "scripts": {},
   "devkit": {
