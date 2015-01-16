@@ -6,7 +6,7 @@
   "repository": {},
   "dependencies": {
     "devkit-entities": "https://github.com/gameclosure/devkit-entities",
-    "devkit-parallax": "https://github.com/gameclosure/devkit-parallax",
+    "devkit-parallax": "https://github.com/gameclosure/devkit-parallax"
   },
   "scripts": {},
   "devkit": {
