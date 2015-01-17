@@ -18,6 +18,13 @@ var builtin_collision_handlers = {
       }
     },
 
+  stop:
+    function(entity, opts) {
+      this.resolveCollidingStateWith(entity);
+      this.vx = 0;
+      this.vy = 0;
+    },
+
   gameOver:
     function(entity, opts) {
       this.scene.gameOver(opts);
@@ -40,15 +47,9 @@ exports = Class(Entity, function() {
     // Center the entity by default
     this.x = opts.x || GC.app.bgWidth / 2;
     this.y = opts.y || GC.app.bgHeight / 2;
-/*
-    this.__defineGetter__('vX', this.getVelocityX)
-    this.__defineGetter__('vY', this.getVelocityY)
-    this.__defineGetter__('aX', this.getAccelerationX)
-    this.__defineGetter__('aY', this.getAccelerationY)
-*/}
+  }
 
   this.reset = function() {
-    // TODO fix this to work more than the first time
     this.config.ax = this.ax;
     this.config.ay = this.ay;
     this.config.vx = this.vx;
@@ -57,13 +58,13 @@ exports = Class(Entity, function() {
   }
 
   this.update = function(dt) {
+    supr.update.call(this, dt * .01);
     for (var i in this.collision_handlers) {
       c = this.collision_handlers[i];
       if (this.collidesWith(c.entity)) {
         c.handler.call(this, c.entity, c.opts)
       }
     }
-    supr.update.call(this, dt * .01);
   }
 
   this.destroy = function() {
@@ -79,7 +80,6 @@ exports = Class(Entity, function() {
    * ~ callback function for an onTouch event
    */
   this.onTouch = function(cb) {
-//    this.view.on('InputSelect', cb);
     this.view.onInputSelect = cb;
   }
 
@@ -115,26 +115,4 @@ exports = Class(Entity, function() {
       })
     }
   }
-/*
-  this.setAcceleration = function(x, y) {
-    this.ax = x * ACCELERATION_MULTIPLIER;
-    this.ay = y * ACCELERATION_MULTIPLIER;
-  }
-
-  this.setAccelerationX = function(x) { this.setAcceleration(x, 0) }
-  this.setAccelerationY = function(y) { this.setAcceleration(y, 0) }
-  
-  this.getAccelerationX = function(x) { return this.ax / ACCELERATION_MULTIPLIER }
-  this.getAccelerationY = function(y) { return this.ay / ACCELERATION_MULTIPLIER }
-  
-  this.setVelocity = function(x, y) {
-    this.ax = x * VELOCITY_MULTIPLIER;
-    this.ay = y * VELOCITY_MULTIPLIER;
-  }
-
-  this.setVelocityX = function(x) { this.setVelocity(x, 0) }
-  this.setVelocityY = function(y) { this.setVelocity(y, 0) }
-  
-  this.getVelocityX = function(x) { return this.ax / VELOCITY_MULTIPLIER }
-  this.getVelocityY = function(y) { return this.ay / VELOCITY_MULTIPLIER }*/
 })

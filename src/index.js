@@ -8,16 +8,7 @@ import entities.EntityPool as EntityPool;
 import parallax.Parallax as Parallax;
 
 import .Actor;
-
-// Import weeby if it exists
-var Application
-try {
-  weeby = jsio('import weeby');
-  Application = weeby.Application
-} catch (e) {
-  weeby = null;
-  Application = GC.Application;
-}
+import .Collidable;
 
 var DEFAULT_TEXT_WIDTH = 100;
 var DEFAULT_TEXT_HEIGHT = 50;
@@ -36,6 +27,15 @@ randRange = function(low, high, bipolar) {
 }
 
 scene = function (defaultModeFun) {
+  // Potentially include weeby
+  if (scene.enableWeeby) {
+    weeby = jsio('import weeby');
+    var Application = weeby.Application;
+  } else {
+    weeby = null;
+    var Application = GC.Application;
+  }
+
   scene.mode('default', defaultModeFun)
 
   return Class(Application, function() {
@@ -64,26 +64,33 @@ scene = function (defaultModeFun) {
       this.bgOffsetX = 0
       this.bgOffsetY = 0
 
-      scene.screen.left   = new Entity({ parent: this.staticView })
-      scene.screen.right  = new Entity({ parent: this.staticView })
-      scene.screen.top    = new Entity({ parent: this.staticView })
-      scene.screen.bottom = new Entity({ parent: this.staticView })
+      // TODO maybe infinite in one dimension for each of these?
+      w = this.bgWidth;
+      h = this.bgHeight;
+      scene.screen.left   = new Collidable(-10,  -h,  10, 3*h, { parent: this.staticView });
+      scene.screen.right  = new Collidable(  w,  -h,  10, 3*h, { parent: this.staticView });
+      scene.screen.top    = new Collidable( -w, -10, 3*w,  10, { parent: this.staticView });
+      scene.screen.bottom = new Collidable( -w,   h, 3*w,  10, { parent: this.staticView });
+
+      // account for starting the game without weeby
+      if (weeby === null) {
+        this.launchUI = bind(this, this.onStartGame());
+      }
     }
 
     /**
-     * launchUI
+     * onStartGame
      */
-    this.launchUI = function() {
+    this.onStartGame = function() {
       // show the splash screen
       if (modes.splash) {
         this.reset('splash')
 
         // start the game when you click
         self = this
-        this.overlay.onInputSelect = function() {
-          delete self.overlay.onInputSelect;
+        scene.screen.onOneTouch(function() {
           self.reset('default');
-        }
+        })
       } else {
         this.reset()
       }
@@ -109,9 +116,10 @@ scene = function (defaultModeFun) {
       delete this.scoreView;
 
       // Clear the tallies
-      this.actors = []
-      this.bgLayers = []
-      this.extraViews = []
+      this.actors = [];
+      this.bgLayers = [];
+      this.extraViews = [];
+      this.ghosts = [];
       scene.score = 0;
 
       // Let's reboot the fun!
@@ -127,13 +135,15 @@ scene = function (defaultModeFun) {
       this.parallax.reset(this.bgLayers);
 
       // Now let us frame the scene.
-      // TODO maybe infinite in one dimension for each of these?
-      w = this.bgWidth
-      h = this.bgHeight
-      scene.screen.left.reset  (0, 0, { isAnchored: true, hitBounds: { x: -10, y:  -h, w:  10, h: 3*h } })
-      scene.screen.right.reset (0, 0, { isAnchored: true, hitBounds: { x:   w, y:  -h, w:  10, h: 3*h } })
-      scene.screen.top.reset   (0, 0, { isAnchored: true, hitBounds: { x:  -w, y: -10, w: 3*w, h:  10 } })
-      scene.screen.bottom.reset(0, 0, { isAnchored: true, hitBounds: { x:  -w, y:   h, w: 3*w, h:  10 } })
+      scene.screen.left.reset();
+      scene.screen.right.reset();
+      scene.screen.top.reset();
+      scene.screen.bottom.reset();
+
+      // Be wary, for ghosts haunt the stage
+      for (var k in this.ghosts) {
+        this.ghosts[k].reset();
+      }
 
       // The curtain rises, and Act 1 begins!
       this.game_running = true
@@ -143,11 +153,13 @@ scene = function (defaultModeFun) {
      * setScreenDimensions
      */
     this.setScreenDimensions = function(w, h) {
-      var ds = device.screen
-      var vs = this.view.style
+      var ds = device.screen;
+      var vs = this.view.style;
 
-      this.bgWidth = w
-      this.bgHeight = h
+      this.bgWidth = w;
+      this.bgHeight = h;
+      scene.screen.width = w;
+      scene.screen.height = h;
 
       vs.width  = w > h ? ds.width  * (h / ds.height) : w
       vs.height = w < h ? ds.height * (w / ds.width ) : h
@@ -174,9 +186,34 @@ scene = function (defaultModeFun) {
   })
 }
 
-scene.screen = {};
 scene.score = 0;
 scene.usingScore = false;
+
+scene.screen = {
+  /**
+   * screen.onTouch(cb) - register event that happens on the screen being touched
+   */
+  onTouch:
+    function(cb) {
+      GC.app.overlay.onInputSelect = cb;
+    },
+
+  offTouch:
+    function() {
+      delete GC.app.overlay.onInputSelect;
+    },
+
+  /**
+   * screen.onOneTouch(cb) - Like onTouch, but only happens once
+   */
+  onOneTouch:
+    function(cb) {
+      GC.app.overlay.onInputSelect = function() {
+        scene.screen.offTouch();
+        cb();
+      }
+    }
+};
 
 /**
  * createActor
@@ -185,14 +222,29 @@ scene.usingScore = false;
  * Casting is important. The right actor must play the right part, lest the play be faulty.
  */
 scene.createActor = function(resource) {
-  a = new Actor(scene, {
+  var a = new Actor(scene, {
     image: resource,
     parent: GC.app.view,
-  })
-  GC.app.actors.push(a)
-  return a
+  });
+  GC.app.actors.push(a);
+  return a;
 }
 
+/**
+ * addCollidable(x, y, w, h, [opts])  - create a collidable box
+ * addCollidable(x, y, r, [opts])     - create a collidable circle
+ */
+scene.addCollidable = function(x, y, w, h, opts) {
+  opts = opts || {};
+  opts.parent = GC.app.staticView;
+  var c = new Collidable(x, y, w, h, opts);
+  GC.app.ghosts.push(c);
+  return c;
+}
+
+/**
+ * addBackgroundLayer
+ */
 scene.addBackgroundLayer = function(resource, opts0) {
   opts0 = opts0 || {};
   opts = {
@@ -316,10 +368,9 @@ scene.gameOver = function(opts) {
         scene.centerText('Game over!')
       }
 
-      GC.app.overlay.onInputSelect = function() {
-        delete GC.app.overlay.onInputSelect;
-        GC.app.reset()
-      }
+      scene.screen.onOneTouch(function () {
+        GC.app.reset();
+      })
     }
   }
 }
