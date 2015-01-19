@@ -33,13 +33,12 @@ var builtin_collision_handlers = {
 
 
 exports = Class(Entity, function() {
-  var VELOCITY_MULTIPLIER = 2;
-  var ACCELERATION_MULTIPLIER = 1; 
   var supr = Entity.prototype;
 
-  this.init = function(scene, opts) {
+  this.init = function(scene, viewClass, opts) {
+    this.viewClass = viewClass;
     supr.init.call(this, opts);
-    
+
     this.scene = scene;
     this.config = opts;
     this.collision_handlers = [];
@@ -55,6 +54,15 @@ exports = Class(Entity, function() {
     this.config.vx = this.vx;
     this.config.vy = this.vy;
     supr.reset.call(this, this.x, this.y, this.config);
+
+    if (this.view.resetAllAnimations) {
+      this.view.resetAllAnimations(this.config);
+
+      // FIXME This is a hack to get around devkit-entities not knowing how to autosize SpriteViews
+      //       but knowing how to autosize ImageViews if the config's image field is set.
+      this.config.image = this.view.getFrame(this.config.defaultAnimation, 0)._originalURL;
+      supr.reset.call(this, this.x, this.y, this.config);
+    }
   }
 
   this.update = function(dt) {
@@ -88,7 +96,7 @@ exports = Class(Entity, function() {
    * ~ collidable-n    a object or list of objects that can be collided with
    * ~ handler         a string that identifies a handler or a callback function
    * ~ options         a list of extra options to be passed to the handler
-   * 
+   *
    * TODO add support for entity pools
    */
   this.collision = function() {

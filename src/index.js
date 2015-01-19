@@ -2,13 +2,14 @@ import device;
 import ui.View as View;
 import ui.TextView as TextView;
 import ui.ImageView as ImageView;
+import ui.SpriteView as SpriteView;
 import ui.ScoreView as ScoreView;
 import entities.Entity as Entity;
 import entities.EntityPool as EntityPool;
 import parallax.Parallax as Parallax;
 
 import .Actor;
-import .Collidable;
+import .Ghost;
 
 var DEFAULT_TEXT_WIDTH = 100;
 var DEFAULT_TEXT_HEIGHT = 50;
@@ -20,6 +21,12 @@ var merge = function(a, b) {
   return a;
 }
 
+/**
+ * randRange(low, high, bipolar = false)
+ * ~ low        The minimum value to generate
+ * ~ high       The maximum value to generate
+ * ~ bipolar    If true, will 1/2 the time negate the generated value
+ */
 randRange = function(low, high, bipolar) {
   var n = Math.random() * (high - low) + low;
   if (bipolar && Math.random() < .5) n *= -1;
@@ -36,7 +43,7 @@ scene = function (defaultModeFun) {
     var Application = GC.Application;
   }
 
-  scene.mode('default', defaultModeFun)
+  scene.mode('default', defaultModeFun);
 
   return Class(Application, function() {
     /**
@@ -44,11 +51,11 @@ scene = function (defaultModeFun) {
      */
     this.initUI = function() {
       // I am not sure about these defaults; maybe we should default to device dimensions
-      this.setScreenDimensions(576, 1024)
+      this.setScreenDimensions(576, 1024);
 
       // This comment is to inform you that default mode is 'default'
       this.mode = 'default';
-      
+
       // The superview for all views that do not except possible input
       this.staticView = new View({
         parent: this.view,
@@ -58,19 +65,19 @@ scene = function (defaultModeFun) {
         blockEvents: true,
       })
 
-      this.parallax = new Parallax({ parent: this.staticView })
-      this.overlay = new View({ parent: this.view, infinite: true })
+      this.parallax = new Parallax({ parent: this.staticView });
+      this.overlay = new View({ parent: this.view, infinite: true });
 
-      this.bgOffsetX = 0
-      this.bgOffsetY = 0
+      this.bgOffsetX = 0;
+      this.bgOffsetY = 0;
 
       // TODO maybe infinite in one dimension for each of these?
       w = this.bgWidth;
       h = this.bgHeight;
-      scene.screen.left   = new Collidable(-10,  -h,  10, 3*h, { parent: this.staticView });
-      scene.screen.right  = new Collidable(  w,  -h,  10, 3*h, { parent: this.staticView });
-      scene.screen.top    = new Collidable( -w, -10, 3*w,  10, { parent: this.staticView });
-      scene.screen.bottom = new Collidable( -w,   h, 3*w,  10, { parent: this.staticView });
+      scene.screen.left   = new Ghost(-10,  -h,  10, 3*h, { parent: this.staticView });
+      scene.screen.right  = new Ghost(  w,  -h,  10, 3*h, { parent: this.staticView });
+      scene.screen.top    = new Ghost( -w, -10, 3*w,  10, { parent: this.staticView });
+      scene.screen.bottom = new Ghost( -w,   h, 3*w,  10, { parent: this.staticView });
 
       // account for starting the game without weeby
       if (weeby === null) {
@@ -84,7 +91,7 @@ scene = function (defaultModeFun) {
     this.onStartGame = function() {
       // show the splash screen
       if (modes.splash) {
-        this.reset('splash')
+        this.reset('splash');
 
         // start the game when you click
         self = this
@@ -92,7 +99,7 @@ scene = function (defaultModeFun) {
           self.reset('default');
         })
       } else {
-        this.reset()
+        this.reset();
       }
     }
 
@@ -106,11 +113,11 @@ scene = function (defaultModeFun) {
 
       // Cleanup after the last performance before begining a new one
       for (var k in this.actors) {
-        this.actors[k].destroy()
+        this.actors[k].destroy();
       }
 
       for (var k in this.extraViews) {
-        this.extraViews[k].removeFromSuperview()
+        this.extraViews[k].removeFromSuperview();
       }
 
       delete this.scoreView;
@@ -128,7 +135,7 @@ scene = function (defaultModeFun) {
 
       // Let the players take their places.
       for (var k in this.actors) {
-        this.actors[k].reset()
+        this.actors[k].reset();
       }
 
       // The backdrop falls into place.
@@ -146,7 +153,7 @@ scene = function (defaultModeFun) {
       }
 
       // The curtain rises, and Act 1 begins!
-      this.game_running = true
+      this.game_running = true;
     }
 
     /**
@@ -161,9 +168,9 @@ scene = function (defaultModeFun) {
       scene.screen.width = w;
       scene.screen.height = h;
 
-      vs.width  = w > h ? ds.width  * (h / ds.height) : w
-      vs.height = w < h ? ds.height * (w / ds.width ) : h
-      vs.scale  = w > h ? ds.height / h : ds.width / w
+      vs.width  = w > h ? ds.width  * (h / ds.height) : w;
+      vs.height = w < h ? ds.height * (w / ds.width ) : h;
+      vs.scale  = w > h ? ds.height / h : ds.width / w;
     }
 
     /**
@@ -171,17 +178,17 @@ scene = function (defaultModeFun) {
      */
     this.tick = function(dt) {
       for (var k in this.actors) {
-        this.actors[k].update(dt)
+        this.actors[k].update(dt);
       }
 
-      this.bgOffsetX += 1 
-      this.bgOffsetY += 1
-      this.parallax.update(this.bgOffsetX, this.bgOffsetY)
+      this.bgOffsetX += 1;
+      this.bgOffsetY += 1;
+      this.parallax.update(this.bgOffsetX, this.bgOffsetY);
 
-      scene.screen.left.update(dt)
-      scene.screen.right.update(dt)
-      scene.screen.top.update(dt)
-      scene.screen.bottom.update(dt)
+      scene.screen.left.update(dt);
+      scene.screen.right.update(dt);
+      scene.screen.top.update(dt);
+      scene.screen.bottom.update(dt);
     }
   })
 }
@@ -216,28 +223,55 @@ scene.screen = {
 };
 
 /**
- * createActor
- * ~ resource    as of now simply a path to an image
+ * createActor(imagePath, [opts])
+ * ~ imagePath    A path to a static image
+ * ~ opts         Additional options to pass to the entity
+ *
+ * createActor(url, animation, [opts])
+ * ~ url          The URL of the resource
+ * ~ animation    The animation name of the resource
+ * ~ opts         Additional options to pass to the entity
  *
  * Casting is important. The right actor must play the right part, lest the play be faulty.
  */
-scene.createActor = function(resource) {
-  var a = new Actor(scene, {
-    image: resource,
-    parent: GC.app.view,
-  });
+scene.createActor = function(resource, animation, opts) {
+  if (typeof(animation) === 'object') {
+    opts = animation;
+    animation = undefined;
+  }
+
+  opts = opts || {};
+  opts.parent = GC.app.view;
+
+  if (animation === undefined) {
+    // static image
+    var viewClass = ImageView;
+    opts.image = resource;
+  } else {
+    // animated image
+    var viewClass = SpriteView;
+    opts.url = resource;
+    opts.defaultAnimation = animation;
+    opts.loop = true;
+    opts.autoStart = true;
+    opts.width = 100;
+    opts.height = 100;
+    opts.visible = true;
+  }
+
+  var a = new Actor(scene, viewClass, opts);
   GC.app.actors.push(a);
   return a;
 }
 
 /**
- * addCollidable(x, y, w, h, [opts])  - create a collidable box
- * addCollidable(x, y, r, [opts])     - create a collidable circle
+ * addGhost(x, y, w, h, [opts])  - create a collidable box
+ * addGhost(x, y, r, [opts])     - create a collidable circle
  */
-scene.addCollidable = function(x, y, w, h, opts) {
+scene.addGhost = function(x, y, w, h, opts) {
   opts = opts || {};
   opts.parent = GC.app.staticView;
-  var c = new Collidable(x, y, w, h, opts);
+  var c = new Ghost(x, y, w, h, opts);
   GC.app.ghosts.push(c);
   return c;
 }
@@ -253,12 +287,12 @@ scene.addBackgroundLayer = function(resource, opts0) {
     yGapRange: [0, 0],
     pieceOptions: [{ image: resource }],
   };
-  
+
   if (opts0.scrollY && !opts0.scrollX) {
     opts.xCanSpawn = false;
     opts.xCanRelease = false;
   }
-  
+
   if (!opts0.scrollY && opts0.scrollX) {
     opts.yCanSpawn = false;
     opts.yCanRelease = false;
@@ -268,7 +302,7 @@ scene.addBackgroundLayer = function(resource, opts0) {
   opts.yMultiplier = opts0.scrollY || 0;
   delete opts0.scrollX;
   delete opts0.scrollY;
-  
+
   GC.app.bgLayers.push(merge(opts, opts0));
   return opts
 }
@@ -297,11 +331,11 @@ scene.drawText = function(x, y, text, opts) {
 scene.horCenterText = function(y, text, opts) {
   opts = opts || {};
   opts.width = GC.app.view.style.width;
-  scene.drawText(0, y, text, opts)
+  scene.drawText(0, y, text, opts);
 }
 
 scene.centerText = function(text, opts) {
-  scene.horCenterText(GC.app.bgHeight / 2 - DEFAULT_TEXT_HEIGHT / 2, text, opts)
+  scene.horCenterText(GC.app.bgHeight / 2 - DEFAULT_TEXT_HEIGHT / 2, text, opts);
 }
 
 /**
@@ -352,20 +386,20 @@ scene.getScore = function() {
  */
 scene.gameOver = function(opts) {
   if (GC.app.game_running) {
-    GC.app.game_running = false
+    GC.app.game_running = false;
 
     for (var k in GC.app.actors) {
-      GC.app.actors[k].stop()
+      GC.app.actors[k].stop();
     }
 
     if (!opts.no_gameover_screen) {
       var bgHeight = GC.app.bgHeight;
 
       if (scene.usingScore) {
-        scene.horCenterText(bgHeight / 2 - DEFAULT_TEXT_HEIGHT, 'Game over!')
-        scene.horCenterText(bgHeight / 2, 'Your score was ' + scene.score)
+        scene.horCenterText(bgHeight / 2 - DEFAULT_TEXT_HEIGHT, 'Game over!');
+        scene.horCenterText(bgHeight / 2, 'Your score was ' + scene.score);
       } else {
-        scene.centerText('Game over!')
+        scene.centerText('Game over!');
       }
 
       scene.screen.onOneTouch(function () {
@@ -376,16 +410,25 @@ scene.gameOver = function(opts) {
 }
 
 /**
- * mode(name, resetFun, opts = {})
+ * mode(name, resetFun, opts = {}) - Set a mode to the given function
  * ~ name    the name of the mode to set
  * ~ fun     the function to call from reset, whenever the mode resets or begins
  * ~ opts    options to pass to the mode function
+ *
+ * mode(name) - Switches to the given mode
+ * ~ name    the name of the mode to switch to
  */
 scene.mode = function(name, fun, opts) {
-  opts = opts || {}
-  modes[name] = {
-    fun: fun,
-    opts: opts
+  if (fun !== undefined) {
+    // Set a mode to a function
+    opts = opts || {};
+    modes[name] = {
+      fun: fun,
+      opts: opts
+    };
+  } else {
+    // Change to the given mode
+    GC.app.reset(name);
   }
 }
 
@@ -393,7 +436,7 @@ scene.mode = function(name, fun, opts) {
  * splash(fun, opts)
  */
 scene.splash = function(fun, opts) {
-  scene.mode('splash', fun, opts)
+  scene.mode('splash', fun, opts);
 }
 
-exports = scene
+exports = scene;
