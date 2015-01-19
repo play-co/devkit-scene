@@ -118,8 +118,8 @@ exports = Class(Entity, function() {
     for (var i in args) {
       this.collision_handlers.push({
         entity: args[i],
-				handler: handler,
-				opts: opts
+        handler: handler,
+        opts: opts
       })
     }
   }
