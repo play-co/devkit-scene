@@ -8,30 +8,14 @@ import entities.Entity as Entity;
 import entities.EntityPool as EntityPool;
 import parallax.Parallax as Parallax;
 
+import .util;
 import .Actor;
 import .Ghost;
 
-var DEFAULT_TEXT_WIDTH = 100;
+var DEFAULT_TEXT_WIDTH = 200;
 var DEFAULT_TEXT_HEIGHT = 50;
 
 var modes = {}
-
-var merge = function(a, b) {
-  for (var k in b) a[k] = b[k];
-  return a;
-}
-
-/**
- * randRange(low, high, bipolar = false)
- * ~ low        The minimum value to generate
- * ~ high       The maximum value to generate
- * ~ bipolar    If true, will 1/2 the time negate the generated value
- */
-randRange = function(low, high, bipolar) {
-  var n = Math.random() * (high - low) + low;
-  if (bipolar && Math.random() < .5) n *= -1;
-  return n;
-}
 
 scene = function (defaultModeFun) {
   // Potentially include weeby
@@ -78,17 +62,20 @@ scene = function (defaultModeFun) {
       scene.screen.right  = new Ghost(  w,  -h,  10, 3*h, { parent: this.staticView });
       scene.screen.top    = new Ghost( -w, -10, 3*w,  10, { parent: this.staticView });
       scene.screen.bottom = new Ghost( -w,   h, 3*w,  10, { parent: this.staticView });
+    }
 
-      // account for starting the game without weeby
+    this.launchUI = function() {
       if (weeby === null) {
-        this.launchUI = bind(this, this.onStartGame());
+        this.startGame();
+      } else {
+        Application.prototype.launchUI.call(this);
       }
     }
 
     /**
-     * onStartGame
+     * startGame
      */
-    this.onStartGame = function() {
+    this.startGame = function() {
       // show the splash screen
       if (modes.splash) {
         this.reset('splash');
@@ -174,7 +161,7 @@ scene = function (defaultModeFun) {
     }
 
     /**
-     * tick
+     * tick tock
      */
     this.tick = function(dt) {
       for (var k in this.actors) {
@@ -196,6 +183,9 @@ scene = function (defaultModeFun) {
 scene.score = 0;
 scene.usingScore = false;
 
+/**
+ * A wonderous object that describes the screen
+ */
 scene.screen = {
   /**
    * screen.onTouch(cb) - register event that happens on the screen being touched
@@ -303,7 +293,7 @@ scene.addBackgroundLayer = function(resource, opts0) {
   delete opts0.scrollX;
   delete opts0.scrollY;
 
-  GC.app.bgLayers.push(merge(opts, opts0));
+  GC.app.bgLayers.push(combine(opts, opts0));
   return opts
 }
 
@@ -317,7 +307,7 @@ scene.addBackgroundLayer = function(resource, opts0) {
  * This function perhaps draws text to the screen.
  */
 scene.drawText = function(x, y, text, opts) {
-  GC.app.extraViews.push(new TextView(merge({
+  GC.app.extraViews.push(new TextView(combine({
     superview: GC.app.staticView,
     text: text,
     x: x,
@@ -345,7 +335,7 @@ scene.showScore = function(x, y, opts) {
   var app = GC.app;
   if (app.scoreView) return;
 
-  app.scoreView = new TextView(merge({
+  app.scoreView = new TextView(combine({
     parent: app.staticView,
     x: x,
     y: y,
@@ -389,7 +379,7 @@ scene.gameOver = function(opts) {
     GC.app.game_running = false;
 
     for (var k in GC.app.actors) {
-      GC.app.actors[k].stop();
+      GC.app.actors[k].stopInput();
     }
 
     if (!opts.no_gameover_screen) {

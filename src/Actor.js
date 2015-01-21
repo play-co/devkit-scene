@@ -49,7 +49,11 @@ exports = Class(Entity, function() {
     this.y = opts.y || GC.app.bgHeight / 2;
   }
 
-  this.reset = function() {
+  this.reset = function(x, y, config) {
+    this.x = x || this.x;
+    this.y = y || this.y;
+    this.config = config || this.config;
+
     this.has_reset = true;
     this.config.ax = this.ax;
     this.config.ay = this.ay;
@@ -65,6 +69,8 @@ exports = Class(Entity, function() {
       this.config.image = this.view.getFrame(this.config.defaultAnimation, 0)._originalURL;
       supr.reset.call(this, this.x, this.y, this.config);
 
+      // The purpose of this is to start animations that could not be started before calling the
+      // resetAllAnimations function. These variables are set in play() and loop()
       this.initial_function.apply(this, this.initial_arguments);
     }
   }
@@ -79,12 +85,19 @@ exports = Class(Entity, function() {
     }
   }
 
+  /**
+   * This function destroys the Actor, as in, removes it from the scene
+   */
   this.destroy = function() {
     this.view.removeFromSuperview()
   }
 
-  this.stop = function() {
-    delete this.view.onInputSelect;
+  /**
+   * This function stops all input to the actor
+   */
+  this.stopInput = function() {
+    delete this.view.onInputStart;
+    return this;
   }
 
   /**
@@ -92,7 +105,7 @@ exports = Class(Entity, function() {
    * ~ callback function for an onTouch event
    */
   this.onTouch = function(cb) {
-    this.view.onInputSelect = cb;
+    this.view.onInputStart = cb;
   }
 
   /**
@@ -135,7 +148,9 @@ exports = Class(Entity, function() {
     if (this.has_reset) {
       this.view.startAnimation(animation, {
         loop: false,
-        callback: function () { this.view.pause(); }.bind(this)
+        callback: function () {
+          this.view.pause();
+        }.bind(this)
       });
       this.view.resume();
     } else {
@@ -156,4 +171,4 @@ exports = Class(Entity, function() {
       this.initial_arguments = Array.prototype.slice.call(arguments);
     }
   }
-})
+});
