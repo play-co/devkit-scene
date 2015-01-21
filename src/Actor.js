@@ -1,7 +1,7 @@
 import entities.Entity as Entity;
 
 /**
- * An object that contains a collection of builtin collision handlers 
+ * An object that contains a collection of builtin collision handlers
  */
 var builtin_collision_handlers = {
   bounce:
@@ -39,6 +39,7 @@ exports = Class(Entity, function() {
     this.viewClass = viewClass;
     supr.init.call(this, opts);
 
+    this.has_reset = false;
     this.scene = scene;
     this.config = opts;
     this.collision_handlers = [];
@@ -49,6 +50,7 @@ exports = Class(Entity, function() {
   }
 
   this.reset = function() {
+    this.has_reset = true;
     this.config.ax = this.ax;
     this.config.ay = this.ay;
     this.config.vx = this.vx;
@@ -62,6 +64,8 @@ exports = Class(Entity, function() {
       //       but knowing how to autosize ImageViews if the config's image field is set.
       this.config.image = this.view.getFrame(this.config.defaultAnimation, 0)._originalURL;
       supr.reset.call(this, this.x, this.y, this.config);
+
+      this.initial_function.apply(this, this.initial_arguments);
     }
   }
 
@@ -120,7 +124,36 @@ exports = Class(Entity, function() {
         entity: args[i],
         handler: handler,
         opts: opts
-      })
+      });
+    }
+  }
+
+  /**
+   * play(animation)
+   */
+  this.play = function(animation) {
+    if (this.has_reset) {
+      this.view.startAnimation(animation, {
+        loop: false,
+        callback: function () { this.view.pause(); }.bind(this)
+      });
+      this.view.resume();
+    } else {
+      this.initial_function = this.play;
+      this.initial_arguments = Array.prototype.slice.call(arguments);
+    }
+  }
+
+  /**
+   * loop(animation)
+   */
+  this.loop = function(animation) {
+    if (this.has_reset) {
+      this.view.startAnimation(animation, { loop: true });
+      this.view.resume();
+    } else {
+      this.initial_function = this.loop;
+      this.initial_arguments = Array.prototype.slice.call(arguments);
     }
   }
 })

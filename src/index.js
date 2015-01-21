@@ -223,40 +223,36 @@ scene.screen = {
 };
 
 /**
- * createActor(imagePath, [opts])
- * ~ imagePath    A path to a static image
- * ~ opts         Additional options to pass to the entity
+ * createActor(resource, opts = {})
  *
- * createActor(url, animation, [opts])
- * ~ url          The URL of the resource
- * ~ animation    The animation name of the resource
- * ~ opts         Additional options to pass to the entity
+ * Possible resource object structures:
+ *   {
+ *     type: 'image',
+ *     url: 'url/path/to/image.png',
+ *   }
+ *
+ *   {
+ *     type: 'sprite',
+ *     url: 'url/prefix/for/sprite',
+ *     framerate: 12
+ *   }
  *
  * Casting is important. The right actor must play the right part, lest the play be faulty.
  */
-scene.createActor = function(resource, animation, opts) {
-  if (typeof(animation) === 'object') {
-    opts = animation;
-    animation = undefined;
-  }
-
+scene.createActor = function(resource, opts) {
   opts = opts || {};
   opts.parent = GC.app.view;
 
-  if (animation === undefined) {
+  if (resource.type === 'image') {
     // static image
     var viewClass = ImageView;
-    opts.image = resource;
-  } else {
+    opts.image = resource.url;
+  } else
+  if (resource.type === 'sprite') {
     // animated image
     var viewClass = SpriteView;
-    opts.url = resource;
-    opts.defaultAnimation = animation;
-    opts.loop = true;
-    opts.autoStart = true;
-    opts.width = 100;
-    opts.height = 100;
-    opts.visible = true;
+    opts.url = resource.url;
+    opts.autoStart = false;
   }
 
   var a = new Actor(scene, viewClass, opts);
@@ -280,12 +276,16 @@ scene.addGhost = function(x, y, w, h, opts) {
  * addBackgroundLayer
  */
 scene.addBackgroundLayer = function(resource, opts0) {
+  if (resource.type !== 'image') {
+    throw 'Background layers must be images, but you gave me a ' + resource.type + '!';
+  }
+
   opts0 = opts0 || {};
   opts = {
     zIndex: -1,
     xGapRange: [0, 0],
     yGapRange: [0, 0],
-    pieceOptions: [{ image: resource }],
+    pieceOptions: [{ image: resource.url }],
   };
 
   if (opts0.scrollY && !opts0.scrollX) {
