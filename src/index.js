@@ -34,19 +34,25 @@ scene = function (defaultModeFun) {
      * initUI
      */
     this.initUI = function() {
+      if (weeby === null) {
+        this.rootView = this.view;
+      } else {
+        this.rootView = weeby.getGameView();
+      }
+
       // This comment is to inform you that default mode is 'default'
       this.mode = 'default';
 
       // The superview for all views that do not except possible input
       this.staticView = new View({
-        parent: this.view,
+        parent: this.rootView,
         width:  scene.screen.width,
         height: scene.screen.height,
         blockEvents: true,
       })
 
       this.parallax = new Parallax({ parent: this.staticView });
-      this.overlay = new View({ parent: this.view, infinite: true });
+      this.overlay = new View({ parent: this.rootView, infinite: true });
 
       this.bgOffsetX = 0;
       this.bgOffsetY = 0;
@@ -61,18 +67,13 @@ scene = function (defaultModeFun) {
     }
 
     this.launchUI = function() {
-      if (weeby === null) {
-        this.startGame();
-      } else {
-        Application.prototype.launchUI.call(this);
-      }
+      this.startGame();
     }
 
     /**
      * startGame
      */
     this.startGame = function() {
-      this.setScreenDimensions();
       // show the splash screen
       if (modes.splash) {
         this.reset('splash');
@@ -91,9 +92,9 @@ scene = function (defaultModeFun) {
      * reset
      */
     this.reset = function(mode) {
-      if (mode) {
-        this.mode = mode;
-      }
+      this.setScreenDimensions();
+
+      if (mode) this.mode = mode;
 
       // Cleanup after the last performance before begining a new one
       for (var k in this.actors) {
@@ -145,7 +146,7 @@ scene = function (defaultModeFun) {
      */
     this.setScreenDimensions = function(w, h) {
       var ds = device.screen;
-      var vs = this.view.style;
+      var vs = this.rootView.style;
 
       w = scene.screen.width;
       h = scene.screen.height;
@@ -230,7 +231,7 @@ scene.screen = {
  */
 scene.createActor = function(resource, opts) {
   opts = opts || {};
-  opts.parent = GC.app.view;
+  opts.parent = GC.app.rootView;
 
   if (resource.type === 'image') {
     // static image
@@ -319,7 +320,7 @@ scene.drawText = function(x, y, text, opts) {
 
 scene.horCenterText = function(y, text, opts) {
   opts = opts || {};
-  opts.width = GC.app.view.style.width;
+  opts.width = GC.app.rootView.style.width;
   scene.drawText(0, y, text, opts);
 }
 
