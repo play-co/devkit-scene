@@ -3,8 +3,8 @@
  * Bound to entities to be called upon their release (e.g. leaving the screen)
  */
 var releaseEntity = function() {
-  this._generator_using = false;
-  this._generator._free.push(this._generator_index);
+  this._spawner_using = false;
+  this._spawner._free.push(this._spawner_index);
   if (this.destroy) this.destroy();
 }
 
@@ -14,7 +14,7 @@ var releaseEntity = function() {
  */
 exports = Class(function () {
   /**
-   * Generator(constructEntity, spawnEntity, spawnCoords, [spawnDelay], [opts]) 
+   * Spawner(constructEntity, spawnEntity, spawnCoords, [spawnDelay], [opts]) 
    * ~ constructEntity
    *     A function called when a new entity is constructed
    * ~ spawnEntity()
@@ -46,17 +46,17 @@ exports = Class(function () {
    */
   this.spawn = function() {
     if (this._free.length > 0) {
-      e._generator_index = this._free.shift();
-      var e = this._entities[e._generator_index];
+      e._spawner_index = this._free.shift();
+      var e = this._entities[e._spawner_index];
     } else {
       var e = this.constructEntity();
-      e._generator = this;
-      e._generator_index = this._entities.push(e) - 1; 
+      e._spawner = this;
+      e._spawner_index = this._entities.push(e) - 1; 
     }
 
     e.x = randRange(this.spawnX);
     e.y = randRange(this.spawnY);
-    e._generator_using = true; 
+    e._spawner_using = true; 
     e.release = releaseEntity.bind(e);
 
     this.spawnEntity.call(e);
@@ -74,7 +74,7 @@ exports = Class(function () {
     }
 
     for (var k in this.entities) {
-      if (this.entities[k]._generator_using) {
+      if (this.entities[k]._spawner_using) {
         this.entities[k].update(dt);
       }
     }
