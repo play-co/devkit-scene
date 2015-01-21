@@ -2,7 +2,7 @@
   "name": "devkit-scene",
   "author": "Game Closure",
   "description": "The play's scene up on the high stage, the module to play the game.",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "repository": {},
   "dependencies": {
     "devkit-entities": "git+ssh://git@github.com/gameclosure/devkit-entities.git",
