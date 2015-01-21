@@ -34,18 +34,14 @@ scene = function (defaultModeFun) {
      * initUI
      */
     this.initUI = function() {
-      // I am not sure about these defaults; maybe we should default to device dimensions
-      this.setScreenDimensions(576, 1024);
-
       // This comment is to inform you that default mode is 'default'
       this.mode = 'default';
 
       // The superview for all views that do not except possible input
       this.staticView = new View({
         parent: this.view,
-        y: this.view.style.height - this.bgHeight,
-        width:  this.bgWidth,
-        height: this.bgHeight,
+        width:  scene.screen.width,
+        height: scene.screen.height,
         blockEvents: true,
       })
 
@@ -56,8 +52,8 @@ scene = function (defaultModeFun) {
       this.bgOffsetY = 0;
 
       // TODO maybe infinite in one dimension for each of these?
-      w = this.bgWidth;
-      h = this.bgHeight;
+      w = scene.screen.width;
+      h = scene.screen.height;
       scene.screen.left   = new Ghost(-10,  -h,  10, 3*h, { parent: this.staticView });
       scene.screen.right  = new Ghost(  w,  -h,  10, 3*h, { parent: this.staticView });
       scene.screen.top    = new Ghost( -w, -10, 3*w,  10, { parent: this.staticView });
@@ -76,6 +72,7 @@ scene = function (defaultModeFun) {
      * startGame
      */
     this.startGame = function() {
+      this.setScreenDimensions();
       // show the splash screen
       if (modes.splash) {
         this.reset('splash');
@@ -150,10 +147,8 @@ scene = function (defaultModeFun) {
       var ds = device.screen;
       var vs = this.view.style;
 
-      this.bgWidth = w;
-      this.bgHeight = h;
-      scene.screen.width = w;
-      scene.screen.height = h;
+      w = scene.screen.width;
+      h = scene.screen.height;
 
       vs.width  = w > h ? ds.width  * (h / ds.height) : w;
       vs.height = w < h ? ds.height * (w / ds.width ) : h;
@@ -187,6 +182,10 @@ scene.usingScore = false;
  * A wonderous object that describes the screen
  */
 scene.screen = {
+  // I am not sure about these defaults; maybe we should default to device dimensions
+  width: 576,
+  height: 1024,
+
   /**
    * screen.onTouch(cb) - register event that happens on the screen being touched
    */
@@ -325,7 +324,7 @@ scene.horCenterText = function(y, text, opts) {
 }
 
 scene.centerText = function(text, opts) {
-  scene.horCenterText(GC.app.bgHeight / 2 - DEFAULT_TEXT_HEIGHT / 2, text, opts);
+  scene.horCenterText(scene.screen.height / 2 - DEFAULT_TEXT_HEIGHT / 2, text, opts);
 }
 
 /**
@@ -383,7 +382,7 @@ scene.gameOver = function(opts) {
     }
 
     if (!opts.no_gameover_screen) {
-      var bgHeight = GC.app.bgHeight;
+      var bgHeight = scene.screen.height;
 
       if (scene.usingScore) {
         scene.horCenterText(bgHeight / 2 - DEFAULT_TEXT_HEIGHT, 'Game over!');

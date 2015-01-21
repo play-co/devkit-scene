@@ -45,8 +45,8 @@ exports = Class(Entity, function() {
     this.collision_handlers = [];
 
     // Center the entity by default
-    this.x = opts.x || GC.app.bgWidth / 2;
-    this.y = opts.y || GC.app.bgHeight / 2;
+    this.x = opts.x || scene.screen.width / 2;
+    this.y = opts.y || scene.screen.height / 2;
   }
 
   this.reset = function(x, y, config) {
