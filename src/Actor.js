@@ -106,6 +106,7 @@ exports = Class(Entity, function() {
    */
   this.onTouch = function(cb) {
     this.view.onInputStart = cb;
+    return this;
   }
 
   /**
@@ -139,6 +140,8 @@ exports = Class(Entity, function() {
         opts: opts
       });
     }
+
+    return this;
   }
 
   /**
@@ -157,6 +160,8 @@ exports = Class(Entity, function() {
       this.initial_function = this.play;
       this.initial_arguments = Array.prototype.slice.call(arguments);
     }
+
+    return this;
   }
 
   /**
@@ -170,5 +175,7 @@ exports = Class(Entity, function() {
       this.initial_function = this.loop;
       this.initial_arguments = Array.prototype.slice.call(arguments);
     }
+
+    return this;
   }
 });
