@@ -178,6 +178,8 @@ scene = function (defaultModeFun) {
 
 scene.score = 0;
 scene.usingScore = false;
+scene.text_color = 'white';
+scene.text_font = 'Arial';
 
 /**
  * A wonderous object that describes the screen
@@ -312,7 +314,8 @@ scene.drawText = function(x, y, text, opts) {
     text: text,
     x: x,
     y: y,
-    color: 'white',
+    color: scene.text_color,
+    fontFamily: scene.text_font,
     width: DEFAULT_TEXT_WIDTH,
     height: DEFAULT_TEXT_HEIGHT,
   }, opts || {})));
@@ -326,6 +329,16 @@ scene.horCenterText = function(y, text, opts) {
 
 scene.centerText = function(text, opts) {
   scene.horCenterText(scene.screen.height / 2 - DEFAULT_TEXT_HEIGHT / 2, text, opts);
+}
+
+scene.setTextColor = function(color) {
+  // TODO validate?
+  scene.text_color = color;
+}
+
+scene.setTextFont = function(font) {
+  // TODO validate?
+  scene.text_font = font;
 }
 
 /**
