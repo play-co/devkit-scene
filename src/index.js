@@ -85,7 +85,7 @@ scene = function (defaultModeFun) {
         blockEvents: true,
       })
 
-      this.background = new Background(this.staticView);
+      scene.background = new Background(this.staticView);
       this.overlay = new View({ parent: this.rootView, infinite: true });
 
       // TODO maybe infinite in one dimension for each of these?
@@ -141,7 +141,7 @@ scene = function (defaultModeFun) {
       }
 
       delete this.scoreView;
-      this.background.destroy();
+      scene.background.destroy();
 
       // Clear the tallies
       this.extraViews = [];
@@ -159,7 +159,7 @@ scene = function (defaultModeFun) {
       }
 
       // The backdrop falls into place.
-      this.background.reset();
+      scene.background.reset();
 
       // Now let us frame the scene.
       scene.screen.left.reset();
@@ -203,7 +203,7 @@ scene = function (defaultModeFun) {
         this.spawners[k].update(dt);
       }
 
-      this.background.update(dt * SCALE_DT);
+      scene.background.update(dt * SCALE_DT);
 
       scene.screen.left.update(dt);
       scene.screen.right.update(dt);
@@ -326,16 +326,14 @@ scene.removeActor = function(actor) {
 scene.addGhost = function(x, y, w, h, opts) {
   opts = opts || {};
   opts.parent = GC.app.staticView;
-  var c = new Ghost(x, y, w, h, opts);
-  GC.app.ghosts.push(c);
-  return c;
+  return _track(new Ghost(x, y, w, h, opts));
 }
 
 /**
  * addBackgroundLayer
  */
 scene.addBackgroundLayer = function(resource, opts0) {
-  return GC.app.background.addLayer(resource, opts0);
+  return scene.background.addLayer(resource, opts0);
 }
 
 /**
