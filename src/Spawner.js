@@ -22,7 +22,6 @@ exports = Class(function () {
   }
 
   this.reset = function() {
-    this.destroy();
     if (this.spawnDelay) {
       this.delay = randRange(this.spawnDelay);
     }
@@ -84,22 +83,15 @@ exports = Class(function () {
    * Check if any of the entities spawned collide with the given entity or spawner
    */
   this.collidesWith = function(against) {
-    for (var k in this._entities) {
-      var e = this._entities[k];
+    var i = this._entities.length;
+    while (i--) {
+      var e = this._entities[i];
       if (e.destroyed) {
-        var rm = rm || [];
-        rm.push(k);
+        this._entities.splice(i, 1);
       } else {
         if (against.collidesWith(e)) {
           return e;
         }
-      }
-    }
-
-    // Remove stuff we don't care about
-    if (rm) {
-      for (var i in rm) {
-        this._entities.splice(rm[i]);
       }
     }
 
