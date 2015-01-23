@@ -51,7 +51,7 @@ exports = Class(function () {
 
     e.x = x;
     e.y = y;
-    this._entities.push(e);
+    var i = this._entities.push(e);
 
     if (e.reset) e.reset();
     return e;
@@ -70,22 +70,13 @@ exports = Class(function () {
         this.spawn();
       }
     }
-
-    // Update spawned entities
-    for (var k in this._entities) {
-      this._entities[k].update(dt);
-    }
   }
 
   /**
-   * Release and destroys all spawned entities
+   * We don't need to actually destroy any entities, as they should be tracked
+   * by the scene itself. Destroying them here would be redundant
    */
   this.destroy = function() {
-    for (var k in this._entities) {
-      if (this._entities[k].destroy) {
-        this._entities[k].destroy();
-      }
-    }
     this._entities = [];
   }
 
@@ -95,10 +86,23 @@ exports = Class(function () {
   this.collidesWith = function(against) {
     for (var k in this._entities) {
       var e = this._entities[k];
-      if (against.collidesWith(e)) {
-        return e;
+      if (e.destroyed) {
+        var rm = rm || [];
+        rm.push(k);
+      } else {
+        if (against.collidesWith(e)) {
+          return e;
+        }
       }
     }
+
+    // Remove stuff we don't care about
+    if (rm) {
+      for (var i in rm) {
+        this._entities.splice(rm[i]);
+      }
+    }
+
     return false;
   }
 });

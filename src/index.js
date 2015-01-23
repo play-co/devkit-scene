@@ -12,11 +12,48 @@ import .Ghost;
 import .Spawner;
 import .Background;
 
-var DEFAULT_TEXT_WIDTH = 200;
+// Default values
+var DEFAULT_TEXT_WIDTH  = 200;
 var DEFAULT_TEXT_HEIGHT = 50;
+var DEFAULT_TEXT_COLOR  = 'white';
+var DEFAULT_TEXT_FONT   = 'Arial';
 
-var modes = {}
+// To make speeds 'feel' nicer
+var SCALE_DT = 0.01;
 
+// Variables that are private to this file
+var _modes = {}
+var _score = 0;
+var _using_score = false;
+var _text_color = DEFAULT_TEXT_COLOR;
+var _text_font = DEFAULT_TEXT_FONT;
+var _game_running = false;
+
+/**
+ * Object tracking:
+ *  track(object)     - begin tracking given object
+ *  untrack(object)   - stop tracking an object
+ *  _tracked = [...]  - array of tracked objects
+ */
+var _tracked = [];
+
+function _track(object) {
+  _tracked.push(object);
+  return object;
+}
+
+function _untrack(object) {
+  var i = _tracked.indexOf(object);
+  if (i >= 0) {
+    _tracked.splice(i, 1);
+  } else {
+    throw 'Attempting to untrack object that was untracked in the first place.';
+  }
+}
+
+/**
+ * The primary scene function, imports weeby if needed and sets the default mode function
+ */
 scene = function (defaultModeFun) {
   // Potentially include weeby
   if (scene.enableWeeby) {
@@ -52,8 +89,8 @@ scene = function (defaultModeFun) {
       this.overlay = new View({ parent: this.rootView, infinite: true });
 
       // TODO maybe infinite in one dimension for each of these?
-      w = scene.screen.width;
-      h = scene.screen.height;
+      var w = scene.screen.width;
+      var h = scene.screen.height;
       scene.screen.left   = new Ghost(-10,  -h,  10, 3*h, { parent: this.staticView });
       scene.screen.right  = new Ghost(  w,  -h,  10, 3*h, { parent: this.staticView });
       scene.screen.top    = new Ghost( -w, -10, 3*w,  10, { parent: this.staticView });
@@ -69,7 +106,7 @@ scene = function (defaultModeFun) {
      */
     this.startGame = function() {
       // show the splash screen
-      if (modes.splash) {
+      if (_modes.splash) {
         this.reset('splash');
 
         // start the game when you click
@@ -86,11 +123,13 @@ scene = function (defaultModeFun) {
      * reset
      */
     this.reset = function(mode) {
+      if (mode === undefined) mode = 'default';
+
       this.setScreenDimensions();
 
       // Cleanup after the last performance before begining a new one
-      for (var k in this.actors) {
-        this.actors[k].destroy();
+      for (var k in _tracked) {
+        _tracked[k].destroy();
       }
 
       for (var k in this.extraViews) {
@@ -105,19 +144,19 @@ scene = function (defaultModeFun) {
       this.background.destroy();
 
       // Clear the tallies
-      this.actors = [];
       this.extraViews = [];
       this.ghosts = [];
       this.spawners = [];
-      scene.score = 0;
+      _score = 0;
+      _tracked = [];
 
       // Let's reboot the fun!
-      var currentMode = modes[mode]
+      var currentMode = _modes[mode]
       currentMode.fun(currentMode.opts);
 
       // Let the players take their places.
-      for (var k in this.actors) {
-        this.actors[k].reset();
+      for (var k in _tracked) {
+        _tracked[k].reset();
       }
 
       // The backdrop falls into place.
@@ -140,7 +179,7 @@ scene = function (defaultModeFun) {
       }
 
       // The curtain rises, and Act 1 begins!
-      this.game_running = true;
+      _game_running = true;
     }
 
     /**
@@ -162,15 +201,15 @@ scene = function (defaultModeFun) {
      * tick tock
      */
     this.tick = function(dt) {
-      for (var k in this.actors) {
-        this.actors[k].update(dt);
+      for (var k in _tracked) {
+        _tracked[k].update(dt * SCALE_DT);
       }
 
       for (var k in this.spawners) {
         this.spawners[k].update(dt);
       }
 
-      this.background.update(dt);
+      this.background.update(dt * SCALE_DT);
 
       scene.screen.left.update(dt);
       scene.screen.right.update(dt);
@@ -179,11 +218,6 @@ scene = function (defaultModeFun) {
     }
   })
 }
-
-scene.score = 0;
-scene.usingScore = false;
-scene.text_color = 'white';
-scene.text_font = 'Arial';
 
 /**
  * A wonderous object that describes the screen
@@ -224,7 +258,7 @@ scene.screen = {
    */
   onOneTouch:
     function(cb) {
-      GC.app.overlay.onInputSelect = function() {
+      GC.app.overlay.onInputStart = function() {
         scene.screen.offTouch();
         cb();
       }
@@ -283,9 +317,12 @@ scene.createActor = function(resource, opts) {
     opts.autoStart = false;
   }
 
-  var a = new Actor(scene, viewClass, opts);
-  GC.app.actors.push(a);
-  return a;
+  return _track(new Actor(scene, viewClass, opts));
+}
+
+scene.removeActor = function(actor) {
+  _untrack(actor);
+  actor.destroy();
 }
 
 /**
@@ -333,8 +370,8 @@ scene.drawText = function(x, y, text, opts) {
     text: text,
     x: x,
     y: y,
-    color: scene.text_color,
-    fontFamily: scene.text_font,
+    color: _text_color,
+    fontFamily: _text_font,
     width: DEFAULT_TEXT_WIDTH,
     height: DEFAULT_TEXT_HEIGHT,
   }, opts || {})));
@@ -352,12 +389,12 @@ scene.centerText = function(text, opts) {
 
 scene.setTextColor = function(color) {
   // TODO validate?
-  scene.text_color = color;
+  _text_color = color;
 }
 
 scene.setTextFont = function(font) {
   // TODO validate?
-  scene.text_font = font;
+  _text_font = font;
 }
 
 /**
@@ -399,10 +436,12 @@ scene.showScore = function(x, y, color, font, opts) {
  * score getters/setters
  */
 scene.setScore = function(score) {
-  scene.score = score;
-  scene.usingScore = true;
-  if (GC.app.scoreView) {
-    GC.app.scoreView.setText('' + score);
+  if (_game_running) {
+    _score = score;
+    _using_score = true;
+    if (GC.app.scoreView) {
+      GC.app.scoreView.setText('' + score);
+    }
   }
 }
 
@@ -411,8 +450,8 @@ scene.addScore = function(add) {
 }
 
 scene.getScore = function() {
-  scene.usingScore = true;
-  return scene.score;
+  _using_score = true;
+  return _score;
 }
 
 /**
@@ -421,26 +460,28 @@ scene.getScore = function() {
  * Alas, the final act comes to a close, the curtains fall and the lights dim.
  */
 scene.gameOver = function(opts) {
-  if (GC.app.game_running) {
-    GC.app.game_running = false;
+  if (_game_running) {
+    _game_running = false;
 
-    for (var k in GC.app.actors) {
-      GC.app.actors[k].stopInput();
+    for (var k in _tracked) {
+      if (_tracked[k].stopInput()) {
+        _tracked[k].stopInput();
+      }
     }
 
     if (!opts.no_gameover_screen) {
       var bgHeight = scene.screen.height;
 
-      if (scene.usingScore) {
+      if (_using_score) {
         scene.horCenterText(bgHeight / 2 - DEFAULT_TEXT_HEIGHT, 'Game over!');
-        scene.horCenterText(bgHeight / 2, 'Your score was ' + scene.score);
+        scene.horCenterText(bgHeight / 2, 'Your score was ' + _score);
       } else {
         scene.centerText('Game over!');
       }
 
       scene.screen.onOneTouch(function () {
         GC.app.reset();
-      })
+      });
     }
   }
 }
@@ -458,7 +499,7 @@ scene.mode = function(name, fun, opts) {
   if (fun !== undefined) {
     // Set a mode to a function
     opts = opts || {};
-    modes[name] = {
+    _modes[name] = {
       fun: fun,
       opts: opts
     };

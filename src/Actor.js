@@ -39,6 +39,7 @@ exports = Class(Entity, function() {
     this.viewClass = viewClass;
     supr.init.call(this, opts);
 
+    this.destroyed = false;
     this.has_reset = false;
     this.scene = scene;
     this.config = opts;
@@ -55,6 +56,7 @@ exports = Class(Entity, function() {
     this.config = config || this.config;
 
     this.has_reset = true;
+    this.destroyed = false;
     this.config.ax = this.ax;
     this.config.ay = this.ay;
     this.config.vx = this.vx;
@@ -76,7 +78,12 @@ exports = Class(Entity, function() {
   }
 
   this.update = function(dt) {
-    supr.update.call(this, dt * .01);
+    if (this.destroyed) {
+      console.warn('Will not update destroyed Actor.');
+      return;
+    }
+
+    supr.update.call(this, dt);
 
     // Check for collisions
     for (var i in this.collision_handlers) {
@@ -116,7 +123,8 @@ exports = Class(Entity, function() {
    * This function destroys the Actor, as in, removes it from the scene
    */
   this.destroy = function() {
-    this.view.removeFromSuperview()
+    this.destroyed = true;
+    this.view.removeFromSuperview();
   }
 
   /**
