@@ -39,6 +39,8 @@ exports = Class(function () {
     this.parallax = new Parallax({ parent: parentView });
     this.offsetX = 0;
     this.offsetY = 0;
+    this.autoX = 1;
+    this.autoY = 1;
     this.destroy();
   }
 
@@ -46,13 +48,21 @@ exports = Class(function () {
     this.config = [];
   }
 
+  this.autoScroll = function(autoX, autoY) {
+    if (autoY === undefined) {
+      autoY = autoX;
+    }
+    this.autoX = autoX;
+    this.autoY = autoY;
+  }
+
   this.reset = function() {
     this.parallax.reset(this.config);
   }
 
   this.update = function(dt) {
-    this.offsetX += dt;
-    this.offsetY += dt;
+    this.offsetX += dt * this.autoX;
+    this.offsetY += dt * this.autoY;
     this.parallax.update(this.offsetX, this.offsetY);
   }
 

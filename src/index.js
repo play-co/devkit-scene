@@ -200,6 +200,10 @@ scene = function (defaultModeFun) {
      * tick tock
      */
     this.tick = function(dt) {
+      if (_on_tick) {
+        _on_tick(dt);
+      }
+
       for (var k in _tracked) {
         _tracked[k].update(dt * SCALE_DT);
       }
@@ -214,10 +218,6 @@ scene = function (defaultModeFun) {
       scene.screen.right.update(dt);
       scene.screen.top.update(dt);
       scene.screen.bottom.update(dt);
-
-      if (_on_tick) {
-        _on_tick(dt);
-      }
     }
   })
 }
