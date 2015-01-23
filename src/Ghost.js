@@ -20,11 +20,11 @@ exports = Class(Entity, function() {
     }
 
     if (opts.isAnchored === undefined) opts.isAnchored = true;
-    
+
     supr.init.call(this, opts);
     this.opts = opts;
   }
-  
+
   this.reset = function() {
     supr.reset.call(this, 0, 0, this.opts);
   }

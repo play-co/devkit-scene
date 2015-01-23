@@ -77,11 +77,38 @@ exports = Class(Entity, function() {
 
   this.update = function(dt) {
     supr.update.call(this, dt * .01);
+
+    // Check for collisions
     for (var i in this.collision_handlers) {
       c = this.collision_handlers[i];
-      if (this.collidesWith(c.entity)) {
-        c.handler.call(this, c.entity, c.opts)
+
+      against = c.entity.collidesWith(this);
+      if (against === true) against = c.entity;
+
+      if (against) {
+        c.handler.call(this, against, c.opts)
       }
+    }
+
+    // Ugh... check for offscreen conditions...
+    if (this.offScreenLeftHandler) {
+      var rightBound  = this.x + this.hitBounds.x + this.hitBounds.w;
+      if (rightBound <= 0) this.offScreenLeftHandler();
+    }
+
+    if (this.offScreenRightHandler) {
+      var leftBound = this.x - this.hitBounds.x;
+      if (leftBound >= scene.screen.width) this.offScreenRightHandler();
+    }
+
+    if (this.offScreenTopHandler) {
+      var bottomBound = this.y + this.hitBounds.y + this.hitBounds.h;
+      if (bottomBound <= 0) this.offScreenTopHandler();
+    }
+
+    if (this.offScreenBottomHandler) {
+      var topBound = this.y - this.hitBounds.y;
+      if (topBound >= scene.screen.height) this.offScreenBottomHandler();
     }
   }
 
@@ -114,8 +141,6 @@ exports = Class(Entity, function() {
    * ~ collidable-n    a object or list of objects that can be collided with
    * ~ handler         a string that identifies a handler or a callback function
    * ~ options         a list of extra options to be passed to the handler
-   *
-   * TODO add support for entity pools
    */
   this.collision = function() {
     var handler;
@@ -143,6 +168,14 @@ exports = Class(Entity, function() {
 
     return this;
   }
+
+  /**
+   * Special handlers for when something goes offscreen on the respective sides
+   */
+  this.offScreenTop    = function(handler) { this.offScreenTopHandler    = handler; return this; }
+  this.offScreenBottom = function(handler) { this.offScreenBottomHandler = handler; return this; }
+  this.offScreenLeft   = function(handler) { this.offScreenLeftHandler   = handler; return this; }
+  this.offScreenRight  = function(handler) { this.offScreenRightHandler  = handler; return this; }
 
   /**
    * play(animation)

@@ -1,69 +1,67 @@
 
 /**
- * Bound to entities to be called upon their release (e.g. leaving the screen)
- */
-var releaseEntity = function() {
-  this._spawner_using = false;
-  this._spawner._free.push(this._spawner_index);
-  if (this.destroy) this.destroy();
-}
-
-/**
  * The purpose of this class is to provide an interface that allows the easy generation
- * of a series of entities
+ * of a series of entities. Originally this recycled entities, but I removed that in
+ * favor of a simpler interface. If you want entity recycling, use EntityPool.
  */
 exports = Class(function () {
   /**
-   * Spawner(constructEntity, spawnEntity, spawnCoords, [spawnDelay], [opts]) 
-   * ~ constructEntity
-   *     A function called when a new entity is constructed
+   * Spawner(constructEntity, spawnEntity, spawnCoords, [spawnDelay], [opts])
    * ~ spawnEntity()
-   *     A function called when a new entity is spawned (this = the entity)
-   * ~ spawnCoords = { x: [minX, minY], y: [minY, maxY] }
-   * ~ spawnDelay = [minDelay, maxDelay]
-   *     If spawnDelay is undefined then entities will only spawn when spawn() is manually called
-   * ~ opts - passed to the super constructor
+   *     A function called when a new entity is spawned, should return the entity
+   * ~ opts = { x: [minX, minY], y: [minY, maxY], delay: [min, max] }
+   *     If delay is undefined then entities will only spawn when spawn() is manually called
    */
-  this.init = function(constructEntity, spawnEntity, spawnCoords, spawnDelay) {
-    this.spawnDelay = spawnDelay;
-    this.spawnX = spawnCoords.x || [0, 0];
-    this.spawnY = spawnCoords.y || [0, 0];
-    this.constructEntity = constructEntity;
+  this.init = function(spawnEntity, opts) {
+    this.spawnDelay = opts.delay;
+    this.spawnX = opts.x || [0, 0];
+    this.spawnY = opts.y || [0, 0];
     this.spawnEntity = spawnEntity;
 
     this._entities = [];
-    this._free = [];
   }
 
   this.reset = function() {
-    if (spawnDelay) {
-      this.delay = randRange(spawnDelay);
+    this.destroy();
+    if (this.spawnDelay) {
+      this.delay = randRange(this.spawnDelay);
     }
+  }
+
+  this.setSpawnDelay = function(spawnDelay) {
+    this.spawnDelay = spawnDelay;
+  }
+
+  this.setSpawnCoords = function(spawnCoords) {
+    this.spawnX = spawnCoords.x || this.spawnX;
+    this.spawnY = spawnCoords.y || this.spawnY;
   }
 
   /**
    * Spawns an entity, called manually or automatically based on a timer.
    */
   this.spawn = function() {
-    if (this._free.length > 0) {
-      e._spawner_index = this._free.shift();
-      var e = this._entities[e._spawner_index];
-    } else {
-      var e = this.constructEntity();
-      e._spawner = this;
-      e._spawner_index = this._entities.push(e) - 1; 
+    var x = randRange(this.spawnX);
+    var y = randRange(this.spawnY);
+    var e = this.spawnEntity(x, y);
+
+    if (e === undefined) {
+      console.error('An attempt to spawn an entity returned nothing, did you forget to return the created entity?')
     }
 
-    e.x = randRange(this.spawnX);
-    e.y = randRange(this.spawnY);
-    e._spawner_using = true; 
-    e.release = releaseEntity.bind(e);
+    e.x = x;
+    e.y = y;
+    this._entities.push(e);
 
-    this.spawnEntity.call(e);
+    if (e.reset) e.reset();
     return e;
   }
 
+  /**
+   * Updates the spawner and all spawned entities
+   */
   this.update = function(dt) {
+    // Check if we want to spawn a new minion
     // TODO I might want to make this a setTimeout
     if (this.spawnDelay) {
       this.delay -= dt;
@@ -73,10 +71,34 @@ exports = Class(function () {
       }
     }
 
-    for (var k in this.entities) {
-      if (this.entities[k]._spawner_using) {
-        this.entities[k].update(dt);
+    // Update spawned entities
+    for (var k in this._entities) {
+      this._entities[k].update(dt);
+    }
+  }
+
+  /**
+   * Release and destroys all spawned entities
+   */
+  this.destroy = function() {
+    for (var k in this._entities) {
+      if (this._entities[k].destroy) {
+        this._entities[k].destroy();
       }
     }
+    this._entities = [];
+  }
+
+  /**
+   * Check if any of the entities spawned collide with the given entity or spawner
+   */
+  this.collidesWith = function(against) {
+    for (var k in this._entities) {
+      var e = this._entities[k];
+      if (against.collidesWith(e)) {
+        return e;
+      }
+    }
+    return false;
   }
 });

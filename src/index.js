@@ -5,12 +5,12 @@ import ui.ImageView as ImageView;
 import ui.SpriteView as SpriteView;
 import ui.ScoreView as ScoreView;
 import entities.Entity as Entity;
-import entities.EntityPool as EntityPool;
-import parallax.Parallax as Parallax;
 
 import .util;
 import .Actor;
 import .Ghost;
+import .Spawner;
+import .Background;
 
 var DEFAULT_TEXT_WIDTH = 200;
 var DEFAULT_TEXT_HEIGHT = 50;
@@ -40,9 +40,6 @@ scene = function (defaultModeFun) {
         this.rootView = weeby.getGameView();
       }
 
-      // This comment is to inform you that default mode is 'default'
-      this.mode = 'default';
-
       // The superview for all views that do not except possible input
       this.staticView = new View({
         parent: this.rootView,
@@ -51,11 +48,8 @@ scene = function (defaultModeFun) {
         blockEvents: true,
       })
 
-      this.parallax = new Parallax({ parent: this.staticView });
+      this.background = new Background(this.staticView);
       this.overlay = new View({ parent: this.rootView, infinite: true });
-
-      this.bgOffsetX = 0;
-      this.bgOffsetY = 0;
 
       // TODO maybe infinite in one dimension for each of these?
       w = scene.screen.width;
@@ -94,8 +88,6 @@ scene = function (defaultModeFun) {
     this.reset = function(mode) {
       this.setScreenDimensions();
 
-      if (mode) this.mode = mode;
-
       // Cleanup after the last performance before begining a new one
       for (var k in this.actors) {
         this.actors[k].destroy();
@@ -105,17 +97,22 @@ scene = function (defaultModeFun) {
         this.extraViews[k].removeFromSuperview();
       }
 
+      for (var k in this.spawners) {
+        this.spawners[k].destroy();
+      }
+
       delete this.scoreView;
+      this.background.destroy();
 
       // Clear the tallies
       this.actors = [];
-      this.bgLayers = [];
       this.extraViews = [];
       this.ghosts = [];
+      this.spawners = [];
       scene.score = 0;
 
       // Let's reboot the fun!
-      var currentMode = modes[this.mode]
+      var currentMode = modes[mode]
       currentMode.fun(currentMode.opts);
 
       // Let the players take their places.
@@ -124,7 +121,7 @@ scene = function (defaultModeFun) {
       }
 
       // The backdrop falls into place.
-      this.parallax.reset(this.bgLayers);
+      this.background.reset();
 
       // Now let us frame the scene.
       scene.screen.left.reset();
@@ -135,6 +132,11 @@ scene = function (defaultModeFun) {
       // Be wary, for ghosts haunt the stage
       for (var k in this.ghosts) {
         this.ghosts[k].reset();
+      }
+
+      // The minions of evil doth depart
+      for (var k in this.spawners) {
+        this.spawners[k].reset();
       }
 
       // The curtain rises, and Act 1 begins!
@@ -164,9 +166,11 @@ scene = function (defaultModeFun) {
         this.actors[k].update(dt);
       }
 
-      this.bgOffsetX += 1;
-      this.bgOffsetY += 1;
-      this.parallax.update(this.bgOffsetX, this.bgOffsetY);
+      for (var k in this.spawners) {
+        this.spawners[k].update(dt);
+      }
+
+      this.background.update(dt);
 
       scene.screen.left.update(dt);
       scene.screen.right.update(dt);
@@ -194,10 +198,23 @@ scene.screen = {
    */
   onTouch:
     function(cb) {
-      GC.app.overlay.onInputSelect = cb;
+      GC.app.overlay.onInputStart = cb;
     },
 
   offTouch:
+    function() {
+      delete GC.app.overlay.onInputStart;
+    },
+
+  /**
+   * screen.onTouchLoss(cb)
+   */
+  onTouchLoss:
+    function(cb) {
+      GC.app.overlay.onInputSelect = cb;
+    },
+
+  offTouchLoss:
     function() {
       delete GC.app.overlay.onInputSelect;
     },
@@ -211,7 +228,26 @@ scene.screen = {
         scene.screen.offTouch();
         cb();
       }
-    }
+    },
+
+  /**
+   * screen.onDrag(cb)
+   *  FIXME cannot be used with onTouch/onTouchLoss
+   */
+  onDrag: function(cb) {
+    var down;
+
+    scene.screen.onTouch(function(event, point) {
+      down = point;
+    });
+
+    scene.screen.onTouchLoss(function(event, up) {
+      if (down !== undefined) {
+        cb(down.x, down.y, up.x, up.y);
+        down = undefined;
+      }
+    });
+  }
 };
 
 /**
@@ -268,35 +304,18 @@ scene.addGhost = function(x, y, w, h, opts) {
  * addBackgroundLayer
  */
 scene.addBackgroundLayer = function(resource, opts0) {
-  if (resource.type !== 'image') {
-    throw 'Background layers must be images, but you gave me a ' + resource.type + '!';
-  }
+  return GC.app.background.addLayer(resource, opts0);
+}
 
-  opts0 = opts0 || {};
-  opts = {
-    zIndex: -1,
-    xGapRange: [0, 0],
-    yGapRange: [0, 0],
-    pieceOptions: [{ image: resource.url }],
-  };
-
-  if (opts0.scrollY && !opts0.scrollX) {
-    opts.xCanSpawn = false;
-    opts.xCanRelease = false;
-  }
-
-  if (!opts0.scrollY && opts0.scrollX) {
-    opts.yCanSpawn = false;
-    opts.yCanRelease = false;
-  }
-
-  opts.xMultiplier = opts0.scrollX || 0;
-  opts.yMultiplier = opts0.scrollY || 0;
-  delete opts0.scrollX;
-  delete opts0.scrollY;
-
-  GC.app.bgLayers.push(combine(opts, opts0));
-  return opts
+/**
+ * addSpawner
+ *
+ * See Spawner.js for a description of the arguments
+ */
+scene.addSpawner = function(spawnEntity, opts) {
+  var sp = new Spawner(spawnEntity, opts);
+  GC.app.spawners.push(sp);
+  return sp;
 }
 
 /**
@@ -344,9 +363,22 @@ scene.setTextFont = function(font) {
 /**
  * showScore
  */
-scene.showScore = function(x, y, opts) {
+scene.showScore = function(x, y, color, font, opts) {
+  font = font || 'Arial';
+  color = color || 'white';
+
   var app = GC.app;
   if (app.scoreView) return;
+
+  if (typeof(color) == 'object') {
+    opts = color;
+    color = undefined;
+  }
+
+  if (typeof(font) == 'object') {
+    opts = font;
+    font = undefined;
+  }
 
   app.scoreView = new TextView(combine({
     parent: app.staticView,
@@ -354,7 +386,8 @@ scene.showScore = function(x, y, opts) {
     y: y,
     width: 200,
     height: 75,
-    color: 'white',
+    color: color,
+    fontFamily: font,
     text: scene.getScore(),
     horizontalAlign: 'left',
   }, opts || {}));
