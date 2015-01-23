@@ -48,6 +48,9 @@ exports = Class(Entity, function() {
     this.config.vy = this.vy;
     supr.reset.call(this, this.x, this.y, this.config);
 
+    this.width  = this.hitBounds.w;
+    this.height = this.hitBounds.h;
+
     if (this.view.resetAllAnimations) {
       this.view.resetAllAnimations(this.config);
 
@@ -170,6 +173,22 @@ exports = Class(Entity, function() {
   this.offScreenBottom = function(handler) { this.offScreenBottomHandler = handler; return this; }
   this.offScreenLeft   = function(handler) { this.offScreenLeftHandler   = handler; return this; }
   this.offScreenRight  = function(handler) { this.offScreenRightHandler  = handler; return this; }
+
+  /**
+   * Performs simple on the screen itself.
+   * TODO generalize to arbitrary bounds
+   */
+  this.wrapLeftRight = function() {
+    var self = this;
+    this.offScreenLeft (function() { self.x += scene.screen.width + self.width; });
+    this.offScreenRight(function() { self.x -= scene.screen.width + self.width; });
+  }
+
+  this.wrapTopBottom = function() {
+    var self = this;
+    this.offScreenTop   (function() { self.y += scene.screen.height + self.height; });
+    this.offScreenBottom(function() { self.y -= scene.screen.height + self.height; });
+  }
 
   /**
    * play(animation)
