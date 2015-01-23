@@ -6,7 +6,8 @@
   "repository": {},
   "dependencies": {
     "devkit-entities": "git+ssh://git@github.com/gameclosure/devkit-entities.git",
-    "devkit-parallax": "git+ssh://git@github.com/gameclosure/devkit-parallax.git"
+    "devkit-parallax": "git+ssh://git@github.com/gameclosure/devkit-parallax.git",
+    "accelerometer": "git+ssh://git@github.com/gameclosure/accelerometer.git"
   },
   "scripts": {},
   "devkit": {

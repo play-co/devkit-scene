@@ -4,31 +4,9 @@ import entities.Entity as Entity;
  * An object that contains a collection of builtin collision handlers
  */
 var builtin_collision_handlers = {
-  bounce:
-    function(entity, opts) {
-      px = this.x
-      py = this.y
-      this.resolveCollidingStateWith(entity)
-
-      // Check if we are bouncing in a vertical or horizontal manner
-      if (Math.abs(this.x - px) > Math.abs(this.y - py)) {
-        this.vx = -this.vx;
-      } else {
-        this.vy = -this.vy;
-      }
-    },
-
-  stop:
-    function(entity, opts) {
-      this.resolveCollidingStateWith(entity);
-      this.vx = 0;
-      this.vy = 0;
-    },
-
-  gameOver:
-    function(entity, opts) {
-      this.scene.gameOver(opts);
-    }
+  bounce:   function (entity, opts) { this.collisionBounce(entity, opts); },
+  stop:     function (entity, opts) { this.collisionStop(entity, opts);   },
+  gameOver: function (entity, opts) { this.scene.gameOver(entity, opts);  }
 }
 
 
@@ -37,7 +15,14 @@ exports = Class(Entity, function() {
 
   this.init = function(scene, viewClass, opts) {
     this.viewClass = viewClass;
+    this.opts = opts;
+
     supr.init.call(this, opts);
+
+    if (opts.parent_actor) {
+      this.parent_actor = opts.parent_actor;
+      delete this.opts.parent_actor;
+    }
 
     this.destroyed = false;
     this.has_reset = false;
@@ -86,6 +71,7 @@ exports = Class(Entity, function() {
     supr.update.call(this, dt);
 
     // Check for collisions
+    // TODO refactor, multiple collisions?
     for (var i in this.collision_handlers) {
       c = this.collision_handlers[i];
 
@@ -93,7 +79,7 @@ exports = Class(Entity, function() {
       if (against === true) against = c.entity;
 
       if (against) {
-        c.handler.call(this, against, c.opts)
+        c.handler.call(this, against, c.opts);
       }
     }
 
@@ -218,5 +204,29 @@ exports = Class(Entity, function() {
     }
 
     return this;
+  }
+
+  /**
+   * The bounce collision handler, so it can be called from a more complicated one
+   *
+   * TODO cleanup
+   */
+  this.collisionBounce = function(entity, opts) {
+    px = this.x
+    py = this.y
+    this.resolveCollidingStateWith(entity)
+
+    // Check if we are bouncing in a vertical or horizontal manner
+    if (Math.abs(this.x - px) > Math.abs(this.y - py)) {
+      this.vx = -this.vx;
+    } else {
+      this.vy = -this.vy;
+    }
+  }
+
+  this.collisionStop = function(entity, opts) {
+    this.resolveCollidingStateWith(entity);
+    this.vx = 0;
+    this.vy = 0;
   }
 });

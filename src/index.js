@@ -4,6 +4,8 @@ import ui.TextView as TextView;
 import ui.ImageView as ImageView;
 import ui.SpriteView as SpriteView;
 import ui.ScoreView as ScoreView;
+
+import accelerometer;
 import entities.Entity as Entity;
 
 import .util;
@@ -28,6 +30,8 @@ var _using_score = false;
 var _text_color = DEFAULT_TEXT_COLOR;
 var _text_font = DEFAULT_TEXT_FONT;
 var _game_running = false;
+var _accelerometer_started = false;
+var _on_tick = null;
 
 /**
  * Object tracking:
@@ -148,6 +152,7 @@ scene = function (defaultModeFun) {
       this.spawners = [];
       _score = 0;
       _tracked = [];
+      _on_tick = null;
 
       // Let's reboot the fun!
       var currentMode = _modes[mode]
@@ -209,6 +214,10 @@ scene = function (defaultModeFun) {
       scene.screen.right.update(dt);
       scene.screen.top.update(dt);
       scene.screen.bottom.update(dt);
+
+      if (_on_tick) {
+        _on_tick(dt);
+      }
     }
   })
 }
@@ -277,6 +286,46 @@ scene.screen = {
     });
   }
 };
+
+/**
+ * onTick(cb)
+ */
+scene.onTick = function(cb) {
+  _on_tick = cb;
+}
+
+/**
+ * startAccelerometer(fun)
+ *
+ * Wraps to the accelerometer module, doesn't do much but provide some niceish
+ * calculations by default. If you don't care about those, or are nit-picky with
+ * speed, just use the accelerometer module by yourself.
+ */
+scene.startAccelerometer = function(cb) {
+  _accelerometer_started = true;
+
+  accelerometer.start(function(evt) {
+    var x = -evt.x;
+    var y = -evt.y;
+    var z = -evt.z;
+
+    cb({
+      x: x,
+      y: y,
+      z: z,
+      forwardTilt: Math.atan2(z, y),
+      tilt: Math.atan2(x, y),
+      twist: Math.atan2(x, z),
+    });
+  });
+}
+
+scene.stopAccelerometer = function(cb) {
+  if (_accelerometer_started) {
+    accelerometer.stop();
+    _accelerometer_started = false;
+  }
+}
 
 /**
  * createActor(resource, opts = {})
