@@ -145,7 +145,6 @@ scene = function (defaultModeFun) {
 
       // Clear the tallies
       this.extraViews = [];
-      this.ghosts = [];
       this.spawners = [];
       _score = 0;
       _tracked = [];
@@ -167,11 +166,6 @@ scene = function (defaultModeFun) {
       scene.screen.right.reset();
       scene.screen.top.reset();
       scene.screen.bottom.reset();
-
-      // Be wary, for ghosts haunt the stage
-      for (var k in this.ghosts) {
-        this.ghosts[k].reset();
-      }
 
       // The minions of evil doth depart
       for (var k in this.spawners) {
@@ -464,7 +458,7 @@ scene.gameOver = function(opts) {
     _game_running = false;
 
     for (var k in _tracked) {
-      if (_tracked[k].stopInput()) {
+      if (_tracked[k].stopInput) {
         _tracked[k].stopInput();
       }
     }

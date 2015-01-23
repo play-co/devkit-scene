@@ -28,4 +28,6 @@ exports = Class(Entity, function() {
   this.reset = function() {
     supr.reset.call(this, 0, 0, this.opts);
   }
+
+  this.destroy = function() {}
 })
