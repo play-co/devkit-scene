@@ -45,6 +45,7 @@ exports = Class(function () {
   }
 
   this.destroy = function() {
+    this.zIndex = -1;
     this.config = [];
   }
 
@@ -78,12 +79,13 @@ exports = Class(function () {
 
     opts0 = opts0 || {};
     var opts = {
-      zIndex: -1,
+      zIndex: this.zIndex,
       xGapRange: [0, 0],
       yGapRange: [0, 0],
       pieceOptions: [{ image: resource.url }],
     };
 
+    this.zIndex -= 1;
     this.config.push(opts);
     return new Layer(opts, this)._setScroll(opts0.scrollX, opts0.scrollY);
   }

@@ -32,6 +32,7 @@ var _text_font = DEFAULT_TEXT_FONT;
 var _game_running = false;
 var _accelerometer_started = false;
 var _on_tick = null;
+var _zIndex = 1;
 
 /**
  * Object tracking:
@@ -87,7 +88,17 @@ scene = function (defaultModeFun) {
         width:  scene.screen.width,
         height: scene.screen.height,
         blockEvents: true,
-      })
+        zIndex: 0,
+      });
+
+      // The superview for all text-based views
+      this.textContainer = new View({
+        parent: this.rootView,
+        width:  scene.screen.width,
+        height: scene.screen.height,
+        blockEvents: true,
+        zIndex: 100000
+      });
 
       scene.background = new Background(this.staticView);
       this.overlay = new View({ parent: this.rootView, infinite: true });
@@ -348,6 +359,11 @@ scene.createActor = function(resource, opts) {
   opts = opts || {};
   opts.parent = GC.app.rootView;
 
+  if (!('zIndex' in opts)) {
+    console.log('bar baz');
+    opts.zIndex = _zIndex++;
+  }
+
   if (resource.type === 'image') {
     // static image
     var viewClass = ImageView;
@@ -407,7 +423,7 @@ scene.addSpawner = function(spawnEntity, opts) {
  */
 scene.drawText = function(x, y, text, opts) {
   GC.app.extraViews.push(new TextView(combine({
-    superview: GC.app.staticView,
+    superview: GC.app.textContainer,
     text: text,
     x: x,
     y: y,
@@ -459,7 +475,7 @@ scene.showScore = function(x, y, color, font, opts) {
   }
 
   app.scoreView = new TextView(combine({
-    parent: app.staticView,
+    parent: app.textContainer,
     x: x,
     y: y,
     width: 200,
