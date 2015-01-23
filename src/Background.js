@@ -49,14 +49,6 @@ exports = Class(function () {
     this.config = [];
   }
 
-  this.autoScroll = function(autoX, autoY) {
-    if (autoY === undefined) {
-      autoY = autoX;
-    }
-    this.autoX = autoX;
-    this.autoY = autoY;
-  }
-
   this.reset = function() {
     this.parallax.reset(this.config);
   }
@@ -67,11 +59,33 @@ exports = Class(function () {
     this.parallax.update(this.offsetX, this.offsetY);
   }
 
+  /**
+   * autoScroll(autoScroll)
+   * autoScroll(autoScrollX, autoScrollY)
+   *
+   * Set the rate of the auto scrolling of the background (by default it is 1, 1).
+   * This multiplicativly affects the scrolling of the parallax
+   * (false or 0 disables)
+   */
+  this.autoScroll = function(autoX, autoY) {
+    if (autoY === undefined) {
+      autoY = autoX;
+    }
+    this.autoX = autoX;
+    this.autoY = autoY;
+  }
+
+  /**
+   * scrollTo(x, y)
+   */
   this.scrollTo = function(x, y) {
     this.offsetX = x;
     this.offsetY = y;
   }
 
+  /**
+   * addLayer(resource, imageViewOpts)
+   */
   this.addLayer = function(resource, opts0) {
     if (resource.type !== 'image') {
       throw 'Background layers must be images, but you gave me a ' + resource.type + '!';
