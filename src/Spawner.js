@@ -9,11 +9,16 @@ exports = Class(function () {
    * Spawner(constructEntity, spawnEntity, spawnCoords, [spawnDelay], [opts])
    * ~ spawnEntity()
    *     A function called when a new entity is spawned, should return the entity
-   * ~ opts = { x: [minX, minY], y: [minY, maxY], delay: [min, max] }
-   *     If delay is undefined then entities will only spawn when spawn() is manually called
+   * ~ opts = {
+   *   ~ x: [minX, minY]
+   *   ~ y: [minY, maxY]
+   *   ~ timeDelay: [min, max]   - undefined means will not spawn on a time delay
+   *   ~ pixelDelay: [min, max]  - undefined means will not spawn on a pixel delay
+   * }
    */
   this.init = function(spawnEntity, opts) {
-    this.spawnDelay = opts.delay;
+    this.spawnTimeDelay = opts.timeDelay;
+    this.spawnPixelDelay = opts.pixelDelay;
     this.spawnX = opts.x || [0, 0];
     this.spawnY = opts.y || [0, 0];
     this.spawnEntity = spawnEntity;
@@ -22,8 +27,8 @@ exports = Class(function () {
   }
 
   this.reset = function() {
-    if (this.spawnDelay) {
-      this.delay = randRange(this.spawnDelay);
+    if (this.spawnTimeDelay) {
+      this.timeDelay = randRange(this.spawnTimeDelay);
     }
   }
 
@@ -62,13 +67,15 @@ exports = Class(function () {
   this.update = function(dt) {
     // Check if we want to spawn a new minion
     // TODO I might want to make this a setTimeout
-    if (this.spawnDelay) {
-      this.delay -= dt;
-      if (this.delay <= 0) {
-        this.delay = randRange(this.spawnDelay);
+    if (this.spawnTimeDelay) {
+      this.timeDelay -= dt;
+      if (this.timeDelay <= 0) {
+        this.timeDelay = randRange(this.spawnTimeDelay);
         this.spawn();
       }
     }
+
+    // TODO pixel spawn
   }
 
   /**
