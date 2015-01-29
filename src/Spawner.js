@@ -1,3 +1,5 @@
+var lessThan    = function(x, y) { return x < y; }
+var greaterThan = function(x, y) { return x > y; }
 
 /**
  * The purpose of this class is to provide an interface that allows the easy generation
@@ -6,34 +8,56 @@
  */
 exports = Class(function () {
   /**
-   * Spawner(constructEntity, spawnEntity, spawnCoords, [spawnDelay], [opts])
+   * Spawner(spawnEntity, [opts])
    * ~ spawnEntity()
    *     A function called when a new entity is spawned, should return the entity
    * ~ opts = {
    *   ~ x: [minX, minY]
    *   ~ y: [minY, maxY]
    *   ~ timeDelay: [min, max]   - undefined means will not spawn on a time delay
-   *   ~ pixelDelay: [min, max]  - undefined means will not spawn on a pixel delay
+   *   ~ pixelDelayX: [min, max]  - undefined means will not spawn on an X pixel delay
+   *   ~ pixelDelayY: [min, max]  - undefined means will not spawn on a Y pixel delay
+   *   ~ relativeTo: background
    * }
    */
   this.init = function(spawnEntity, opts) {
     this.spawnTimeDelay = opts.timeDelay;
-    this.spawnPixelDelay = opts.pixelDelay;
+    this.spawnPixelDelayY = opts.pixelDelayY;
+    this.spawnPixelDelayX = opts.pixelDelayX;
     this.spawnX = opts.x || [0, 0];
     this.spawnY = opts.y || [0, 0];
     this.spawnEntity = spawnEntity;
+    this.relativeTo = opts.relativeTo;
 
     this._entities = [];
   }
 
-  this.reset = function() {
+  this._begin_timeDelay = function() {
     if (this.spawnTimeDelay) {
       this.timeDelay = randRange(this.spawnTimeDelay);
     }
   }
 
-  this.setSpawnDelay = function(spawnDelay) {
-    this.spawnDelay = spawnDelay;
+  this._begin_pixelDelayX = function() {
+    if (this.spawnPixelDelayX) {
+      this.pixelDelayX = randRange(this.spawnPixelDelayX);
+      this.xCompare = this.pixelDelayX < 0 ? lessThan : greaterThan;
+      this.pixelDelayX += this.relativeTo.offsetX;
+    }
+  }
+
+  this._begin_pixelDelayY = function() {
+    if (this.spawnPixelDelayY) {
+      this.pixelDelayY = randRange(this.spawnPixelDelayY);
+      this.yCompare = this.pixelDelayY < 0 ? lessThan : greaterThan;
+      this.pixelDelayY += this.relativeTo.offsetY;
+    }
+  }
+
+  this.reset = function() {
+    this._begin_timeDelay();
+    this._begin_pixelDelayX();
+    this._begin_pixelDelayY();
   }
 
   this.setSpawnCoords = function(spawnCoords) {
@@ -70,12 +94,24 @@ exports = Class(function () {
     if (this.spawnTimeDelay) {
       this.timeDelay -= dt;
       if (this.timeDelay <= 0) {
-        this.timeDelay = randRange(this.spawnTimeDelay);
+        this._begin_timeDelay();
         this.spawn();
       }
     }
 
-    // TODO pixel spawn
+    if (this.spawnPixelDelayX) {
+      if (this.xCompare(this.relativeTo.offsetX, this.pixelDelayX)) {
+        this._begin_pixelDelayX();
+        this.spawn();
+      }
+    }
+
+    if (this.spawnPixelDelayY) {
+      if (this.yCompare(this.relativeTo.offsetY, this.pixelDelayY)) {
+        this._begin_pixelDelayY();
+        this.spawn();
+      }
+    }
   }
 
   /**

@@ -407,6 +407,7 @@ scene.addBackgroundLayer = function(resource, opts0) {
  * See Spawner.js for a description of the arguments
  */
 scene.addSpawner = function(spawnEntity, opts) {
+  opts.relativeTo = opts.relativeTo || scene.background;
   var sp = new Spawner(spawnEntity, opts);
   GC.app.spawners.push(sp);
   return sp;
