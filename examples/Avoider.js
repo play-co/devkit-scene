@@ -13,6 +13,7 @@ scene(function() {
   });
   scene.showScore(10, 10);
 
+  // Set up enemies
   var enemySpawner = scene.addSpawner(new scene.spawner.Spawner(
     [
       new scene.shape.Line({ x: 0, y: scene.screen.height, y2: 0 }),
@@ -30,9 +31,9 @@ scene(function() {
     },
     { spawnDelay: 750 }
   ));
-
   scene.onCollision(player, enemySpawner, player.destroy);
 
+  // Add points with time
   scene.onTick(function(dt) {
     scene.addScore(Math.round(dt / 10));
   });
