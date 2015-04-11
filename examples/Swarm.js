@@ -16,8 +16,8 @@ exports = scene(function() {
   var enemySpawner = scene.addSpawner(new Spawner(
     new Line({ x: 30, y: -100, x2: scene.screen.width - 200, y2: -100 }),
     function (x, y, index) {
-      var enemyType = 'enemy_type' + randRangeI(3);
-      var enemy = scene.addActor(art(enemyType));
+      var enemyType = randRangeI(3);
+      var enemy = scene.addActor(art('enemy_type' + enemyType));
       enemy.onContainedBy(scene.screen.bottom, enemy.destroy);
 
       this.spawnDelay = randRange(500, 1000);

@@ -12,7 +12,7 @@ scene.splash(function() {
 
 scene(function() {
   var bg = scene.addBackgroundLayer(art('starcape_1'), { scroll: 0.5 });
-  var actor = scene.createActor(art('pixelman_angry');
+  var actor = scene.addActor(art('pixelman_angry');
   scene.showScore(10, 10);
 
   actor.ay = 9.8;

@@ -1,11 +1,8 @@
 /**
   * @class Rect
+  * @extends Shape
   */
 exports = function() {
-  /** @var {number} Rect#x */
-  this.x = 0;
-  /** @var {number} Rect#y */
-  this.y = 0;
   /** @var {number} Rect#width */
   this.width = 0;
   /** @var {number} Rect#height */
@@ -23,4 +20,7 @@ exports = function() {
   /** @func Rect#bottom
       @returns {number} */
   this.bottom = function() {};
+
+
+  this.getPointOn = function() {};
 };

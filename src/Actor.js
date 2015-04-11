@@ -38,6 +38,23 @@ exports = function() {
   this.onContainedBy = function(target, callback) {};
 
   /**
+    * Fire {@link callback} when this {@link Actor} is completely outside of {@link target}
+    * @func Actor#onEscaped
+    * @arg {Actor} target
+    * @arg {function} callback
+    */
+  this.onEscaped = function(target, callback) {};
+
+  /**
+    * Set {@link Actor#vx} and {@link Actor#vy} to aim for the specified point, with the specified speed.
+    * @func Actor#headToward
+    * @arg {number} x
+    * @arg {number} y
+    * @arg {number} speed
+    */
+  this.headToward = function(x, y, speed) {};
+
+  /**
     * Remove from screen
     * @func Actor#destroy
     */

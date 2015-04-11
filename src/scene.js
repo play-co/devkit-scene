@@ -60,7 +60,7 @@ scene.addText('Hello World', {
     * Add a background parallax layer to the game.
     * @func scene.addBackground
     * @arg {art} art
-    * @arg {Object} [opts] - contains options to be applied to the underlying {@link View}
+    * @arg {Object} [opts] - contains options to be applied to the underlying {@link ParallaxView}
     * @returns {View}
     */
   this.addBackground = function(art, opts) {};
