@@ -1,8 +1,18 @@
-/**
-  * @class Rect
-  * @extends Shape
-  */
+// import .Shape;
+
 exports = function() {
+
+  /**
+    * @class Rect
+    * @extends Shape
+    *
+    * @arg {number} x
+    * @arg {number} y
+    * @arg {number} width
+    * @arg {number} height
+    */
+  this.init = function() {};
+
   /** @var {number} Rect#width */
   this.width = 0;
   /** @var {number} Rect#height */

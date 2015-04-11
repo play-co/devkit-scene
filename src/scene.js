@@ -1,3 +1,10 @@
+// import shape.Shape as Shape;
+// import shape.Rect as Rect;
+// import shape.Line as Line;
+
+// import spawner.Spawner as Spawner;
+// import spawner.HorizontalSpawner as HorizontalSpawner;
+// import spawner.VerticalSpawner as VerticalSpawner;
 
 /**
  * Construct the main scene for the game, this is where all of the gameplay is defined.
@@ -27,6 +34,28 @@ var scene = function(newGameFunc) {
     * @see scene.getScore
     * @see scene.setScore */
   this._score = 0;
+
+  /** Easy access to shape classes
+    * @var {Object} scene.shape
+    * @prop {Shape} scene.shape.Shape
+    * @prop {Rect} scene.shape.Rect
+    * @prop {Line} scene.shape.Line */
+  this.shape = {
+    Shape: Shape,
+    Rect: Rect,
+    Line: Line
+  };
+
+  /** Easy access to spawner classes
+    * @var {Object} scene.spawner
+    * @prop {Spawner} scene.spawner.Spawner
+    * @prop {HorizontalSpawner} scene.spawner.Horizontal
+    * @prop {VerticalSpawner} scene.spawner.Vertical */
+  this.Spawner = {
+    Spawner: Spawner,
+    Horizontal: HorizontalSpawner,
+    Vertical: VerticalSpawner
+  };
 
   /**
     * Construct a splash screen to show at the beginning of the game, click once anywhere to hide the screen.

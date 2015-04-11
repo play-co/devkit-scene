@@ -20,8 +20,8 @@ exports = scene(function() {
   scene.showScore(10, 10);
 
   // Make the spawner
-  var platformSpawner = scene.addSpawner(new VerticalSpawner(
-    new Line({ x: 30, y: -100, x2: scene.screen.width - 200, y2: -100 }),
+  var platformSpawner = scene.addSpawner(new scene.spawner.Vertical(
+    new scene.shape.Line({ x: 30, y: -100, x2: scene.screen.width - 200 }),
     function (x, y, index) {
       var platform = scene.addActor(art('platform'), { isAnchored: true });
       platform.onContainedBy(scene.screen.bottom, platform.destroy);
@@ -43,7 +43,7 @@ exports = scene(function() {
   // Add the camera to follow the player
   scene.cam.update({
     follow: jumper,
-    movementBounds: new Rect(0, scene.screen.midY, scene.screen.width, scene.screen.height - 100)
+    movementBounds: new scene.shape.Rect(0, scene.screen.midY, scene.screen.width, scene.screen.height - 100)
   });
 
   // Update the score

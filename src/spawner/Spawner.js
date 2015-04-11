@@ -18,7 +18,16 @@ exports = function() {
     */
   this.init = function(spawnAt, spawnFunction, opts) {};
 
-  /** @var {Shape|Shape[]|Point} Spawner#spawnAt */
+  /**
+    * When true, {@link Spawner#spawnAt} positions will be considered in-world positions
+    * @var {boolean} Spawner#useWorldSpace
+    */
+  this.useWorldSpace = false;
+
+  /**
+    * This is where the spawning should occur. Positions will always be screen space, not world space, unless {@link Spawner#useWorldSpace} is set
+    * @var {Shape|Shape[]|Point} Spawner#spawnAt
+    */
   this.spawnAt = null;
 
   /** @var {function} Spawner#spawnFunction */
@@ -28,7 +37,7 @@ exports = function() {
   this.spawnDelay = 0;
 
   /**
-    * Returns a point from somewhere on {@link Spawner#spawnAt}
+    * Returns a point from somewhere on {@link Spawner#spawnAt}, translated based on the current {@link scene.cam} position.
     * @func Spawner#getSpawnPoint
     * @returns {Point}
     */
@@ -41,17 +50,3 @@ exports = function() {
     */
   this.tick = function(dt) {};
 };
-
-
-exports.VerticalSpawner = function() {
-
-  /**
-    * Used for spawning things in a game where the camera is moving in the y direction
-    * @class VerticalSpawner
-    * @extends Spawner
-    */
-  this.init = function() {};
-
-  this.tick = function() {};
-};
-

@@ -13,11 +13,11 @@ scene(function() {
   });
   scene.showScore(10, 10);
 
-  var enemySpawner = scene.addSpawner(new Spawner(
+  var enemySpawner = scene.addSpawner(new scene.spawner.Spawner(
     [
-      new Line({ x: 0, y: scene.screen.height, x2: 0, y2: 0 }),
-      new Line({ x: 0, y: 0, x2: scene.screen.width, y2: 0 }),
-      new Line({ x: scene.screen.width, y: 0, x2: scene.screen.width, y2: scene.screen.height }),
+      new scene.shape.Line({ x: 0, y: scene.screen.height, y2: 0 }),
+      new scene.shape.Line({ x: 0, y: 0, x2: scene.screen.width, }),
+      new scene.shape.Line({ x: scene.screen.width, y: 0, y2: scene.screen.height })
     ],
     function (x, y, index) {
       var enemy = scene.addActor(art('angry_bullet'));

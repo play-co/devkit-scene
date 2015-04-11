@@ -13,8 +13,8 @@ exports = scene(function() {
   scene.showScore(10, 10);
 
   // Make the spawners
-  var enemySpawner = scene.addSpawner(new Spawner(
-    new Line({ x: 30, y: -100, x2: scene.screen.width - 200, y2: -100 }),
+  var enemySpawner = scene.addSpawner(new scene.spawner.Spawner(
+    new scene.shape.Line({ x: 30, y: -100, x2: scene.screen.width - 200 }),
     function (x, y, index) {
       var enemyType = randRangeI(3);
       var enemy = scene.addActor(art('enemy_type' + enemyType));
@@ -25,7 +25,7 @@ exports = scene(function() {
     }
   ));
 
-  var bulletSpawner = scene.addSpawner(new Spawner(
+  var bulletSpawner = scene.addSpawner(new scene.spawner.Spawner(
     player,
     function (x, y, index) {
       var bullet = scene.addActor(art('lazer'));
@@ -46,6 +46,6 @@ exports = scene(function() {
   // Add the camera to follow the player
   scene.cam.update({
     follow: player,
-    movementBounds: new Rect(0, scene.screen.height - 100, scene.screen.width, scene.screen.height - 100)
+    movementBounds: new scene.shape.Rect(0, scene.screen.height - 100, scene.screen.width, scene.screen.height - 100)
   });
 });
