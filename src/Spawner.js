@@ -18,7 +18,7 @@ exports = function() {
     */
   this.init = function(spawnAt, spawnFunction, opts) {};
 
-  /** @var {Shape|Shape[]} Spawner#spawnAt */
+  /** @var {Shape|Shape[]|Point} Spawner#spawnAt */
   this.spawnAt = null;
 
   /** @var {function} Spawner#spawnFunction */

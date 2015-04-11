@@ -7,16 +7,26 @@
 var scene = function(newGameFunc) {
 
   /**
-    * @var scene.screen
-    * @type {Screen}
+    * @var {Screen} scene.screen
     */
   this.screen = null;
 
   /**
-    * @var scene.cam
-    * @type {Camera}
+    * @var {Camera} scene.cam
     */
   this.cam = null;
+
+  /**
+    * There can be only one player. {@link scene.gameOver} is automatically called when the player is destroyed.
+    * @var {Actor} scene.player
+    */
+  this.player = null;
+
+  /** Use the get and set method
+    * @var {number} scene._score
+    * @see scene.getScore
+    * @see scene.setScore */
+  this._score = 0;
 
   /**
     * Construct a splash screen to show at the beginning of the game, click once anywhere to hide the screen.
@@ -65,6 +75,17 @@ scene.addText('Hello World', {
   this.addActor = function(art, opts) {};
 
   /**
+    * Sets the scene player, makes sure not to override an existing player.
+    * @func scene.addPlayer
+    *
+    * @see scene.addActor
+    * @arg {art} art
+    * @arg {Object} [opts] - contains options to be applied to the underlying {@link Actor}
+    * @returns {View} - The newly set player
+    */
+  this.addPlayer = function(art, opts) {};
+
+  /**
     * Add a new spawner
     * @func scene.addSpawner
     * @arg {Spawner} spawner
@@ -80,6 +101,24 @@ scene.addText('Hello World', {
     * @arg {Object} [opts] contains options to be applied to the underlying {@link View}
     */
   this.showScore = function(x, y, opts) {};
+
+  /**
+    * Calling this function will set {@link scene._score} and update the score view.
+    * @func scene.setScore
+    * @arg {number} newScore
+    */
+  this.setScore = function(newScore) {};
+
+  /** @func scene.getScore
+    * @returns {number} */
+  this.getScore = function() {};
+
+  /**
+    * @func scene.addScore
+    * @see scene.setScore
+    * @arg {number} amount
+    */
+  this.addScore = function(amount) {};
 
   /**
     * Called when a collision occurs
