@@ -39,6 +39,7 @@ exports = function() {
 /**
   * A collidable element representing these semantic screen spaces.
   * @class Wall
+  * @extends Actor
   */
 var Wall = function() {
 };

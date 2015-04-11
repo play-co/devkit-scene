@@ -50,7 +50,7 @@ scene.addText('Hello World', {
     * Add a background parallax layer to the game.
     * @func scene.addBackground
     * @arg {art} art
-    * @arg {Object} [opts] contains options to be applied to the underlying {@link View}
+    * @arg {Object} [opts] - contains options to be applied to the underlying {@link View}
     * @returns {View}
     */
   this.addBackground = function(art, opts) {};
@@ -59,10 +59,18 @@ scene.addText('Hello World', {
     * Create a new actor that will be automatically updated each tick
     * @func scene.addActor
     * @arg {art} art
-    * @arg {Object} [opts] contains options to be applied to the underlying {@link Actor}
+    * @arg {Object} [opts] - contains options to be applied to the underlying {@link Actor}
     * @returns {View}
     */
   this.addActor = function(art, opts) {};
+
+  /**
+    * Add a new spawner
+    * @func scene.addSpawner
+    * @arg {Spawner} spawner
+    * @returns {@link Spawner}
+    */
+  this.addSpawner = function(spawner) {};
 
   /**
     * Set the x and y coordinates in screen space for the score text. The score text remains invisible until this function is called.
@@ -80,11 +88,12 @@ scene.addText('Hello World', {
     * @arg {Actor} b
     */
   /**
-    * This collision check will be run each tick
+    * This collision check will be run each tick. {@link callback} will be called only once per tick
     * @func scene.onCollision
-    * @arg {Actor|Group|array} a
-    * @arg {Actor|Group|array} b
+    * @arg {Actor|Actor[]|Group} a
+    * @arg {Actor|Actor[]|Group} b
     * @arg {onCollisionCallback} callback
+    * @arg {boolean} [allCollisions] - {@link callback} may be called more than once per tick
     */
   this.onCollision = function(a, b, callback) {};
 
