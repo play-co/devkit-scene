@@ -1,0 +1,11 @@
+{
+  "name": "scene",
+  "version": "0.0.1",
+  "dependencies": {
+    "gulp": "^3.8.11"
+  },
+  "devDependencies": {
+    "gulp-jsdoc": "^0.1.4",
+    "gulp-webserver": "^0.9.0"
+  }
+}
