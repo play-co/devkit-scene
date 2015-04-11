@@ -2,7 +2,7 @@ var gulp = require('gulp');
 var webserver = require('gulp-webserver');
 var jsdoc = require("gulp-jsdoc");
 
-var targetDir = 'scene/**/*.js';
+var targetDir = 'src/**/*.js';
 
 gulp.task('jsdoc', [], function(cb) {
   try {
@@ -15,7 +15,7 @@ gulp.task('jsdoc', [], function(cb) {
   cb();
 });
 
-gulp.task('watch', [], function() {
+gulp.task('watch', ['jsdoc'], function() {
   gulp.watch(targetDir, ['jsdoc']);
 });
 
