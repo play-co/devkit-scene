@@ -26,7 +26,7 @@ exports = function() {
   this.ay = 0;
 
   /** If true, the entity will not move when colliding with other entities.
-      @var {boolean} Actor#isAnchored */
+     * @var {boolean} Actor#isAnchored */
   this.isAnchored = false;
 
   /**
@@ -55,9 +55,23 @@ exports = function() {
   this.headToward = function(x, y, speed) {};
 
   /**
+    * Register a new tick handler
+    * @func Actor#onTick
+    * @arg {onTickCallback} callback
+    */
+  this.onTick = function(callback) {};
+
+  /**
     * Remove from screen
     * @func Actor#destroy
     */
   this.destroy = function() {};
+
+  /**
+    * Register a new destroy handler, will be called after {@link Actor#destroy} has been called.
+    * @func Actor#onDestroy
+    * @arg {function} callback
+    */
+  this.onDestroy = function(callback) {};
 
 };

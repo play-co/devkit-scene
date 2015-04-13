@@ -1,6 +1,7 @@
 /**
   * This is a very simple game: There is a ball on screen, it falls down.
   * Touch the ball to juggle it.
+  * @requires scene 0.0.1
   */
 import scene, art;
 

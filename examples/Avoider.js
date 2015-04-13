@@ -1,5 +1,8 @@
 import scene, art;
 
+/**
+  * @requires scene 0.0.1
+  */
 scene.splash(function() {
   scene.addText('Avoider: Tap to start!');
   scene.addBackground(art('starscape_2');

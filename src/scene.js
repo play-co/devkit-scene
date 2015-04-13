@@ -6,9 +6,12 @@
 // import spawner.HorizontalSpawner as HorizontalSpawner;
 // import spawner.VerticalSpawner as VerticalSpawner;
 
+// import collision.CollisionManager as CollisionManager;
+
 /**
  * Construct the main scene for the game, this is where all of the gameplay is defined.
  * @namespace scene
+ * @version 0.0.2
  * @arg {function} - The function which will initialize a new game scene
  */
 var scene = function(newGameFunc) {
@@ -22,6 +25,11 @@ var scene = function(newGameFunc) {
     * @var {Camera} scene.cam
     */
   this.cam = null;
+
+  /**
+    * @var {CollisionManager} scene.collision
+    */
+  this.collision = null;
 
   /**
     * There can be only one player. {@link scene.gameOver} is automatically called when the player is destroyed.
@@ -57,6 +65,10 @@ var scene = function(newGameFunc) {
     Vertical: VerticalSpawner
   };
 
+  /** The total number of milliseconds that have elapsed since the start of the game.
+    * @var {number} scene.totalDt */
+  this.totalDt = 0;
+
   /**
     * Construct a splash screen to show at the beginning of the game, click once anywhere to hide the screen.
     * @func scene.splash
@@ -88,39 +100,47 @@ scene.addText('Hello World', {
   /**
     * Add a background parallax layer to the game.
     * @func scene.addBackground
-    * @arg {art} art
+    * @arg {ParallaxView} view
     * @arg {Object} [opts] - contains options to be applied to the underlying {@link ParallaxView}
     * @returns {View}
     */
-  this.addBackground = function(art, opts) {};
+  this.addBackground = function(view, opts) {};
 
   /**
     * Create a new actor that will be automatically updated each tick
     * @func scene.addActor
-    * @arg {art} art
+    * @arg {View} view
     * @arg {Object} [opts] - contains options to be applied to the underlying {@link Actor}
     * @returns {View}
     */
-  this.addActor = function(art, opts) {};
+  /**
+    * @func scene.addActor(2)
+    * @arg {View} view
+    * @arg {number} x
+    * @arg {number} y
+    * @arg {Object} [opts] - contains options to be applied to the underlying {@link Actor}
+    * @returns {View}
+    */
+  this.addActor = function(view, x, y, opts) {};
 
   /**
     * Sets the scene player, makes sure not to override an existing player.
     * @func scene.addPlayer
     *
     * @see scene.addActor
-    * @arg {art} art
+    * @arg {View} view
     * @arg {Object} [opts] - contains options to be applied to the underlying {@link Actor}
     * @returns {View} - The newly set player
     */
-  this.addPlayer = function(art, opts) {};
+  this.addPlayer = function(view, opts) {};
 
   /**
-    * Add a new spawner
-    * @func scene.addSpawner
-    * @arg {Spawner} spawner
-    * @returns {@link Spawner}
+    * Add a new group
+    * @func scene.addGroup
+    * @arg {Object} [opts]
+    * @returns {@link Group}
     */
-  this.addSpawner = function(spawner) {};
+  this.addGroup = function(opts) {};
 
   /**
     * Set the x and y coordinates in screen space for the score text. The score text remains invisible until this function is called.
@@ -150,20 +170,38 @@ scene.addText('Hello World', {
   this.addScore = function(amount) {};
 
   /**
-    * Called when a collision occurs
-    * @callback onCollisionCallback
-    * @arg {Actor} a
-    * @arg {Actor} b
+    * Execute a callback every specified amount of milliseconds. Game dt will be used
+    * to determine how long has passed, not system time. Replacement for `setInterval`.
+    * @func scene.addInterval
+    * @arg {function} callback
+    * @arg {number} ms - milliseconds between callback executions
+    * @returns {number} intervalID
     */
+  this.addInterval = function(callback, ms) {};
+
   /**
-    * This collision check will be run each tick. {@link callback} will be called only once per tick
-    * @func scene.onCollision
-    * @arg {Actor|Actor[]|Group} a
-    * @arg {Actor|Actor[]|Group} b
-    * @arg {onCollisionCallback} callback
-    * @arg {boolean} [allCollisions] - {@link callback} may be called more than once per tick
+    * Remove an interval before it has executed. Replacement for `clearInterval`.
+    * @func scene.removeInterval
+    * @arg {number} intervalID
     */
-  this.onCollision = function(a, b, callback) {};
+  this.removeInterval = function(intervalID) {};
+
+  /**
+    * Execute a callback after a specified amount of milliseconds. Callback will only execute once.
+    * Game dt will be used to determine how long has passed, not system time. Replacement for `setTimeout`.
+    * @func scene.addTimeout
+    * @arg {function} callback
+    * @arg {number} ms - milliseconds until callback is executed
+    * @returns {number} timeoutID
+    */
+  this.addTimeout = function(callback, ms) {};
+
+  /**
+    * Remove a timeout before it has executed. Replacement for `clearTimeout`.
+    * @func scene.removeTimeout
+    * @arg {number} timeoutID
+    */
+  this.removeTimeout = function(timeoutID) {};
 
   /**
     * Called when a touch occurs

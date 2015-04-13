@@ -8,7 +8,7 @@ exports = function() {
     * @func Camera#update
     * @arg {Object} opts
     * @arg {Actor} [opts.follow] - This is the actor the camera will try to follow
-    * @arg {Rect} [opts.movementBounds] - If follow is set, the camera will keep the actor within these screen bounds
+    * @arg {Shape} [opts.movementBounds] - If follow is set, the camera will keep the actor within these screen bounds
     */
   this.update = function(opts) {};
 };

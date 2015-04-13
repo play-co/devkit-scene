@@ -1,6 +1,7 @@
 /**
   * Jump up the platforms, dont fall off the bottom
-  * see https://play.google.com/store/apps/details?id=au.com.phil&hl=en
+  * @see https://play.google.com/store/apps/details?id=au.com.phil&hl=en
+  * @requires scene 0.0.1
   */
 import scene, art;
 
