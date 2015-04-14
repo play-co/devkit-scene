@@ -1,46 +1,112 @@
+import .Actor;
+import .shape.Rect as Rect;
+
 /**
   * @class Screen
-  * @extends Rect
   */
-exports = function() {
-  /** @var {Wall} Screen#left */
-  this.left = null;
-  /** @var {Wall} Screen#right */
-  this.right = null;
-  /** @var {Wall} Screen#top */
-  this.top = null;
-  /** @var {Wall} Screen#bottom */
-  this.bottom = null;
+exports = Class(Rect, function(supr) {
 
-  /** @var {number} Screen#midX */
-  this.midX = 0;
-  /** @var {number} Screen#midY */
-  this.midY = 0;
+  this.init = function(width, height) {
+    supr(this, "init", [0, 0, width, height]);
+    this.resetTouches();
+  };
 
-  /**
-    * Determines which wall was hit, and inverts the actors velocity in the respective axis.
-    * @func Screen#bounceOff
-    * @type {onCollisionCallback}
-    * @arg {Actor} actor1
-    * @arg {Actor} actor2
-    */
-  this.bounceOff = function(actor1, actor2) {};
+  this.resetTouches = function() {
+    this.onTouchCallbacks = [];
+    this.onTapCallbacks = [];
+    this.singleTouchCallbacks = [];
+    this.offTouchCallbacks = [];
+    this.activeTouches = {};
+  };
 
-  /**
-    * Determines which wall was hit, and wraps the actor around to the other side of the screen.
-    * @func Screen#wrap
-    * @type {onCollisionCallback}
-    * @arg {Actor} actor1
-    * @arg {Actor} actor2
-    */
-  this.wrap = function(actor1, actor2) {};
-};
+  // TODO: move this to an event system instead of a bunch of fixed functions
+  this.onTouch = function(cb) {
+    return this.onTouchCallbacks.push(cb) - 1;
+  };
 
-/**
-  * A collidable element representing these semantic screen spaces.
-  * @class Wall
-  * @extends Actor
-  * @mixes Collidable
-  */
-var Wall = function() {
-};
+  this.onTap = function(cb) {
+    this.onTapCallbacks.push(cb);
+  };
+
+  this.removeOnTap = function(cb) {
+    var i = this.onTapCallbacks.indexOf(cb);
+    if (i >= 0) {
+      this.onTapCallbacks.splice(i, 1);
+    }
+  };
+
+  this.removeOnTouch = function(cb) {
+    var i = this.onTouchCallbacks.indexOf(cb);
+    if (i >= 0) {
+      this.onTouchCallbacks.splice(i, 1);
+    }
+  };
+
+  this.inputStartHandler = function(event, point) {
+    var i;
+    for (i in this.onTouchCallbacks) {
+      this.onTouchCallbacks[i](event.id, point);
+    }
+    for (i in this.onTapCallbacks) {
+      this.onTapCallbacks[i](event.id, point);
+    }
+    while (this.singleTouchCallbacks.length > 0) {
+      this.singleTouchCallbacks.shift()(event.id, point);
+    }
+    this.activeTouches[event.id] = { x: point.x, y: point.y };
+  };
+
+  this.onTouchMove = function(cb) {
+    return this.touchMoveCallbacks.push(cb) - 1;
+  };
+
+  this.removeOnTouchMove = function(cb) {
+    var i = this.touchMoveCallbacks.indexOf(cb);
+    if (i >= 0) {
+      this.touchMoveCallbacks.splice(i, 1);
+    }
+  };
+
+  this.inputMoveHandler = function(event, point) {
+    for (var i in this.onTouchCallbacks) {
+      this.onTouchCallbacks[i](event.id, point);
+    }
+    var existingTouch = this.activeTouches[event.id];
+    if (existingTouch) {
+      existingTouch.x = point.x
+      existingTouch.y = point.y;
+    }
+  };
+
+  this.onTouchOnce = function(cb) {
+    return this.singleTouchCallbacks.push(cb) - 1;
+  };
+
+  this.removeOnTouchOnce = function(index) {
+    this.singleTouchCallbacks.splice(index, 1);
+  };
+
+  this.offTouch = function(cb) {
+    return this.offTouchCallbacks.push(cb) - 1;
+  };
+
+  this.removeOffTouch = function(cb) {
+    var i = this.offTouchCallbacks.indexOf(cb);
+    if (i >= 0) {
+      this.offTouchCallbacks.splice(i, 1);
+    }
+  };
+
+  this.inputStopHandler = function(event, point) {
+    for (var i in this.offTouchCallbacks) {
+      this.offTouchCallbacks[i](event.id, point);
+    }
+    this.activeTouches[event.id] = null;
+  };
+
+  this.getTouch = function(index) {
+    index = index || -1; // Default is mouse
+    return this.activeTouches[index];
+  };
+
+});

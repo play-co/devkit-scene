@@ -1,12 +1,21 @@
-# devkit-scene
-The play's scene up on the high stage, the module to play the game.
+Devkit2 Scene Module
+====================
 
-### Installation
+The purpose of the scene module is to provide a easy to use layer of abstraction
+on top of the devkit2 game engine and other devkit2 modules.
 
-Run `npm install`
+Installation and Usage
+----------------------
 
-### Generating docs
+To install the scene module into your devkit2 project, execute:
 
-Run `gulp` to generate doc, and start a live reload webserver for viewing them.
+    devkit install https://github.com/weebygames/devkit-scene
 
-Any chages made to the src folder will result in the docs building and the server live reloading.
+Then, to use the scene module change your `Application.js` to fit the following:
+
+    import scene;
+
+    exports = scene(function() {
+        // Setup your game here
+    });
+
