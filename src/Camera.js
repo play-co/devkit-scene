@@ -101,19 +101,21 @@ exports = Class(Rect, function() {
 
   /**
     * Determines which wall was hit, and inverts the actors velocity in the respective axis.
+    * One argument must be a {@link Wall} and one must be an {@link Actor}.
     * @func Screen#bounceOff
     * @type {onCollisionCallback}
-    * @arg {Actor} actor1
-    * @arg {Actor} actor2
+    * @arg {Actor|Wall} actor1
+    * @arg {Actor|wall} actor2
     */
   this.bounceOff = function(actor1, actor2) {};
 
   /**
     * Determines which wall was hit, and wraps the actor around to the other side of the screen.
+    * One argument must be a {@link Wall} and one must be an {@link Actor}.
     * @func Screen#wrap
     * @type {onCollisionCallback}
-    * @arg {Actor} actor1
-    * @arg {Actor} actor2
+    * @arg {Actor|Wall} actor1
+    * @arg {Actor|Wall} actor2
     */
   this.wrap = function(actor1, actor2) {};
 });

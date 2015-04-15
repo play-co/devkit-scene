@@ -1,7 +1,6 @@
 import math.geom.Point as Point;
 import .Shape;
 
-
 /**
   * Must define either {@link x2}, {@link y2}, or both.
   * @class Line
@@ -22,11 +21,6 @@ exports = Class(Shape, function(supr) {
     this.y2 = (opts.y2 !== undefined) ? opts.y2 : this.y;
   };
 
-  /**
-    * Returns a random point from somewhere on this shape
-    * @func Shape#getPointOn
-    * @returns {Point}
-    */
   this.getPointOn = function(result) {
     result = result || new Point();
     var startX = Math.min(this.x, this.x2);

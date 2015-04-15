@@ -23,35 +23,19 @@ exports = Class(function(supr) {
   };
 
   /**
-    * Called when a collision occurs
-    * @callback onCollisionCallback
-    * @arg {Actor} a
-    * @arg {Actor} b
-    */
-  /**
-    * This collision check will be run each tick. {@link callback} will be called only once per tick
-    * @func CollisionManager#check
-    * @arg {Actor|Actor[]|Group|Collidable} a
-    * @arg {Actor|Actor[]|Group|Collidable} b
-    * @arg {onCollisionCallback} callback
-    * @arg {boolean} [allCollisions] - {@link callback} may be called more than once per tick
+    * @func CollisionManager#registerCollision
+    * @arg {CollisionChecker} collisionChecker
     * @returns {number} collisionCheckID
     */
-  this.addCollision = function(a, b, callback, allCollisions) {
+  this.registerCollision = function(collisionChecker) {
     this.collisionCheckID++;
 
     // create a new collision checker
-    var check = new CollisionChecker({
-      a: a,
-      b: b,
-      callback: callback,
-      allCollisions: allCollisions,
-
-      collisionCheckID: this.collisionCheckID
-    });
+    collisionChecker.onRegistered({ collisionCheckID: this.collisionCheckID });
 
     // append to the internal collision checks array
-    this._collisionChecks.push(check) - 1;
+    this._collisionChecks.push(collisionChecker) - 1;
+
     return this.collisionCheckID;
   };
 

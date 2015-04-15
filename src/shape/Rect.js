@@ -20,26 +20,32 @@ exports = Class(Shape, function(supr) {
     this.height = height || 0;
   };
 
+  /** @func Rect#left
+      @returns {number} */
+  this._objpLeft = { get: function() { return this.x; } };
+  /** @func Rect#right
+      @returns {number} */
+  this._objpRight = { get: function() { return this.x + this.width; } };
+  /** @func Rect#top
+      @returns {number} */
+  this._objpTop = { get: function() { return this.y; } };
+  /** @func Rect#bottom
+      @returns {number} */
+  this._objpBottom = { get: function() { return this.y + this.height; } };
+
   Object.defineProperties(this, {
-    /** @func Rect#left
-        @returns {number} */
-    left: { get: function() { return this.x; } },
-    /** @func Rect#right
-        @returns {number} */
-    right: { get: function() { return this.x + this.width; } },
-    /** @func Rect#top
-        @returns {number} */
-    top: { get: function() { return this.y; } },
-    /** @func Rect#bottom
-        @returns {number} */
-    bottom: { get: function() { return this.y + this.height; } }
+    left: this._objpLeft,
+    right: this._objpRight,
+    top: this._objpTop,
+    bottom: this._objpBottom
   });
 
-  /**
-    * Returns a random point from somewhere on this shape
-    * @func Shape#getPointOn
-    * @returns {Point}
-    */
+  // Mock out some functions for EntityPhysics
+  this.getMinHitX = this._objpLeft.get;
+  this.getMaxHitX = this._objpRight.get;
+  this.getMinHitY = this._objpTop.get;
+  this.getMaxHitY = this._objpBottom.get;
+
   this.getPointOn = function(result) {
     result = result || new Point();
     result.x = Math.floor(this.x + Math.random() * this.width);

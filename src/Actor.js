@@ -1,6 +1,6 @@
 import entities.Entity as Entity;
-import .ActorView;
 
+import .ActorView;
 
 /**
   * This is the basic entity for all things in a scene game.  If it moves, it's and actor.
@@ -91,19 +91,36 @@ exports = Class(Entity, function() {
 
   /**
     * Fire {@link callback} when this {@link Actor} is completely inside {@link target}
-    * @func Actor#onContainedBy
+    * @func Actor#onEntered
     * @arg {Actor} target
     * @arg {function} callback
+    * @returns {number} collisionCheckID
     */
-  this.onContainedBy = function(target, callback) {};
+  this.onEntered = function(target, callback) {
+    this._registerCollision(target, callback, 'ON_ENTERED');
+  };
 
   /**
     * Fire {@link callback} when this {@link Actor} is completely outside of {@link target}
-    * @func Actor#onEscaped
+    * @func Actor#onExited
     * @arg {Actor} target
     * @arg {function} callback
+    * @returns {number} collisionCheckID
     */
-  this.onEscaped = function(target, callback) {};
+  this.onExited = function(target, callback) {
+    this._registerCollision(target, callback, 'ON_EXITED');
+  };
+
+  this._registerCollision = function(target, callback, type) {
+    return scene.collisions.registerCollision(
+      new scene.collision.CollisionChecker({
+        a: this,
+        b: target,
+        callback: callback,
+        collisionType: type
+      })
+    );
+  }
 
   /**
     * Set {@link Actor#vx} and {@link Actor#vy} to aim for the specified point, with the specified speed.

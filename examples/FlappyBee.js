@@ -21,8 +21,8 @@ exports = scene(function() {
 
   scene.showScore(scene.screen.midX, 10, {color: 'black'});
   scene.camera.follow(player, new scene.shape.Rect(screenW * 0.2, -screenH, 0, screenH * 3));
-  scene.onCollision(player, scene.camera.borderBottom, function(a, b) {
-    if (player.y > scene.camera.bottom) { player.destroy(); }
+  scene.onCollision(player, scene.camera, function(player, b) {
+    player.destroy();
   });
 
   scene.screen.onTap(function() {

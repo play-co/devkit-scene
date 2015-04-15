@@ -3,7 +3,6 @@ import math.geom.Point as Point;
 /**
   * @class Shape
   */
-
 exports = Class(function() {
 
   this.init = function(x, y, width, height) {
@@ -22,5 +21,18 @@ exports = Class(function() {
     result = result || new Point();
     return result;
   };
+
+  /**
+    * Find the nearest point which is on the shape
+    * @func Shape#getNearestPoint
+    * @arg {number} x
+    * @arg {number} y
+    * @returns {Object} result
+    * @returns {number} result.x
+    * @returns {number} result.y
+    * @returns {number} result.dx
+    * @returns {number} result.dy
+    */
+  this.getNearestPoint = function(x, y) {};
 
 });

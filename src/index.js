@@ -16,6 +16,7 @@ import .shape.Line as Line;
 import .shape.Rect as Rect;
 
 import .collision.CollisionManager as CollisionManager;
+import .collision.CollisionChecker as CollisionChecker;
 
 import .Actor;
 import .Group;
@@ -150,7 +151,7 @@ scene = function (newGameFunc) {
       scene.screen.resetTouches();
       scene.background.reset();
 
-      scene.collisionManager.reset();
+      scene.collisions.reset();
       scene.group.destroy();
       scene.player = null;
       scene.camera.stopFollowing();
@@ -234,7 +235,7 @@ scene = function (newGameFunc) {
         this.groups[i].update(dt);
       }
       scene.camera.update(dt);
-      scene.collisionManager.update();
+      scene.collisions.update();
       this.stage.style.x = -scene.camera.x;
       this.stage.style.y = -scene.camera.y;
       scene.background.scrollTo(-scene.camera.x, -scene.camera.y);
@@ -254,9 +255,9 @@ scene.screen = new Screen(576, 1024);
 scene.camera = new Camera(scene.screen.width, scene.screen.height);
 
 /**
-  * @var {CollisionManager} scene.collisionManager
+  * @var {CollisionManager} scene.collisions
   */
-scene.collisionManager = new CollisionManager();
+scene.collisions = new CollisionManager();
 
 /**
   * There can be only one player. {@link scene.gameOver} is automatically called when the player is destroyed.
@@ -634,10 +635,26 @@ scene.removeSpawner = function(spawner) {
   }
 };
 
-
+/**
+  * This collision check will be run each tick. {@link callback} will be called only once per tick
+  * @func scene.onCollision
+  * @arg {Actor|Actor[]|Group|Collidable} a
+  * @arg {Actor|Actor[]|Group|Collidable} b
+  * @arg {onCollisionCallback} callback
+  * @arg {boolean} [allCollisions] - {@link callback} may be called more than once per tick
+  * @see CollisionChecker
+  * @returns {number} collisionCheckID
+  */
 scene.onCollision = function(a, b, callback, allCollisions) {
-  allCollisions = allCollisions || true;
-  this.collisionManager.addCollision(a, b, callback, allCollisions);
+  // create a new collision checker
+  var check = new CollisionChecker({
+    a: a,
+    b: b,
+    callback: callback,
+    allCollisions: allCollisions
+  });
+
+  return this.collisions.registerCollision(check);
 };
 
 scene.spawner = {
@@ -649,6 +666,10 @@ scene.spawner = {
 scene.shape = {
   Rect: Rect,
   Line: Line
+};
+
+scene.collision = {
+  CollisionChecker: CollisionChecker
 };
 
 
