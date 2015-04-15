@@ -1,5 +1,4 @@
-import entities.EntityPool as EntityPool;
-import entities.Entity as Entity;
+import ..Group as Group;
 
 /**
   * Responsible for updating, and manging collision checks.
@@ -19,11 +18,7 @@ exports = Class(function(supr) {
   };
 
   this.reset = function() {
-    this.entityVsEntity = [];
-    this.entityVsPoolFirst = [];
-    this.entityVsPoolAll = [];
-    this.poolVsPoolFirst = [];
-    this.poolVsPoolAll = [];
+    this.collisionChecks = [];
     this.collisionCheckID = -1;
   };
 
@@ -52,104 +47,22 @@ exports = Class(function(supr) {
         this.check(a, b[i]);
       }
     } else {
-
-      var aIsPool = a instanceof EntityPool;
-      var bIsPool = b instanceof EntityPool;
-      // Since we can't compare pool on entity, we may need to reverse a and
-      // b so it's entity on pool
-      var reverseTargets = !aIsPool && bIsPool;
-      var collisionData = new CollisionData(a, b, callback, reverseTargets);
-
-      if (aIsPool && bIsPool) {
-        // Pool on pool collision
-        if (allCollisions) {
-          this.poolVsPoolAll.push(collisionData);
-        } else {
-          this.poolVsPoolFirst.push(collisionData);
-        }
-      } else if (!aIsPool && !bIsPool) {
-        // entity on entity collision
-        this.entityVsEntity.push(collisionData);
-      } else {
-        // entity on pool collision
-        if (allCollisions) {
-          this.entityVsPoolAll.push(collisionData);
-        } else {
-          this.entityVsPoolFirst.push(collisionData);
-        }
-      }
+      allCollisions = allCollisions || false;
+      var check = new CollisionChecker(a, b, callback, allCollisions);
+      this.collisionChecks.push(check);
+      return check;
     }
-
-    return this.collisionCheckID++;
   };
 
   this.update = function(dt) {
-    var checkCount = this.entityVsEntity.length;
-    var deadHandlers = false;
-    for (var i = 0; i < checkCount; i++) {
-      var collisionData = this.entityVsEntity[i];
-      if (collisionData.a.destroyed || collisionData.b.destroyed) {
-        deadHandlers = true;
-      } else if (collisionData.a.collidesWith(collisionData.b)) {
-        collisionData.callback(collisionData.a, collisionData.b);
-      }
-    }
-
-    if (deadHandlers) {
-      this.clearDeadHandlers(this.entityVsEntity);
-    }
-
-    checkCount = this.entityVsPoolFirst.length;
-    deadHandlers = false;
-    for (var i = 0; i < checkCount; i++) {
-      var collisionData = this.entityVsPoolFirst[i];
-      if (collisionData.a.destroyed || collisionData.b.destroyed) {
-        deadHandlers = true;
-      } else {
-        collisionData.a.onFirstCollision(collisionData.b, collisionData.callback, GC.app);
-      }
-    }
-
-    if (deadHandlers) {
-      this.clearDeadHandlers(this.entityVsPoolFirst);
-    }
-
-    checkCount = this.entityVsPoolAll.length;
-    deadHandlers = false;
-    for (var i = 0; i < checkCount; i++) {
-      var collisionData = this.entityVsPoolAll[i];
-      if (collisionData.a.destroyed || collisionData.b.destroyed) {
-        deadHandlers = true;
-      } else {
-        collisionData.a.onAllCollisions(collisionData.b, collisionData.callback, GC.app);
-      }
-    }
-
-    if (deadHandlers) {
-      this.clearDeadHandlers(this.entityVsPoolAll);
-    }
-
-    checkCount = this.poolVsPoolFirst.length;
-    for (var i = 0; i < checkCount; i++) {
-      var collisionData = this.poolVsPoolFirst[i];
-      collisionData.a.onFirstPoolCollisions(collisionData.b, collisionData.callback, GC.app);
-    }
-
-    checkCount = this.poolVsPoolAll.length;
-    for (var i = 0; i < checkCount; i++) {
-      var collisionData = this.poolVsPoolAll[i];
-      collisionData.a.onAllPoolCollisions(collisionData.b, collisionData.callback, GC.app);
-    }
-  };
-
-  this.clearDeadHandlers = function(handlers) {
-    for (var i = handlers.length - 1; i >= 0; i--) {
-      var collisionData = handlers[i];
-      if (collisionData.a.destroyed || collisionData.b.destroyed) {
-        var lastHandler = handlers.pop();
-        if (i < handlers.length) {
-          handlers[i] = lastHandler;
-        }
+    // Iterate backwards so we can prune dead checks on the fly
+    for (var i = this.collisionChecks.length - 1; i >= 0; i--) {
+      var success = this.collisionChecks[i].run();
+      if (success === false) {
+        // Dead check, remove it by popping the last check off of the stack
+        // and replacing the dead one. This changes the order of checks.
+        var lastCheck = this.collisionChecks.pop();
+        if (i < this.collisionChecks.length) { this.collisionChecks[i] = lastCheck; }
       }
     }
   };
@@ -157,9 +70,9 @@ exports = Class(function(supr) {
   /**
     * Fully remove the collision check, cannot subsequently call {@link CollisionManager#start}
     * @func CollisionManager#remove
-    * @arg {number} collisionCheckID
+    * @arg {number} collisionCheck
     */
-  this.remove = function(collisionCheckID) {};
+  this.remove = function(collisionCheck) {};
 
   /**
     * Temporarily stop a collision from being checked, do not unregister it.
@@ -177,20 +90,74 @@ exports = Class(function(supr) {
 
 });
 
-var CollisionData = function(a, b, callback, reverseTargets) {
-  if (reverseTargets) {
-    this.a = b;
-    this.b = a;
-    this.callback = this.createReversalWrapper(callback);
-  } else {
-    this.a = a;
-    this.b = b;
-    this.callback = callback;
-  }
-};
+var CollisionChecker = Class(function() {
 
-CollisionData.prototype.createReversalWrapper = function(a, b, callback) {
-  return function() {
-    callback(b, a);
+  this.ENTITY_VS_ENTITY = 0;
+  this.ENTITY_VS_POOL_FIRST = 1;
+  this.ENTITY_VS_POOL_ALL = 2;
+  this.POOL_VS_POOL_FIRST = 3;
+  this.POOL_VS_POOL_ALL = 4;
+
+  this.init = function(a, b, callback, allCollisions) {
+
+    var aIsGroup = a instanceof Group;
+    var bIsGroup = b instanceof Group;
+    var reverseTargets = !aIsGroup && bIsGroup;
+
+    if (reverseTargets) {
+      this.a = b;
+      this.b = a;
+      this.callback = this.createReversalWrapper(callback);
+    } else {
+      this.a = a;
+      this.b = b;
+      this.callback = callback;
+    }
+
+    if (aIsGroup && bIsGroup) {
+      this.mode = allCollisions ? this.POOL_VS_POOL_ALL : this.POOL_VS_POOL_FIRST;
+    } else if (aIsGroup !== bIsGroup) {
+      this.mode = allCollisions ? this.ENTITY_VS_POOL_ALL : this.ENTITY_VS_POOL_FIRST;
+    } else {
+      this.mode = this.ENTITY_VS_ENTITY;
+    }
+
   };
-};
+
+  this.run = function() {
+
+    if (this.a.destroyed || this.b.destroyed) { return false; }
+
+    switch (this.mode) {
+
+      case this.ENTITY_VS_ENTITY:
+        if (this.a.collidesWith(this.b)) { this.callback(this.a, this.b); }
+        break;
+
+      case this.ENTITY_VS_POOL_FIRST:
+        this.a.onFirstCollision(this.b, this.callback, GC.app);
+        break;
+
+      case this.ENTITY_VS_POOL_ALL:
+        this.a.onAllCollisions(this.b, this.callback, GC.app);
+        break;
+
+      case this.POOL_VS_POOL_FIRST:
+        this.a.onFirstPoolCollisions(this.b, this.callback, GC.app);
+        break;
+
+      case this.POOL_VS_POOL_ALL:
+        this.a.onAllPoolCollisions(this.b, this.callback, GC.app);
+        break;
+
+    }
+
+    return true;
+
+  };
+
+  this.createReversalWrapper = function(callback) {
+    return function(a, b) { callback(b, a); };
+  };
+
+});

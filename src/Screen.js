@@ -11,6 +11,11 @@ exports = Class(Rect, function(supr) {
     this.resetTouches();
   };
 
+  Object.defineProperties(this, {
+    midX: { get: function() { return this.width * 0.5; } },
+    midY: { get: function() { return this.height * 0.5; } }
+  });
+
   this.resetTouches = function() {
     this.onTouchCallbacks = [];
     this.onTapCallbacks = [];

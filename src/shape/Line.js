@@ -1,24 +1,25 @@
+import math.geom.Point as Point;
 import .Shape;
+
 
 /**
   * Must define either {@link x2}, {@link y2}, or both.
   * @class Line
   * @extends Shape
-  * @arg {number} x
-  * @arg {number} y
-  * @arg {number} x2
-  * @arg {number} y2
+  * @arg {Object} [opts]
+  * @arg {number} [opts.x2]
+  * @arg {number} [opts.y2]
   */
 exports = Class(Shape, function(supr) {
 
-  this.init = function(x, y, x2, y2) {
-    supr(this, "init", [x, y]);
+  this.init = function(opts) {
+    supr(this, "init", [opts.x || 0, opts.y || 0]);
     /** The endpoint for this line
         @var {number} Shape#x2 */
-    this.x2 = x2 || 0;
+    this.x2 = (opts.x2 !== undefined) ? opts.x2 : this.x;
     /** The endpoint for this line
         @var {number} Shape#y2 */
-    this.y2 = y2 || 0;
+    this.y2 = (opts.y2 !== undefined) ? opts.y2 : this.y;
   };
 
   /**

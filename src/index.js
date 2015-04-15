@@ -8,6 +8,13 @@ import ui.ScoreView as ScoreView;
 import accelerometer;
 import entities.Entity as Entity;
 
+import .spawner.HorizontalSpawner as HorizontalSpawner;
+import .spawner.VerticalSpawner as VerticalSpawner;
+import .spawner.Spawner as Spawner;
+
+import .shape.Line as Line;
+import .shape.Rect as Rect;
+
 import .collision.CollisionManager as CollisionManager;
 
 import .Actor;
@@ -58,6 +65,7 @@ scene = function (newGameFunc) {
     this.initUI = function() {
       this.rootView = this.view;
       scene.background = new Background(this.rootView);
+      scene.view = this.rootView;
 
       // Create the stage for our actors to perform on
       this.stage = new View({
@@ -79,7 +87,6 @@ scene = function (newGameFunc) {
         blockEvents: true,
         zIndex: 100000
       });
-
 
       this.overlay = new View({ parent: this.rootView, infinite: true });
       // bind our screen functions to the overlay
@@ -130,6 +137,10 @@ scene = function (newGameFunc) {
         this.groups[i].destroy();
       }
 
+      for (var j in this.spawners) {
+        this.spawners[i].destroy();
+      }
+
       for (var k in this.extraViews) {
         this.extraViews[k].removeFromSuperview();
       }
@@ -140,6 +151,7 @@ scene = function (newGameFunc) {
       // Clear the tallies
       this.extraViews = [];
       this.groups = [];
+      this.spawners = [];
       _score = 0;
       _on_tick = null;
 
@@ -157,19 +169,25 @@ scene = function (newGameFunc) {
     /**
      * setScreenDimensions
      */
-    this.setScreenDimensions = function(w, h) {
+    this.setScreenDimensions = function() {
+
       var ds = device.screen;
       var vs = this.rootView.style;
+      var targetWidth = ds.width > ds.height ? 1024 : 576;
 
-      w = scene.screen.width;
-      h = scene.screen.height;
+      vs.width = targetWidth;
+      vs.height = ds.height * (targetWidth / device.width);
+      vs.scale = device.width / targetWidth;
 
-      vs.width  = w > h ? ds.width  * (h / ds.height) : w;
-      vs.height = w < h ? ds.height * (w / ds.width ) : h;
-      vs.scale  = w > h ? ds.height / h : ds.width / w;
+      vs.x = (ds.width - vs.width) / 2;
+      vs.y = (ds.height - vs.height) / 2;
+      vs.anchorX = vs.width / 2;
+      vs.anchorY = vs.height / 2;
 
       scene.camera.resize(vs.width, vs.height);
-    }
+      scene.screen.width = vs.width;
+      scene.screen.height = vs.height;
+    };
 
     /**
      * tick tock
@@ -177,6 +195,12 @@ scene = function (newGameFunc) {
     this.tick = function(dt) {
       if (_on_tick) {
         _on_tick(dt);
+      }
+
+      scene.totalDt += dt;
+
+      for (var i = 0; i < this.spawners.length; i++) {
+        this.spawners[i].tick(dt);
       }
 
       dt *= SCALE_DT;
@@ -539,8 +563,8 @@ scene.addActor = function(resource, opts) {
   var imageURL = (typeof resource === "string") ? resource : resource.url;
   opts.url = imageURL;
   return scene.group.obtain(
-    scene.camera.x + scene.screen.width / 2,
-    scene.camera.y + scene.screen.height / 2,
+    opts.x || scene.camera.x + scene.screen.width / 2,
+    opts.y || scene.camera.y + scene.screen.height / 2,
     opts
   );
 };
@@ -575,9 +599,40 @@ scene.addGroup = function(opts) {
   return result;
 };
 
+/**
+  * Helper object for creating and registering new things
+  * @prop {function} spawner - Returns a new {@link Spawner}
+  */
+scene.addSpawner = function(spawner) {
+  GC.app.spawners.push(spawner);
+  return spawner;
+};
+
+scene.removeSpawner = function(spawner) {
+  var index = GC.app.spawners.indexOf(spawner);
+  if (index !== -1) {
+    var lastSpawner = GC.app.spawners.pop();
+    if (index < GC.app.spawners.length) {
+      GC.app.spawners[index] = lastSpawner;
+    }
+  }
+};
+
+
 scene.onCollision = function(a, b, callback, allCollisions) {
   allCollisions = allCollisions || true;
   this.collisionManager.addCollision(a, b, callback, allCollisions);
+};
+
+scene.spawner = {
+  Horizontal: HorizontalSpawner,
+  Vertical: VerticalSpawner,
+  Timed: Spawner
+};
+
+scene.shape = {
+  Rect: Rect,
+  Line: Line
 };
 
 

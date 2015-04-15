@@ -1,3 +1,5 @@
+import math.geom.Point as Point;
+
 /**
   * @class Shape
   */

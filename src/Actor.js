@@ -48,10 +48,6 @@ exports = Class(Entity, function() {
     this.config.ay = config.ay || 0;
     this.config.vx = config.vx || 0;
     this.config.vy = config.vy || 0;
-    supr.reset.call(this, this.x, this.y, this.config);
-
-    this.width  = this.hitBounds.w;
-    this.height = this.hitBounds.h;
 
     this.view.resetAllAnimations(this.config);
 
@@ -60,12 +56,15 @@ exports = Class(Entity, function() {
       // FIXME This is a hack to get around devkit-entities not knowing how to autosize SpriteViews
       //       but knowing how to autosize ImageViews if the config's image field is set.
       this.config.image = this.view.getFrame(this.config.defaultAnimation, 0)._originalURL;
-      supr.reset.call(this, this.x, this.y, this.config);
 
       // The purpose of this is to start animations that could not be started before calling the
       // resetAllAnimations function. These variables are set in play() and loop()
       this.initial_function && this.initial_function.apply(this, this.initial_arguments);
+    } else {
+      this.config.image = this.config.url;
     }
+
+    supr.reset.call(this, this.x, this.y, this.config);
   }
 
   // Cached reference to make faster direct calls
@@ -129,6 +128,7 @@ exports = Class(Entity, function() {
     for (var i = 0; i < this.destroyHandlers.length; i++) {
       this.destroyHandlers[i]();
     }
+    if (this.view.hasAnimations) { this.view.stopAnimation(); }
     this.destroyed = true;
     if (this.pool) {
       this.release();

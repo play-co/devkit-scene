@@ -3,6 +3,8 @@ import ui.SpriteView as SpriteView;
 exports = Class(SpriteView, function(supr) {
 
   this.init = function(opts) {
+    opts = opts || {};
+    opts.autoSize = true;
     this.updateHasAnimationFlag(opts);
     if (!this.hasAnimations) {
       opts.image = opts.url;

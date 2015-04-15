@@ -1,4 +1,5 @@
 import scene;
+import effects;
 import scene.shape.Rect as Rect;
 //import art;
 
@@ -9,60 +10,78 @@ var art = function(id) {
   };
 };
 
+scene.splash(function() {
+  scene.setTextColor('black');
+  scene.centerText('Flap away, bee: Tap to start!');
+  scene.addBackground(art('flat_forest'), { repeatY: true });
+});
 
 /**
   * @requires scene 0.0.1
   */
 
 exports = scene(function() {
-  var bg = scene.addBackground(art('flat_forest'), { scroll: 0.1 });
-  var player = scene.addPlayer(art('flapping_bee'));
+
+  var screenH = scene.screen.height;
+  var screenW = scene.screen.width;
+
+  var bees = [];
+  for (var i = 0; i < 5; i++) {
+    var bee = scene.addActor(art('flapping_bee'));
+    bee.loop('flap');
+    bees.push(bee);
+  }
+  for (var i = 0; i < 5; i++) {
+    bees.pop().destroy();
+  }
+
+  scene.addBackground(art('flat_forest'), { scrollX: 0.1, repeatX: true });
+  scene.addBackground(art('foreground'), { scrollX: 0.5, repeatX: true, yAlign:"bottom", y: screenH });
+
+  var player = scene.addPlayer(art('flapping_bee'), { zIndex: 1000, vx: 200, ay: 2000 });
   player.loop("flap");
 
-  scene.showScore(scene.screen.width / 2, 10);
-
-  // Set up logs
-  // var logSpawner = scene.addSpawner(new scene.spawner.Horizontal(
-  //   new scene.shape.Line({x: scene.screen.width + 100, y: scene.screen.height * 0.25, y1: scene.screen.height * 0.75}),
-  //   function (x, y, index) {
-  //     var topLog = scene.addActor(art('log'));
-  //     var bottomLog = scene.addActor(art('log'));
-
-  //     topLog.x = bottomLog.x = x;
-  //     topLog.y = y - 100 - topLog.style.height;
-  //     bottomLog.y = y + 100;
-
-  //     topLog.onContainedBy(scene.screen.left, function() {
-  //       scene.addScore(1);
-  //       topLog.destroy();
-  //       bottomLog.destroy();
-  //     });
-
-  //     return [topLog, bottomLog];
-  //   },
-  //   { spawnDelay: 300 }
-  // ));
-  // scene.onCollision(player, logSpawner, player.destroy);
-
-  // Set up the camera
-  player.vx = 100;
-  scene.camera.follow(player, new Rect(scene.screen.width * 0.2, -200, 0, scene.screen.height + 400));
-
-  // Set up gravity
-  player.ay = 980;
-
+  scene.showScore(scene.screen.midX, 10, {color: 'black'});
+  scene.camera.follow(player, new Rect(screenW * 0.2, -screenH, 0, screenH * 3));
   scene.onCollision(player, scene.camera.borderBottom, function(a, b) {
-    player.destroy();
+    if (player.y > scene.camera.bottom) { player.destroy(); }
   });
 
   scene.screen.onTap(function() {
-    if (!player.collidesWith(scene.camera.borderTop)) {
-      player.vy = -600;
+    if (player.vx > 0 && !player.collidesWith(scene.camera.borderTop)) {
+      player.vy = -800;
     }
   });
-});
 
-scene.splash(function() {
-  scene.centerText('Flap away, bee: Tap to start!');
-  scene.addBackground(art('flat_forest'));
+  var logs = scene.addGroup();
+
+  scene.onCollision(player, logs, function() {
+    if (player.vx > 0) {
+      player.vx = player.vy = 0;
+      player.play('crash');
+      effects.shake(scene.view);
+    }
+  });
+
+  scene.onCollision(logs, scene.camera.borderLeft, function(log, border) {
+    if (log.getRightViewX() < scene.camera.x) { log.destroy(); }
+  });
+
+  var logSpawner = scene.addSpawner(new scene.spawner.Horizontal(logs,
+    new scene.shape.Line({ x: screenW + 100, y: screenH * 0.25, y2: screenH * 0.75}),
+    function (x, y, index) {
+
+      var topLog = logs.addActor(art('log'), { x: x, y: y - 150 });
+      var bottomLog = logs.addActor(art('log'), { x: x, y: y + 150 });
+
+      topLog.y -= topLog.viewBounds.h;
+
+      var honey = scene.addActor(art('hdrop'), { x: x + 20, y: y });
+      scene.onCollision(player, honey, function() {
+        effects.explode(honey.view);
+        honey.destroy();
+        scene.addScore(1);
+      });
+
+    }, 400, false ));
 });

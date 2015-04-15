@@ -1,3 +1,4 @@
+import math.geom.Point as Point;
 import .Shape;
 
 /**

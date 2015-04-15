@@ -86,16 +86,22 @@ exports = Class(function () {
     //   throw 'Background layers must be images, but you gave me a ' + resource.type + '!';
     // }
 
+    opts = opts || {};
     var imageUrl = (typeof resource === "string") ? resource : resource.url;
 
-    opts = opts || {};
+    var pieceOptions = { image:imageUrl };
+    if (opts.xAlign !== undefined) { pieceOptions.xAlign = opts.xAlign; }
+    if (opts.yAlign !== undefined) { pieceOptions.yAlign = opts.yAlign; }
+    if (opts.x !== undefined) { pieceOptions.x = opts.x; }
+    if (opts.y !== undefined) { pieceOptions.y = opts.y; }
+
     var config_opts = {
       zIndex: this.zIndex,
-      //xCanSpawn: false,
-      //xCanRelease: false,
-      yCanSpawn: false,
-      yCanRelease: false,
-      pieceOptions: [{ image: imageUrl }],
+      xCanSpawn: opts.repeatX || false,
+      xCanRelease: opts.repeatX || false,
+      yCanSpawn: opts.repeatY || false,
+      yCanRelease: opts.repeatY || false,
+      pieceOptions: [pieceOptions]
     };
 
     this.zIndex -= 1;

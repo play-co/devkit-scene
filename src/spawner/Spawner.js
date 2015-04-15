@@ -1,4 +1,8 @@
-exports = function() {
+import math.geom.Point as Point;
+
+import ..Group as Group;
+
+exports = Class(function() {
   /**
     * @callback SpawnFunction
     * @arg {number} x
@@ -10,43 +14,68 @@ exports = function() {
   /**
     * Calls {@link Spawner#spawnFunction} every {@link Spawner#spawnDelay}
     * @class Spawner
-    * @extends Group
     * @arg {Shape} spawnAt
     * @arg {SpawnFunction} spawnFunction
-    * @arg {Object} [opts]
-    * @arg {Object} [opts.spawnDelay] - Either expressed as pixels or as milliseconds until the next spawn
+    * @arg {Number} spawnDelay - Either expressed as pixels or as milliseconds until the next spawn
+    * @arg {Boolean} useWorldSpace (false) - positions will be considered in-world positions
     */
-  this.init = function(spawnAt, spawnFunction, opts) {};
+  this.init = function(group, spawnAt, spawnFunction, spawnDelay, useWorldSpace) {
 
-  /**
-    * When true, {@link Spawner#spawnAt} positions will be considered in-world positions
-    * @var {boolean} Spawner#useWorldSpace
-    */
-  this.useWorldSpace = false;
+    this.group = group;
+    /**
+      * This is where the spawning should occur. Positions will always be screen space, not world space, unless {@link Spawner#useWorldSpace} is set
+      * @var {Shape|Shape[]|Point} Spawner#spawnAt
+      */
+    this.spawnAt = spawnAt;
 
-  /**
-    * This is where the spawning should occur. Positions will always be screen space, not world space, unless {@link Spawner#useWorldSpace} is set
-    * @var {Shape|Shape[]|Point} Spawner#spawnAt
-    */
-  this.spawnAt = null;
+    /** @var {function} Spawner#spawnFunction */
+    this.spawnFunction = spawnFunction;
 
-  /** @var {function} Spawner#spawnFunction */
-  this.spawnFunction = null;
+    /** @var {number} Spawner#spawnDelay */
+    this.spawnDelay = spawnDelay;
+    /**
+      * When true, {@link Spawner#spawnAt} positions will be considered in-world positions
+      * @var {boolean} Spawner#useWorldSpace
+      */
+    this.useWorldSpace = useWorldSpace || false;
 
-  /** @var {number} Spawner#spawnDelay */
-  this.spawnDelay = 0;
+    this._cachedPoint = new Point();
+    this._spawnIndex = -1;
+    this._lastSpawnTime = scene.totalDt;
+  };
+
+  this.spawn = function() {
+    var spawnPoint = this.getSpawnPoint();
+    this.spawnFunction(spawnPoint.x, spawnPoint.y, this._spawnIndex++);
+  };
 
   /**
     * Returns a point from somewhere on {@link Spawner#spawnAt}, translated based on the current {@link scene.cam} position.
     * @func Spawner#getSpawnPoint
     * @returns {Point}
     */
-  this.getSpawnPoint = function() {};
+  this.getSpawnPoint = function() {
+    var result = this.spawnAt.getPointOn(this._cachedPoint);
+    if (!this.useWorldSpace) {
+      result.x += scene.camera.x;
+      result.y += scene.camera.y;
+    }
+    return result;
+  };
 
   /**
     * Called every tick by scene, check to see if we should spawn or not
     * @func Spawner#tick
-    * @returns {Point}
     */
-  this.tick = function(dt) {};
-};
+  this.tick = function(dt) {
+    if (scene.totalDt - this._lastSpawnTime > this.spawnDelay) {
+      this._lastSpawnTime = scene.totalDt;
+      this.spawn();
+    }
+  };
+
+  this.destroy = function() {
+    scene.removeSpawner(this);
+  };
+
+});
