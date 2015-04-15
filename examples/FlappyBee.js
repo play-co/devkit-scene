@@ -13,16 +13,6 @@ exports = scene(function() {
   var screenH = scene.screen.height;
   var screenW = scene.screen.width;
 
-  var bees = [];
-  for (var i = 0; i < 5; i++) {
-    var bee = scene.addActor(communityart('flapping_bee'));
-    bee.loop('flap');
-    bees.push(bee);
-  }
-  for (var i = 0; i < 5; i++) {
-    bees.pop().destroy();
-  }
-
   scene.addBackground(communityart('flat_forest'), { scrollX: 0.1 });
   scene.addBackground(communityart('foreground'), { scrollX: 0.5, yAlign: 'bottom' });
 
