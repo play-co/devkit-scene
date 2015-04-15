@@ -24,10 +24,12 @@ import .Camera;
 import .Background;
 import .utils;
 
+import communityart;
+
 // Default values
 var DEFAULT_TEXT_WIDTH  = 200;
 var DEFAULT_TEXT_HEIGHT = 50;
-var DEFAULT_TEXT_COLOR  = 'white';
+var DEFAULT_TEXT_COLOR  = '#111';
 var DEFAULT_TEXT_FONT   = 'Arial';
 
 // To make speeds 'feel' nicer
@@ -51,7 +53,7 @@ var _on_tick = null;
 /**
  * Construct the main scene for the game, this is where all of the gameplay is defined.
  * @namespace scene
- * @version 0.0.2
+ * @version 0.0.3
  * @arg {function} - The function which will initialize a new game scene
  */
 scene = function (newGameFunc) {
@@ -64,22 +66,43 @@ scene = function (newGameFunc) {
      */
     this.initUI = function() {
       this.rootView = this.view;
-      scene.background = new Background(this.rootView);
+
+      /**
+        * This is the devkit {@link View} which all backgrounds should be added to.
+        * @var {Background} scene.background
+        */
+      scene.background = new Background({
+        parent: this.rootView,
+        width: scene.screen.width,
+        height: scene.screen.height
+      });
+
+      /**
+        * The devkit {@link View} which contains the entire scene.
+        * @var {View} scene.view
+        */
       scene.view = this.rootView;
 
-      // Create the stage for our actors to perform on
+      /**
+        * This is the devkit {@link View} which all actors should be added to.
+        * @var {View} scene.stage
+        */
       this.stage = new View({
-        parent: this.rootView,
+        parent: scene.view,
         infinite: true
       });
 
       /**
        * The root group for all objects created on the scene instead of
-       * on their own group
+       * on their own group.
+       * @var {Group} scene.group
        */
       scene.group = new Group({superview: this.stage});
 
-      // The superview for all text-based views
+      /**
+       * The superview for all text views.
+       * @var {View} scene.textContainer
+       */
       this.textContainer = new View({
         parent: this.rootView,
         width:  scene.screen.width,
@@ -125,6 +148,7 @@ scene = function (newGameFunc) {
 
       this.setScreenDimensions();
       scene.screen.resetTouches();
+      scene.background.reset();
 
       scene.collisionManager.reset();
       scene.group.destroy();
@@ -159,8 +183,7 @@ scene = function (newGameFunc) {
       var currentMode = _modes[mode]
       currentMode.fun(currentMode.opts);
 
-      // The backdrop falls into place.
-      scene.background.reset();
+      scene.background.reloadConfig();
 
       // The curtain rises, and Act 1 begins!
       _game_running = true;
@@ -385,7 +408,7 @@ scene.setTextFont = function(font) {
   */
 scene.showScore = function(x, y, color, font, opts) {
   font = font || 'Arial';
-  color = color || 'white';
+  color = color || '#111';
 
   var app = GC.app;
   if (app.scoreView) return;
@@ -540,15 +563,8 @@ scene.splash = function(fun, opts) {
   scene.mode('splash', fun, opts);
 };
 
-/**
-  * Add a background parallax layer to the game.
-  * @func scene.addBackground
-  * @arg {ParallaxView} view
-  * @arg {Object} [opts] - contains options to be applied to the underlying {@link ParallaxView}
-  * @returns {View}
-  */
-scene.addBackground = function(resource, opts) {
-  return scene.background.addLayer(resource, opts);
+scene.addBackground = function(art, opts) {
+  return scene.background.addLayer(art, opts);
 };
 
 /**

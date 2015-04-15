@@ -1,3 +1,6 @@
+import ui.View as View;
+import ui.ImageView as ImageView;
+
 import parallax.Parallax as Parallax;
 
 // The background serves as a generator for this class
@@ -20,13 +23,23 @@ var Layer = Class(function () {
   // This function doesn't fully work right now
   this.setScroll = function(sx, sy) {
     this._setScroll(sx, sy);
-    this.background.reset();
+    this.background.reloadConfig();
   }
 });
 
-exports = Class(function () {
-  this.init = function(parentView) {
-    this.parallax = new Parallax({ parent: parentView });
+exports = Class(View, function (supr) {
+  /**
+    * The generic background class for a scene game.
+    * @class Background
+    * @arg {Object} [opts]
+    * @extends View
+    */
+  this.init = function(opts) {
+    supr(this, 'init', arguments);
+
+    this.parallax = new Parallax({
+      parent: this
+    });
     this.offsetX = 0;
     this.offsetY = 0;
     this.autoX = 0;
@@ -39,8 +52,22 @@ exports = Class(function () {
     this.config = [];
   }
 
-  this.reset = function() {
+  this.reloadConfig = function() {
     this.parallax.reset(this.config);
+  };
+
+  this.reset = function() {
+    this.config = [];
+    this.reloadConfig();
+    // Clear all subviews, except parallax
+    var subviews = this.getSubviews();
+    var parallaxViews = this.parallax.layerPool._views;
+
+    for (var i = 0; i < subviews.length; ++i) {
+      var subview = subviews[i];
+      if (parallaxViews.indexOf(subview) >= 0) continue;
+      this.removeSubview(subview);
+    }
   }
 
   this.update = function(dt) {
@@ -79,16 +106,43 @@ exports = Class(function () {
   };
 
   /**
-   * addLayer(resource, imageViewOpts)
-   */
+    * @alias scene.addBackground
+    * @arg {ArtObject} art
+    * @arg {Object} [opts] - Contains options to be applied to the underlying {@link Layer}. If not specified, a static {@link View} is displayed.
+    * @arg {number} [opts.scrollX] - Marks the parallax layer to sroll in the X direction, by the specified amount
+    * @arg {number} [opts.scrollY] - Marks the parallax layer to sroll in the Y direction, by the specified amount
+    * @arg {number} [opts.xAlign] - Either `left` or `right`
+    * @arg {number} [opts.yAlign] - Either `top` or `bottom`
+    * @returns {Layer|View}
+    */
   this.addLayer = function(resource, opts) {
-    // if (resource.type !== 'image') {
-    //   throw 'Background layers must be images, but you gave me a ' + resource.type + '!';
-    // }
-
-    opts = opts || {};
     var imageUrl = (typeof resource === "string") ? resource : resource.url;
 
+    // Static image
+    if (!opts) {
+      var view = new ImageView({
+        superview: this,
+        image: resource.url || resource,
+        x: 0,
+        y: 0,
+        width: this.style.width,
+        height: this.style.height
+      });
+      return view;
+    }
+
+    opts = opts || {};
+
+    // Automatic repeating
+    if (!opts.repeatX && opts.scrollX) { opts.repeatX = true; }
+    if (!opts.repeatY && opts.scrollY) { opts.repeatY = true; }
+    // Automatic alignment
+    if (opts.yAlign === 'bottom' && opts.y === undefined) { opts.y = this.style.height; }
+    else if (opts.yAlign === 'top' && opts.y === undefined) { opts.y = 0; }
+    if (opts.xAlign === 'left' && opts.x === undefined) { opts.x = this.style.width; }
+    else if (opts.xAlign === 'right' && opts.x === undefined) { opts.x = 0; }
+
+    // Build pieceOptions
     var pieceOptions = { image:imageUrl };
     if (opts.xAlign !== undefined) { pieceOptions.xAlign = opts.xAlign; }
     if (opts.yAlign !== undefined) { pieceOptions.yAlign = opts.yAlign; }
@@ -104,8 +158,10 @@ exports = Class(function () {
       pieceOptions: [pieceOptions]
     };
 
-    this.zIndex -= 1;
+    this.zIndex = Math.max(this.zIndex - 1, 0);
     this.config.push(config_opts);
-    return new Layer(config_opts, this)._setScroll(opts.scrollX, opts.scrollY);
+    var layer = new Layer(config_opts, this);
+    layer._setScroll(opts.scrollX, opts.scrollY)
+    return layer;
   }
 });

@@ -1,25 +1,13 @@
-import scene;
-import effects;
-import scene.shape.Rect as Rect;
-//import art;
-
-var art = function(id) {
-  switch(id) {
-    case "flapping_bee": return "resources/images/bees/yellow/yellowBee";
-    default: return "resources/images/" + id + ".png";
-  };
-};
+import scene, effects, communityart;
 
 scene.splash(function() {
-  scene.setTextColor('black');
   scene.centerText('Flap away, bee: Tap to start!');
-  scene.addBackground(art('flat_forest'), { repeatY: true });
+  scene.addBackground(communityart('flat_forest'));
 });
 
 /**
-  * @requires scene 0.0.1
+  * @requires scene 0.0.3
   */
-
 exports = scene(function() {
 
   var screenH = scene.screen.height;
@@ -27,7 +15,7 @@ exports = scene(function() {
 
   var bees = [];
   for (var i = 0; i < 5; i++) {
-    var bee = scene.addActor(art('flapping_bee'));
+    var bee = scene.addActor(communityart('flapping_bee'));
     bee.loop('flap');
     bees.push(bee);
   }
@@ -35,14 +23,14 @@ exports = scene(function() {
     bees.pop().destroy();
   }
 
-  scene.addBackground(art('flat_forest'), { scrollX: 0.1, repeatX: true });
-  scene.addBackground(art('foreground'), { scrollX: 0.5, repeatX: true, yAlign:"bottom", y: screenH });
+  scene.addBackground(communityart('flat_forest'), { scrollX: 0.1 });
+  scene.addBackground(communityart('foreground'), { scrollX: 0.5, yAlign: 'bottom' });
 
-  var player = scene.addPlayer(art('flapping_bee'), { zIndex: 1000, vx: 200, ay: 2000 });
+  var player = scene.addPlayer(communityart('flapping_bee'), { zIndex: 1000, vx: 200, ay: 2000 });
   player.loop("flap");
 
   scene.showScore(scene.screen.midX, 10, {color: 'black'});
-  scene.camera.follow(player, new Rect(screenW * 0.2, -screenH, 0, screenH * 3));
+  scene.camera.follow(player, new scene.shape.Rect(screenW * 0.2, -screenH, 0, screenH * 3));
   scene.onCollision(player, scene.camera.borderBottom, function(a, b) {
     if (player.y > scene.camera.bottom) { player.destroy(); }
   });
@@ -71,12 +59,12 @@ exports = scene(function() {
     new scene.shape.Line({ x: screenW + 100, y: screenH * 0.25, y2: screenH * 0.75}),
     function (x, y, index) {
 
-      var topLog = logs.addActor(art('log'), { x: x, y: y - 150 });
-      var bottomLog = logs.addActor(art('log'), { x: x, y: y + 150 });
+      var topLog = logs.addActor(communityart('log'), { x: x, y: y - 150 });
+      var bottomLog = logs.addActor(communityart('log'), { x: x, y: y + 150 });
 
       topLog.y -= topLog.viewBounds.h;
 
-      var honey = scene.addActor(art('hdrop'), { x: x + 20, y: y });
+      var honey = scene.addActor(communityart('hdrop'), { x: x + 20, y: y });
       scene.onCollision(player, honey, function() {
         effects.explode(honey.view);
         honey.destroy();
