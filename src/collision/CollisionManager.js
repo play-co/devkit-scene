@@ -1,4 +1,4 @@
-import ..Group as Group;
+import .CollisionChecker;
 
 /**
   * Responsible for updating, and manging collision checks.
@@ -18,7 +18,7 @@ exports = Class(function(supr) {
   };
 
   this.reset = function() {
-    this.collisionChecks = [];
+    this._collisionChecks = [];
     this.collisionCheckID = -1;
   };
 
@@ -38,31 +38,32 @@ exports = Class(function(supr) {
     * @returns {number} collisionCheckID
     */
   this.addCollision = function(a, b, callback, allCollisions) {
-    if (Array.isArray(a)) {
-      for (var i = 0; i < a.length; i++) {
-        this.check(a[i], b);
-      }
-    } else if (Array.isArray(b)) {
-      for (var i = 0; i < b.length; i++) {
-        this.check(a, b[i]);
-      }
-    } else {
-      allCollisions = allCollisions || false;
-      var check = new CollisionChecker(a, b, callback, allCollisions);
-      this.collisionChecks.push(check);
-      return check;
-    }
+    this.collisionCheckID++;
+
+    // create a new collision checker
+    var check = new CollisionChecker({
+      a: a,
+      b: b,
+      callback: callback,
+      allCollisions: allCollisions,
+
+      collisionCheckID: this.collisionCheckID
+    });
+
+    // append to the internal collision checks array
+    this._collisionChecks.push(check) - 1;
+    return this.collisionCheckID;
   };
 
   this.update = function(dt) {
     // Iterate backwards so we can prune dead checks on the fly
-    for (var i = this.collisionChecks.length - 1; i >= 0; i--) {
-      var success = this.collisionChecks[i].run();
+    for (var i = this._collisionChecks.length - 1; i >= 0; i--) {
+      var success = this._collisionChecks[i].run();
       if (success === false) {
         // Dead check, remove it by popping the last check off of the stack
         // and replacing the dead one. This changes the order of checks.
-        var lastCheck = this.collisionChecks.pop();
-        if (i < this.collisionChecks.length) { this.collisionChecks[i] = lastCheck; }
+        var lastCheck = this._collisionChecks.pop();
+        if (i < this._collisionChecks.length) { this._collisionChecks[i] = lastCheck; }
       }
     }
   };
@@ -87,77 +88,5 @@ exports = Class(function(supr) {
     * @arg {number} collisionCheckID
     */
   this.start = function(collisionCheckID) {};
-
-});
-
-var CollisionChecker = Class(function() {
-
-  this.ENTITY_VS_ENTITY = 0;
-  this.ENTITY_VS_POOL_FIRST = 1;
-  this.ENTITY_VS_POOL_ALL = 2;
-  this.POOL_VS_POOL_FIRST = 3;
-  this.POOL_VS_POOL_ALL = 4;
-
-  this.init = function(a, b, callback, allCollisions) {
-
-    var aIsGroup = a instanceof Group;
-    var bIsGroup = b instanceof Group;
-    var reverseTargets = !aIsGroup && bIsGroup;
-
-    if (reverseTargets) {
-      this.a = b;
-      this.b = a;
-      this.callback = this.createReversalWrapper(callback);
-    } else {
-      this.a = a;
-      this.b = b;
-      this.callback = callback;
-    }
-
-    if (aIsGroup && bIsGroup) {
-      this.mode = allCollisions ? this.POOL_VS_POOL_ALL : this.POOL_VS_POOL_FIRST;
-    } else if (aIsGroup !== bIsGroup) {
-      this.mode = allCollisions ? this.ENTITY_VS_POOL_ALL : this.ENTITY_VS_POOL_FIRST;
-    } else {
-      this.mode = this.ENTITY_VS_ENTITY;
-    }
-
-  };
-
-  this.run = function() {
-
-    if (this.a.destroyed || this.b.destroyed) { return false; }
-
-    switch (this.mode) {
-
-      case this.ENTITY_VS_ENTITY:
-        if (this.a.collidesWith(this.b)) { this.callback(this.a, this.b); }
-        break;
-
-      case this.ENTITY_VS_POOL_FIRST:
-        this.a.onFirstCollision(this.b, this.callback, GC.app);
-        break;
-
-      case this.ENTITY_VS_POOL_ALL:
-        this.a.onAllCollisions(this.b, this.callback, GC.app);
-        break;
-
-      case this.POOL_VS_POOL_FIRST:
-        this.a.onFirstPoolCollisions(this.b, this.callback, GC.app);
-        break;
-
-      case this.POOL_VS_POOL_ALL:
-        this.a.onAllPoolCollisions(this.b, this.callback, GC.app);
-        break;
-
-    }
-
-    return true;
-
-  };
-
-  this.createReversalWrapper = function(callback) {
-    return function(a, b) { callback(b, a); };
-  };
 
 });

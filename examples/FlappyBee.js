@@ -14,7 +14,7 @@ exports = scene(function() {
   var screenW = scene.screen.width;
 
   scene.addBackground(communityart('flat_forest'), { scrollX: 0.1 });
-  scene.addBackground(communityart('foreground'), { scrollX: 0.5, yAlign: 'bottom' });
+  scene.addBackground(communityart('foreground'), { scrollX: 0.5, align: 'bottom' });
 
   var player = scene.addPlayer(communityart('flapping_bee'), { zIndex: 1000, vx: 200, ay: 2000 });
   player.loop("flap");
@@ -46,7 +46,7 @@ exports = scene(function() {
   });
 
   var logSpawner = scene.addSpawner(new scene.spawner.Horizontal(logs,
-    new scene.shape.Line({ x: screenW + 100, y: screenH * 0.25, y2: screenH * 0.75}),
+    new scene.shape.Line({ x: screenW + 65, y: screenH * 0.25, y2: screenH * 0.75}),
     function (x, y, index) {
 
       var topLog = logs.addActor(communityart('log'), { x: x, y: y - 150 });

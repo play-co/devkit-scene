@@ -111,8 +111,7 @@ exports = Class(View, function (supr) {
     * @arg {Object} [opts] - Contains options to be applied to the underlying {@link Layer}. If not specified, a static {@link View} is displayed.
     * @arg {number} [opts.scrollX] - Marks the parallax layer to sroll in the X direction, by the specified amount
     * @arg {number} [opts.scrollY] - Marks the parallax layer to sroll in the Y direction, by the specified amount
-    * @arg {number} [opts.xAlign] - Either `left` or `right`
-    * @arg {number} [opts.yAlign] - Either `top` or `bottom`
+    * @arg {number} [opts.align] - Either `left`, `right`, `top`, or `bottom`
     * @returns {Layer|View}
     */
   this.addLayer = function(resource, opts) {
@@ -137,15 +136,18 @@ exports = Class(View, function (supr) {
     if (!opts.repeatX && opts.scrollX) { opts.repeatX = true; }
     if (!opts.repeatY && opts.scrollY) { opts.repeatY = true; }
     // Automatic alignment
-    if (opts.yAlign === 'bottom' && opts.y === undefined) { opts.y = this.style.height; }
-    else if (opts.yAlign === 'top' && opts.y === undefined) { opts.y = 0; }
-    if (opts.xAlign === 'left' && opts.x === undefined) { opts.x = this.style.width; }
-    else if (opts.xAlign === 'right' && opts.x === undefined) { opts.x = 0; }
+    if (opts.align === 'bottom' && opts.y === undefined) { opts.y = this.style.height; }
+    else if (opts.align === 'top' && opts.y === undefined) { opts.y = 0; }
+    else if (opts.align === 'left' && opts.x === undefined) { opts.x = this.style.width; }
+    else if (opts.align === 'right' && opts.x === undefined) { opts.x = 0; }
 
     // Build pieceOptions
     var pieceOptions = { image:imageUrl };
-    if (opts.xAlign !== undefined) { pieceOptions.xAlign = opts.xAlign; }
-    if (opts.yAlign !== undefined) { pieceOptions.yAlign = opts.yAlign; }
+    if (opts.align === 'left' || opts.align === 'right') {
+      pieceOptions.xAlign = opts.align;
+    } else if (opts.align === 'top' || opts.align === 'bottom') {
+      pieceOptions.yAlign = opts.align;
+    }
     if (opts.x !== undefined) { pieceOptions.x = opts.x; }
     if (opts.y !== undefined) { pieceOptions.y = opts.y; }
 
