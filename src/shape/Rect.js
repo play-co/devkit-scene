@@ -18,6 +18,8 @@ exports = Class(Shape, function(supr) {
     this.width = width || 0;
     /** @var {number} Rect#height */
     this.height = height || 0;
+
+    this.hitOffset = { x: 0, y: 0 };
   };
 
   /** @func Rect#left
@@ -41,10 +43,10 @@ exports = Class(Shape, function(supr) {
   });
 
   // Mock out some functions for EntityPhysics
-  this.getMinHitX = this._objpLeft.get;
-  this.getMaxHitX = this._objpRight.get;
-  this.getMinHitY = this._objpTop.get;
-  this.getMaxHitY = this._objpBottom.get;
+  this.getMinHitX = function() { return this.left + this.hitOffset.x; };
+  this.getMaxHitX = function() { return this.right + this.hitOffset.x; };
+  this.getMinHitY = function() { return this.top + this.hitOffset.y; };
+  this.getMaxHitY = function() { return this.bottom + this.hitOffset.y; };
 
   this.getPointOn = function(result) {
     result = result || new Point();

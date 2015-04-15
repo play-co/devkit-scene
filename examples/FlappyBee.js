@@ -17,16 +17,16 @@ exports = scene(function() {
   scene.addBackground(communityart('foreground'), { scrollX: 0.5, align: 'bottom' });
 
   var player = scene.addPlayer(communityart('flapping_bee'), { zIndex: 1000, vx: 200, ay: 2000 });
-  player.loop("flap");
+  player.loop('flap');
 
   scene.showScore(scene.screen.midX, 10, {color: 'black'});
   scene.camera.follow(player, new scene.shape.Rect(screenW * 0.2, -screenH, 0, screenH * 3));
-  scene.onCollision(player, scene.camera, function(player, b) {
+  scene.onCollision(player, scene.camera.bottomWall, function(player, b) {
     player.destroy();
   });
 
-  scene.screen.onTap(function() {
-    if (player.vx > 0 && !player.collidesWith(scene.camera.borderTop)) {
+  scene.onTap(function() {
+    if (player.vx > 0) {
       player.vy = -800;
     }
   });
@@ -41,7 +41,7 @@ exports = scene(function() {
     }
   });
 
-  scene.onCollision(logs, scene.camera.borderLeft, function(log, border) {
+  scene.onCollision(logs, scene.camera.leftWall, function(log, border) {
     if (log.getRightViewX() < scene.camera.x) { log.destroy(); }
   });
 

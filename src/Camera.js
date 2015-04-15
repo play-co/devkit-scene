@@ -1,24 +1,39 @@
 import .Actor;
 import .shape.Rect as Rect;
 
-/**
-  * @class Camera
-  * @extends Rect
-  */
 exports = Class(Rect, function() {
 
+  /** @var {number} Camera._MAX_SIZE */
+  this._MAX_SIZE = 32767;
+
+  /**
+    * Origin at top left, all numbers are in world positions, not screen positions
+    * @class Camera
+    * @extends Rect
+    */
   this.init = function(width, height) {
     this._x = 0;
     this._y = 0;
 
+    /** The camera will keep this {@link Actor} inside of the {@link Camera#movementBounds}
+        @var {Actor} Camera#following **/
     this.following = null;
+    /** The camera will keep the {@link Camera#following} inside of this {@link Shape} when set.
+        @var {Shape} Camera#movementBounds **/
     this.movementBounds = null;
 
-    this.borderLeft = new Actor({});
-    this.borderRight = new Actor({});
-    this.borderTop = new Actor({});
-    this.borderBottom = new Actor({});
-    this.bounds = new Actor({});
+    /** A collidable element representing the entire space left of the camera.
+        @var {Rect} Camera#leftWall **/
+    this.leftWall = new Rect(0, 0, this._MAX_SIZE, this._MAX_SIZE);
+    /** A collidable element representing the entire space right of the camera.
+        @var {Rect} Camera#rightWall **/
+    this.rightWall = new Rect(0, 0, this._MAX_SIZE, this._MAX_SIZE);
+    /** A collidable element representing the entire space above the camera.
+        @var {Rect} Camera#topWall **/
+    this.topWall = new Rect(0, 0, this._MAX_SIZE, this._MAX_SIZE);
+    /** A collidable element representing the entire space below the camera.
+        @var {Rect} Camera#bottomWall **/
+    this.bottomWall = new Rect(0, 0, this._MAX_SIZE, this._MAX_SIZE);
 
     this.resize(width, height);
   };
@@ -26,19 +41,25 @@ exports = Class(Rect, function() {
   this.resize = function(width, height) {
     this.width = width;
     this.height = height;
-    var max = 32767;
-    resetWall(this.borderLeft, -max, -max / 2, max, max);
-    resetWall(this.borderRight, width, -max / 2, max, max);
-    resetWall(this.borderTop, -max / 2, -max, max, max);
-    resetWall(this.borderBottom, -max / 2, height, max, max);
-    resetWall(this.bounds, 0, 0, width, height);
+
+    this.leftWall.hitOffset.x = -this._MAX_SIZE;
+    this.leftWall.hitOffset.y = -this._MAX_SIZE / 2;
+
+    this.topWall.hitOffset.x = -this._MAX_SIZE / 2;
+    this.topWall.hitOffset.y = -this._MAX_SIZE;
+
+    this.rightWall.hitOffset.x = width;
+    this.rightWall.hitOffset.y = -this._MAX_SIZE / 2;
+
+    this.bottomWall.hitOffset.x = -this._MAX_SIZE / 2;
+    this.bottomWall.hitOffset.y = height;
   };
 
   /**
     * Set the target for the camera to follow
     * @func Camera#follow
     * @arg {Actor} target - This is the actor the camera will try to follow
-    * @arg {Rect} movementBounds - The camera will keep the actor within these screen bounds
+    * @arg {Rect} [movementBounds] - The camera will keep the actor within these screen bounds
     */
   this.follow = function(target, movementBounds) {
     this.following = target;
@@ -52,30 +73,35 @@ exports = Class(Rect, function() {
     */
   this.stopFollowing = function() {
     this.following = null;
-    this.movementBounds = null;
   };
+
+  /**
+    * Remove the current {@link Camera#movementBounds}
+    * @func Camera#clearMovementBounds
+    */
+  this.clearMovementBounds = function() {
+    this.movementBounds = null;
+  }
 
   Object.defineProperties(this, {
     x: {
       get: function() { return this._x; },
       set: function(value) {
         this._x = value;
-        this.borderLeft.x = value;
-        this.borderRight.x = value;
-        this.borderTop.x = value;
-        this.borderBottom.x = value;
-        this.bounds.x = value;
+        this.leftWall.x = value;
+        this.rightWall.x = value;
+        this.topWall.x = value;
+        this.bottomWall.x = value;
       }
     },
     y: {
       get: function() { return this._y; },
       set: function(value) {
         this._y = value;
-        this.borderLeft.y = value;
-        this.borderRight.y = value;
-        this.borderTop.y = value;
-        this.borderBottom.y = value;
-        this.bounds.y = value;
+        this.leftWall.y = value;
+        this.rightWall.y = value;
+        this.topWall.y = value;
+        this.bottomWall.y = value;
       }
     }
   });
@@ -119,7 +145,3 @@ exports = Class(Rect, function() {
     */
   this.wrap = function(actor1, actor2) {};
 });
-
-var resetWall = function(wall, x, y, width, height) {
-  wall.reset(wall.x, wall.y, { isAnchored: true, hitBounds: { x: x, y: y, w: width, h: height } });
-};

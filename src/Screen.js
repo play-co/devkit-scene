@@ -29,10 +29,20 @@ exports = Class(Rect, function(supr) {
     return this.onTouchCallbacks.push(cb) - 1;
   };
 
+  /**
+    * @alias scene.onTap
+    * @arg {function} callback
+    * @returns {function} callback
+    */
   this.onTap = function(cb) {
     this.onTapCallbacks.push(cb);
+    return cb;
   };
 
+  /**
+    * @alias scene.removeOnTap
+    * @arg {function} callback - The callback used with {@link scene.onTap}
+    */
   this.removeOnTap = function(cb) {
     var i = this.onTapCallbacks.indexOf(cb);
     if (i >= 0) {

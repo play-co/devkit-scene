@@ -635,6 +635,9 @@ scene.removeSpawner = function(spawner) {
   }
 };
 
+scene.onTap = bind(scene.screen, scene.screen.onTap);
+scene.removeOnTap = bind(scene.screen, scene.screen.removeOnTap);
+
 /**
   * This collision check will be run each tick. {@link callback} will be called only once per tick
   * @func scene.onCollision
