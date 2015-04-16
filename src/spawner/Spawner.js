@@ -19,9 +19,8 @@ exports = Class(function() {
     * @arg {Number} spawnDelay - Either expressed as pixels or as milliseconds until the next spawn
     * @arg {Boolean} useWorldSpace (false) - positions will be considered in-world positions
     */
-  this.init = function(group, spawnAt, spawnFunction, spawnDelay, useWorldSpace) {
+  this.init = function(spawnAt, spawnFunction, spawnDelay, useWorldSpace) {
 
-    this.group = group;
     /**
       * This is where the spawning should occur. Positions will always be screen space, not world space, unless {@link Spawner#useWorldSpace} is set
       * @var {Shape|Shape[]|Point} Spawner#spawnAt
