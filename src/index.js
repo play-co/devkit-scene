@@ -28,6 +28,7 @@ import .SceneText;
 import .utils;
 
 import communityart;
+import effects;
 
 // Default values
 var DEFAULT_TEXT_WIDTH  = 350;
@@ -151,6 +152,7 @@ scene = function (newGameFunc) {
     this.reset = function(mode) {
       if (mode === undefined) mode = 'default';
 
+      effects.commit();
       scene.clearAnimations();
       this.setScreenDimensions();
       scene.screen.resetTouches();

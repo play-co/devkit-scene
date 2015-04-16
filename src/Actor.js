@@ -1,4 +1,5 @@
 import entities.Entity as Entity;
+import effects;
 
 import .ActorView;
 
@@ -33,6 +34,8 @@ exports = Class(Entity, function() {
   }
 
   this.reset = function(x, y, config) {
+    effects.commit(this);
+
     this.x = x || this.x;
     this.y = y || this.y;
     this.config = config || this.config;
@@ -64,6 +67,10 @@ exports = Class(Entity, function() {
     }
 
     supr.reset.call(this, this.x, this.y, this.config);
+
+    // default center anchor
+    this.view.style.anchorX = config.anchorX || this.view.style.width / 2;
+    this.view.style.anchorY = config.anchorY || this.view.style.height / 2;
   }
 
   // Cached reference to make faster direct calls
@@ -141,6 +148,7 @@ exports = Class(Entity, function() {
    * This function destroys the Actor, as in, removes it from the scene
    */
   this.destroy = function() {
+    effects.commit(this);
     for (var i = 0; i < this.destroyHandlers.length; i++) {
       this.destroyHandlers[i]();
     }
