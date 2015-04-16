@@ -5,13 +5,13 @@
   "version": "0.2.0",
   "repository": {},
   "dependencies": {
-    "devkit-entities": "https://github.com/gameclosure/devkit-entities#master",
-    "devkit-parallax": "https://github.com/gameclosure/devkit-parallax#v0.1.5",
-    "community-art": "https://github.com/weebygames/community-art#master",
-    "accelerometer": "https://github.com/gameclosure/accelerometer#v3.0.1",
-    "devkit-effects": "https://github.com/gameclosure/devkit-effects#v1.0.0"
+    "devkit-entities": "git://github.com/gameclosure/devkit-entities.git#master",
+    "devkit-parallax": "git://github.com/gameclosure/devkit-parallax.git#v0.1.5",
+    "community-art": "git+ssh://git@github.com:weebygames/community-art.git#master",
+    "accelerometer": "git://github.com/gameclosure/accelerometer.git#v3.0.1",
+    "devkit-effects": "git://github.com/gameclosure/devkit-effects.git#v1.0.0"
   },
-  "devDependencies": {
+  "_devDependencies": {
     "gulp": "^3.8.11",
     "gulp-jsdoc": "^0.1.4",
     "gulp-webserver": "^0.9.0"
