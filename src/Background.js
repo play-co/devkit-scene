@@ -116,7 +116,13 @@ exports = Class(View, function (supr) {
     * @returns {Layer|View}
     */
   this.addLayer = function(resource, opts) {
+    var isParallaxConfig = false;
     var imageUrl = (typeof resource === "string") ? resource : resource.url;
+
+    if (typeof resource === "object") {
+      opts = opts || {};
+      isParallaxConfig = resource.type === "parallax";
+    }
 
     // Static image
     if (!opts) {
@@ -133,38 +139,49 @@ exports = Class(View, function (supr) {
 
     opts = opts || {};
 
-    // Automatic repeating
-    if (!opts.repeatX && opts.scrollX) { opts.repeatX = true; }
-    if (!opts.repeatY && opts.scrollY) { opts.repeatY = true; }
-    // Automatic alignment
-    if (opts.align === 'bottom' && opts.y === undefined) { opts.y = this.style.height; }
-    else if (opts.align === 'top' && opts.y === undefined) { opts.y = 0; }
-    else if (opts.align === 'left' && opts.x === undefined) { opts.x = this.style.width; }
-    else if (opts.align === 'right' && opts.x === undefined) { opts.x = 0; }
+    if (isParallaxConfig) {
+      var config_opts = resource.config;
+      for (var l in config_opts) {
+        var layerConfig = config_opts[l];
+        var layer = new Layer(layerConfig, this);
+        layer._setScroll(layerConfig.xMultiplier, layerConfig.yMultiplier);
+        this.config.push(layerConfig);
+      }
+    } else {
+      // Automatic repeating
+      if (!opts.repeatX && opts.scrollX) { opts.repeatX = true; }
+      if (!opts.repeatY && opts.scrollY) { opts.repeatY = true; }
+      // Automatic alignment
+      if (opts.align === 'bottom' && opts.y === undefined) { opts.y = this.style.height; }
+      else if (opts.align === 'top' && opts.y === undefined) { opts.y = 0; }
+      else if (opts.align === 'left' && opts.x === undefined) { opts.x = this.style.width; }
+      else if (opts.align === 'right' && opts.x === undefined) { opts.x = 0; }
 
-    // Build pieceOptions
-    var pieceOptions = { image:imageUrl };
-    if (opts.align === 'left' || opts.align === 'right') {
-      pieceOptions.xAlign = opts.align;
-    } else if (opts.align === 'top' || opts.align === 'bottom') {
-      pieceOptions.yAlign = opts.align;
+      // Build pieceOptions
+      var pieceOptions = { image:imageUrl };
+      if (opts.align === 'left' || opts.align === 'right') {
+        pieceOptions.xAlign = opts.align;
+      } else if (opts.align === 'top' || opts.align === 'bottom') {
+        pieceOptions.yAlign = opts.align;
+      }
+      if (opts.x !== undefined) { pieceOptions.x = opts.x; }
+      if (opts.y !== undefined) { pieceOptions.y = opts.y; }
+
+      var config_opts = {
+        zIndex: this.zIndex,
+        xCanSpawn: opts.repeatX || false,
+        xCanRelease: opts.repeatX || false,
+        yCanSpawn: opts.repeatY || false,
+        yCanRelease: opts.repeatY || false,
+        pieceOptions: [pieceOptions]
+      };
+
+      this.config.push(config_opts);
+      var layer = new Layer(config_opts, this);
+      layer._setScroll(opts.scrollX, opts.scrollY);
     }
-    if (opts.x !== undefined) { pieceOptions.x = opts.x; }
-    if (opts.y !== undefined) { pieceOptions.y = opts.y; }
-
-    var config_opts = {
-      zIndex: this.zIndex,
-      xCanSpawn: opts.repeatX || false,
-      xCanRelease: opts.repeatX || false,
-      yCanSpawn: opts.repeatY || false,
-      yCanRelease: opts.repeatY || false,
-      pieceOptions: [pieceOptions]
-    };
 
     this.zIndex = Math.max(this.zIndex - 1, 0);
-    this.config.push(config_opts);
-    var layer = new Layer(config_opts, this);
-    layer._setScroll(opts.scrollX, opts.scrollY)
     return layer;
   }
 });
