@@ -1,4 +1,5 @@
 import device;
+import animate;
 import ui.View as View;
 import ui.TextView as TextView;
 import ui.ImageView as ImageView;
@@ -8,90 +9,105 @@ import ui.ScoreView as ScoreView;
 import accelerometer;
 import entities.Entity as Entity;
 
-import .util;
+import .spawner.HorizontalSpawner as HorizontalSpawner;
+import .spawner.VerticalSpawner as VerticalSpawner;
+import .spawner.Spawner as Spawner;
+
+import .shape.Line as Line;
+import .shape.Rect as Rect;
+
+import .collision.CollisionManager as CollisionManager;
+import .collision.CollisionChecker as CollisionChecker;
+
 import .Actor;
-import .Ghost;
-import .Spawner;
+import .Group;
+import .Screen;
+import .Camera;
 import .Background;
+import .SceneText;
+import .utils;
+
+import communityart;
 
 // Default values
 var DEFAULT_TEXT_WIDTH  = 200;
 var DEFAULT_TEXT_HEIGHT = 50;
-var DEFAULT_TEXT_COLOR  = 'white';
+var DEFAULT_TEXT_COLOR  = '#111';
 var DEFAULT_TEXT_FONT   = 'Arial';
 
 // To make speeds 'feel' nicer
-var SCALE_DT = 0.01;
+var SCALE_DT = 0.001;
 
 // Variables that are private to this file
 var _modes = {}
+
+/** Use the get and set method
+  * @var {number} scene._score
+  * @see scene.getScore
+  * @see scene.setScore */
 var _score = 0;
+
 var _using_score = false;
 var _text_color = DEFAULT_TEXT_COLOR;
 var _text_font = DEFAULT_TEXT_FONT;
 var _game_running = false;
-var _accelerometer_started = false;
 var _on_tick = null;
-var _zIndex = 1;
 
 /**
- * Object tracking:
- *  track(object)     - begin tracking given object
- *  untrack(object)   - stop tracking an object
- *  _tracked = [...]  - array of tracked objects
+ * Construct the main scene for the game, this is where all of the gameplay is defined.
+ * @namespace scene
+ * @version 0.0.3
+ * @arg {function} - The function which will initialize a new game scene
  */
-var _tracked = [];
+scene = function (newGameFunc) {
 
-function _track(object) {
-  _tracked.push(object);
-  return object;
-}
+  scene.mode('default', newGameFunc);
 
-function _untrack(object) {
-  var i = _tracked.indexOf(object);
-  if (i >= 0) {
-    _tracked.splice(i, 1);
-  } else {
-    throw 'Attempting to untrack object that was untracked in the first place.';
-  }
-}
-
-/**
- * The primary scene function, imports weeby if needed and sets the default mode function
- */
-scene = function (defaultModeFun) {
-  // Potentially include weeby
-  if (scene.enableWeeby) {
-    weeby = jsio('import weeby');
-    var Application = weeby.Application;
-  } else {
-    weeby = null;
-    var Application = GC.Application;
-  }
-
-  scene.mode('default', defaultModeFun);
-
-  return Class(Application, function() {
+  return Class(GC.Application, function() {
     /**
      * initUI
      */
     this.initUI = function() {
-      if (weeby === null) {
-        this.rootView = this.view;
-      } else {
-        this.rootView = weeby.getGameView();
-      }
+      this.rootView = this.view;
 
-      // The superview for all views that do not except possible input
-      this.staticView = new View({
+      this.setScreenDimensions();
+
+      /**
+        * This is the devkit {@link View} which all backgrounds should be added to.
+        * @var {Background} scene.background
+        */
+      scene.background = new Background({
         parent: this.rootView,
-        width:  scene.screen.width,
-        height: scene.screen.height,
-        blockEvents: true,
-        zIndex: 0,
+        width: scene.screen.width,
+        height: scene.screen.height
       });
 
-      // The superview for all text-based views
+      /**
+        * The devkit {@link View} which contains the entire scene.
+        * @var {View} scene.view
+        */
+      scene.view = this.rootView;
+
+      /**
+        * This is the devkit {@link View} which all actors should be added to.
+        * @var {View} scene.stage
+        */
+      this.stage = new View({
+        parent: scene.view,
+        infinite: true
+      });
+
+      /**
+       * The root group for all objects created on the scene instead of
+       * on their own group.
+       * @var {Group} scene.group
+       */
+      scene.group = new Group({superview: this.stage});
+
+      /**
+       * The superview for all text views.
+       * @var {View} scene.textContainer
+       */
       this.textContainer = new View({
         parent: this.rootView,
         width:  scene.screen.width,
@@ -100,16 +116,11 @@ scene = function (defaultModeFun) {
         zIndex: 100000
       });
 
-      scene.background = new Background(this.staticView);
       this.overlay = new View({ parent: this.rootView, infinite: true });
-
-      // TODO maybe infinite in one dimension for each of these?
-      var w = scene.screen.width;
-      var h = scene.screen.height;
-      scene.screen.left   = new Ghost(-10,  -h,  10, 3*h, { parent: this.staticView });
-      scene.screen.right  = new Ghost(  w,  -h,  10, 3*h, { parent: this.staticView });
-      scene.screen.top    = new Ghost( -w, -10, 3*w,  10, { parent: this.staticView });
-      scene.screen.bottom = new Ghost( -w,   h, 3*w,  10, { parent: this.staticView });
+      // bind our screen functions to the overlay
+      this.overlay.onInputStart = scene.screen.inputStartHandler.bind(scene.screen);
+      this.overlay.onInputSelect = scene.screen.inputStopHandler.bind(scene.screen);
+      this.overlay.onInputMove = scene.screen.inputMoveHandler.bind(scene.screen);
     }
 
     this.launchUI = function() {
@@ -126,7 +137,7 @@ scene = function (defaultModeFun) {
 
         // start the game when you click
         self = this
-        scene.screen.onOneTouch(function() {
+        scene.screen.onTouchOnce(function() {
           self.reset('default');
         })
       } else {
@@ -140,19 +151,28 @@ scene = function (defaultModeFun) {
     this.reset = function(mode) {
       if (mode === undefined) mode = 'default';
 
+      scene.clearAnimations();
       this.setScreenDimensions();
+      scene.screen.resetTouches();
+      scene.background.reset();
 
-      // Cleanup after the last performance before begining a new one
-      for (var k in _tracked) {
-        _tracked[k].destroy();
+      scene.collisions.reset();
+      scene.group.destroy();
+      scene.player = null;
+      scene.camera.stopFollowing();
+      scene.camera.x = 0;
+      scene.camera.y = 0;
+
+      for (var i in this.groups) {
+        this.groups[i].destroy();
+      }
+
+      for (var j in this.spawners) {
+        this.spawners[i].destroy();
       }
 
       for (var k in this.extraViews) {
         this.extraViews[k].removeFromSuperview();
-      }
-
-      for (var k in this.spawners) {
-        this.spawners[k].destroy();
       }
 
       delete this.scoreView;
@@ -160,33 +180,16 @@ scene = function (defaultModeFun) {
 
       // Clear the tallies
       this.extraViews = [];
+      this.groups = [];
       this.spawners = [];
       _score = 0;
-      _tracked = [];
       _on_tick = null;
 
       // Let's reboot the fun!
       var currentMode = _modes[mode]
       currentMode.fun(currentMode.opts);
 
-      // Let the players take their places.
-      for (var k in _tracked) {
-        _tracked[k].reset();
-      }
-
-      // The backdrop falls into place.
-      scene.background.reset();
-
-      // Now let us frame the scene.
-      scene.screen.left.reset();
-      scene.screen.right.reset();
-      scene.screen.top.reset();
-      scene.screen.bottom.reset();
-
-      // The minions of evil doth depart
-      for (var k in this.spawners) {
-        this.spawners[k].reset();
-      }
+      scene.background.reloadConfig();
 
       // The curtain rises, and Act 1 begins!
       _game_running = true;
@@ -195,17 +198,25 @@ scene = function (defaultModeFun) {
     /**
      * setScreenDimensions
      */
-    this.setScreenDimensions = function(w, h) {
+    this.setScreenDimensions = function() {
+
       var ds = device.screen;
       var vs = this.rootView.style;
+      var targetHeight = ds.width > ds.height ? 576 : 1024;
 
-      w = scene.screen.width;
-      h = scene.screen.height;
+      vs.scale = device.height / targetHeight;
+      vs.width = device.width / vs.scale;
+      vs.height = targetHeight;
 
-      vs.width  = w > h ? ds.width  * (h / ds.height) : w;
-      vs.height = w < h ? ds.height * (w / ds.width ) : h;
-      vs.scale  = w > h ? ds.height / h : ds.width / w;
-    }
+      vs.x = (ds.width - vs.width) / 2;
+      vs.y = (ds.height - vs.height) / 2;
+      vs.anchorX = vs.width / 2;
+      vs.anchorY = vs.height / 2;
+
+      scene.camera.resize(vs.width, vs.height);
+      scene.screen.width = vs.width;
+      scene.screen.height = vs.height;
+    };
 
     /**
      * tick tock
@@ -215,95 +226,82 @@ scene = function (defaultModeFun) {
         _on_tick(dt);
       }
 
-      for (var k in _tracked) {
-        _tracked[k].update(dt * SCALE_DT);
+      scene.totalDt += dt;
+
+      for (var i = 0; i < this.spawners.length; i++) {
+        this.spawners[i].tick(dt);
       }
 
-      for (var k in this.spawners) {
-        this.spawners[k].update(dt);
+      dt *= SCALE_DT;
+
+      scene.background.update(dt);
+      scene.group.update(dt);
+      for (var i = 0; i < this.groups.length; i++) {
+        this.groups[i].update(dt);
       }
-
-      scene.background.update(dt * SCALE_DT);
-
-      scene.screen.left.update(dt);
-      scene.screen.right.update(dt);
-      scene.screen.top.update(dt);
-      scene.screen.bottom.update(dt);
+      scene.camera.update(dt);
+      scene.collisions.update();
+      this.stage.style.x = -scene.camera.x;
+      this.stage.style.y = -scene.camera.y;
+      scene.background.scrollTo(-scene.camera.x, -scene.camera.y);
     }
-  })
-}
+  });
 
-/**
- * A wonderous object that describes the screen
- */
-scene.screen = {
-  // I am not sure about these defaults; maybe we should default to device dimensions
-  width: 576,
-  height: 1024,
-
-  /**
-   * screen.onTouch(cb) - register event that happens on the screen being touched
-   */
-  onTouch:
-    function(cb) {
-      GC.app.overlay.onInputStart = cb;
-    },
-
-  offTouch:
-    function() {
-      delete GC.app.overlay.onInputStart;
-    },
-
-  /**
-   * screen.onTouchLoss(cb)
-   */
-  onTouchLoss:
-    function(cb) {
-      GC.app.overlay.onInputSelect = cb;
-    },
-
-  offTouchLoss:
-    function() {
-      delete GC.app.overlay.onInputSelect;
-    },
-
-  /**
-   * screen.onOneTouch(cb) - Like onTouch, but only happens once
-   */
-  onOneTouch:
-    function(cb) {
-      GC.app.overlay.onInputStart = function() {
-        scene.screen.offTouch();
-        cb();
-      }
-    },
-
-  /**
-   * screen.onDrag(cb)
-   *  FIXME cannot be used with onTouch/onTouchLoss
-   */
-  onDrag: function(cb) {
-    var down;
-
-    scene.screen.onTouch(function(event, point) {
-      down = point;
-    });
-
-    scene.screen.onTouchLoss(function(event, up) {
-      if (down !== undefined) {
-        cb(down.x, down.y, up.x, up.y);
-        down = undefined;
-      }
-    });
-  }
 };
 
 /**
- * onTick(cb)
- */
+  * @var {Screen} scene.screen
+  */
+scene.screen = new Screen(576, 1024);
+
+/**
+  * @var {Camera} scene.cam
+  */
+scene.camera = new Camera(scene.screen.width, scene.screen.height);
+
+/**
+  * @var {CollisionManager} scene.collisions
+  */
+scene.collisions = new CollisionManager();
+
+/**
+  * There can be only one player. {@link scene.gameOver} is automatically called when the player is destroyed.
+  * @var {Actor} scene.player
+  */
+scene.player = null;
+
+/** The total number of milliseconds that have elapsed since the start of the game.
+  * @var {number} scene.totalDt */
+scene.totalDt = 0;
+
+
+/**
+  * Called when a touch occurs
+  * @callback onTouchCallback
+  * @arg {number} x
+  * @arg {number} y
+  */
+/**
+  * Register a new touch callback
+  * @func scene.onTouch
+  * @arg {onTouchCallback} callback
+  */
+scene.onTouch = function(callback) {};
+
+
+/**
+  * Called every tick with accellerometer data
+  * @callback onTickCallback
+  * @arg {number} [dt] - Used to normalise game speed based on real time
+  */
+/**
+  * Register a new tick handler
+  * @func scene.onTick
+  * @arg {onTickCallback} callback
+  */
 scene.onTick = function(cb) {
   _on_tick = cb;
-}
+};
 
 /**
  * startAccelerometer(fun)
@@ -312,109 +310,58 @@ scene.onTick = function(cb) {
  * calculations by default. If you don't care about those, or are nit-picky with
  * speed, just use the accelerometer module by yourself.
  */
-scene.startAccelerometer = function(cb) {
-  _accelerometer_started = true;
+scene.accelerometer = {
+  _started: false,
+  _onAccelerometer: [],
+};
 
-  accelerometer.start(function(evt) {
-    var x = -evt.x;
-    var y = -evt.y;
-    var z = -evt.z;
+/**
+  * Called every tick with accellerometer data
+  * @callback onAccelerometerCallback
+  * @arg {AccellerometerEvent} e
+  */
+/**
+  * Register a new accelerometer callback
+  * @func scene.onAccelerometer
+  * @arg {onAccelerometerCallback} callback
+  */
+scene.onAccelerometer = function(cb) {
+  var accelCallbacks = scene.accelerometer._onAccelerometer;
+  accelCallbacks.push(cb);
 
-    cb({
-      x: x,
-      y: y,
-      z: z,
-      forwardTilt: Math.atan2(z, y),
-      tilt: Math.atan2(x, y),
-      twist: Math.atan2(x, z),
+  if (!scene.accelerometer._started) {
+    scene.accelerometer._started = true;
+
+    accelerometer.on('devicemotion', function (evt) {
+
+      var x = -evt.x;
+      var y = -evt.y;
+      var z = -evt.z;
+      var accelObj = {
+        x: x,
+        y: y,
+        z: z,
+        forwardTilt: Math.atan2(z, y),
+        tilt: Math.atan2(x, y),
+        twist: Math.atan2(x, z),
+      };
+
+      for (var i = 0; i < accelCallbacks.length; ++i) {
+        accelCallbacks[i](accelObj);
+      }
     });
-  });
-}
+  }
+};
 
 scene.stopAccelerometer = function(cb) {
   if (_accelerometer_started) {
     accelerometer.stop();
     _accelerometer_started = false;
   }
-}
+};
 
 /**
- * createActor(resource, opts = {})
- *
- * Possible resource object structures:
- *   {
- *     type: 'image',
- *     url: 'url/path/to/image.png',
- *   }
- *
- *   {
- *     type: 'sprite',
- *     url: 'url/prefix/for/sprite',
- *     framerate: 12
- *   }
- *
- * Casting is important. The right actor must play the right part, lest the play be faulty.
- */
-scene.createActor = function(resource, opts) {
-  opts = opts || {};
-  opts.parent = GC.app.rootView;
-
-  if (!('zIndex' in opts)) {
-    console.log('bar baz');
-    opts.zIndex = _zIndex++;
-  }
-
-  if (resource.type === 'image') {
-    // static image
-    var viewClass = ImageView;
-    opts.image = resource.url;
-  } else
-  if (resource.type === 'sprite') {
-    // animated image
-    var viewClass = SpriteView;
-    opts.url = resource.url;
-    opts.autoStart = false;
-  }
-
-  return _track(new Actor(scene, viewClass, opts));
-}
-
-scene.removeActor = function(actor) {
-  _untrack(actor);
-  actor.destroy();
-}
-
-/**
- * addGhost(x, y, w, h, [opts])  - create a collidable box
- * addGhost(x, y, r, [opts])     - create a collidable circle
- */
-scene.addGhost = function(x, y, w, h, opts) {
-  opts = opts || {};
-  opts.parent = GC.app.staticView;
-  return _track(new Ghost(x, y, w, h, opts));
-}
-
-/**
- * addBackgroundLayer
- */
-scene.addBackgroundLayer = function(resource, opts0) {
-  return scene.background.addLayer(resource, opts0);
-}
-
-/**
- * addSpawner
- *
- * See Spawner.js for a description of the arguments
- */
-scene.addSpawner = function(spawnEntity, opts) {
-  opts.relativeTo = opts.relativeTo || scene.background;
-  var sp = new Spawner(spawnEntity, opts);
-  GC.app.spawners.push(sp);
-  return sp;
-}
-
-/**
- * drawText
+ * addText
  * ~ x      x location
  * ~ y      y location
  * ~ text   text to draw
@@ -422,8 +369,8 @@ scene.addSpawner = function(spawnEntity, opts) {
  *
  * This function perhaps draws text to the screen.
  */
-scene.drawText = function(x, y, text, opts) {
-  GC.app.extraViews.push(new TextView(combine({
+scene.addText = function(x, y, text, opts) {
+  opts = merge(opts, {
     superview: GC.app.textContainer,
     text: text,
     x: x,
@@ -432,35 +379,57 @@ scene.drawText = function(x, y, text, opts) {
     fontFamily: _text_font,
     width: DEFAULT_TEXT_WIDTH,
     height: DEFAULT_TEXT_HEIGHT,
-  }, opts || {})));
-}
+  });
+  var result = new SceneText(opts);
+  GC.app.extraViews.push(result);
+  return result;
+};
+
+scene.removeText = function(sceneText) {
+  var extraViews = GC.app.extraViews;
+  var index = extraViews.indexOf(sceneText);
+  if (index !== -1) {
+    sceneText.removeFromSuperview();
+    var lastView = extraViews.pop();
+    if (index < extraViews.length) {
+      extraViews[index] = lastView;
+    }
+  }
+};
 
 scene.horCenterText = function(y, text, opts) {
   opts = opts || {};
   opts.width = GC.app.rootView.style.width;
-  scene.drawText(0, y, text, opts);
-}
+  scene.addText(0, y, text, opts);
+};
 
 scene.centerText = function(text, opts) {
   scene.horCenterText(scene.screen.height / 2 - DEFAULT_TEXT_HEIGHT / 2, text, opts);
-}
+};
 
 scene.setTextColor = function(color) {
   // TODO validate?
   _text_color = color;
-}
+};
 
 scene.setTextFont = function(font) {
   // TODO validate?
   _text_font = font;
-}
+};
 
 /**
- * showScore
- */
+  * Set the x and y coordinates in screen space for the score text. The score text remains invisible
+  * until this function is called.
+  * @func scene.showScore
+  * @arg {number} x
+  * @arg {number} y
+  * @arg {String} color
+  * @arg {String} font
+  * @arg {Object} [opts] contains options to be applied to the underlying {@link View}
+  */
 scene.showScore = function(x, y, color, font, opts) {
   font = font || 'Arial';
-  color = color || 'white';
+  color = color || '#111';
 
   var app = GC.app;
   if (app.scoreView) return;
@@ -488,11 +457,13 @@ scene.showScore = function(x, y, color, font, opts) {
   }, opts || {}));
 
   app.extraViews.push(app.scoreView);
-}
+};
 
 /**
- * score getters/setters
- */
+  * Calling this function will set {@link scene._score} and update the score view.
+  * @func scene.setScore
+  * @arg {number} newScore
+  */
 scene.setScore = function(score) {
   if (_game_running) {
     _score = score;
@@ -501,33 +472,69 @@ scene.setScore = function(score) {
       GC.app.scoreView.setText('' + score);
     }
   }
-}
+};
 
+/**
+  * @func scene.addScore
+  * @see scene.setScore
+  * @arg {number} amount
+  */
 scene.addScore = function(add) {
   scene.setScore(scene.getScore() + add);
-}
+};
 
+/** @func scene.getScore
+  * @returns {number} */
 scene.getScore = function() {
   _using_score = true;
   return _score;
-}
+};
 
 /**
- * gameOver
- *
- * Alas, the final act comes to a close, the curtains fall and the lights dim.
- */
+  * Execute a callback every specified amount of milliseconds. Game dt will be used
+  * to determine how long has passed, not system time. Replacement for `setInterval`.
+  * @func scene.addInterval
+  * @arg {function} callback
+  * @arg {number} ms - milliseconds between callback executions
+  * @returns {number} intervalID
+  */
+scene.addInterval = function(callback, ms) {};
+
+/**
+  * Remove an interval before it has executed. Replacement for `clearInterval`.
+  * @func scene.removeInterval
+  * @arg {number} intervalID
+  */
+scene.removeInterval = function(intervalID) {};
+
+/**
+  * Execute a callback after a specified amount of milliseconds. Callback will only execute once.
+  * Game dt will be used to determine how long has passed, not system time. Replacement for `setTimeout`.
+  * @func scene.addTimeout
+  * @arg {function} callback
+  * @arg {number} ms - milliseconds until callback is executed
+  * @returns {number} timeoutID
+  */
+scene.addTimeout = function(callback, ms) {};
+
+/**
+  * Remove a timeout before it has executed. Replacement for `clearTimeout`.
+  * @func scene.removeTimeout
+  * @arg {number} timeoutID
+  */
+scene.removeTimeout = function(timeoutID) {};
+
+
+
+/**
+  * When called, this function will restart the game
+  * @func scene.gameOver
+  */
 scene.gameOver = function(opts) {
   if (_game_running) {
     _game_running = false;
 
-    for (var k in _tracked) {
-      if (_tracked[k].stopInput) {
-        _tracked[k].stopInput();
-      }
-    }
-
-    if (!opts.no_gameover_screen) {
+    if (!opts || !opts.no_gameover_screen) {
       var bgHeight = scene.screen.height;
 
       if (_using_score) {
@@ -537,12 +544,12 @@ scene.gameOver = function(opts) {
         scene.centerText('Game over!');
       }
 
-      scene.screen.onOneTouch(function () {
+      scene.screen.onTouchOnce(function () {
         GC.app.reset();
       });
     }
   }
-}
+};
 
 /**
  * mode(name, resetFun, opts = {}) - Set a mode to the given function
@@ -565,13 +572,170 @@ scene.mode = function(name, fun, opts) {
     // Change to the given mode
     GC.app.reset(name);
   }
-}
+};
+
 
 /**
- * splash(fun, opts)
- */
+  * Construct a splash screen to show at the beginning of the game, click once anywhere to hide the screen.
+  * @func scene.splash
+  * @arg {function} func
+  */
 scene.splash = function(fun, opts) {
   scene.mode('splash', fun, opts);
-}
+};
+
+scene.addBackground = function(art, opts) {
+  return scene.background.addLayer(art, opts);
+};
+
+/**
+  * Create a new actor that will be automatically updated each tick
+  * @func scene.addActor
+  * @arg {View} view
+  * @arg {Object} [opts] - contains options to be applied to the underlying {@link Actor}
+  * @returns {Actor}
+  */
+/**
+  * @func scene.addActor(2)
+  * @arg {View} view
+  * @arg {number} x
+  * @arg {number} y
+  * @arg {Object} [opts] - contains options to be applied to the underlying {@link Actor}
+  * @returns {Actor}
+  */
+scene.addActor = function(resource, x, y, opts) {
+  opts = opts || {};
+
+  if (typeof x === 'object') {
+    // Function type 1
+    opts = x;
+  } else if (typeof x === 'number' && typeof y === 'number') {
+    // Function type 2
+    opts.x = opts.x !== undefined ? opts.x : x;
+    opts.y = opts.y !== undefined ? opts.y : y;
+  }
+
+  // Default position
+  opts.x = opts.x !== undefined ? opts.x : scene.camera.x + scene.screen.midX;
+  opts.y = opts.y !== undefined ? opts.y : scene.camera.y + scene.screen.midY;
+
+  // Defualt group
+  opts.group = opts.group || scene.group;
+  opts.parent = opts.parent || scene.stage;
+
+  opts.url = (typeof resource === "string") ? resource : resource.url;
+  return opts.group.obtain(opts.x, opts.y, opts);
+};
+
+/**
+  * Sets the scene player, makes sure not to override an existing player.
+  * @func scene.addPlayer
+  *
+  * @see scene.addActor
+  * @arg {View} view
+  * @arg {Object} [opts] - contains options to be applied to the underlying {@link Actor}
+  * @returns {View} - The newly set player
+  */
+scene.addPlayer = function(resource, opts) {
+  if (scene.player) { throw new Error("You can only add one player!"); }
+  scene.player = scene.addActor(resource, opts);
+  scene.player.onDestroy(function() {
+    scene.gameOver();
+  });
+  return scene.player;
+};
+
+/**
+  * Add a new group
+  * @func scene.addGroup
+  * @arg {Object} [opts]
+  * @returns {@link Group}
+  */
+scene.addGroup = function(opts) {
+  var result = new Group({superview: GC.app.stage});
+  GC.app.groups.push(result);
+  return result;
+};
+
+/**
+  * Helper object for creating and registering new things
+  * @prop {function} spawner - Returns a new {@link Spawner}
+  */
+scene.addSpawner = function(spawner) {
+  GC.app.spawners.push(spawner);
+  return spawner;
+};
+
+scene.removeSpawner = function(spawner) {
+  var index = GC.app.spawners.indexOf(spawner);
+  if (index !== -1) {
+    var lastSpawner = GC.app.spawners.pop();
+    if (index < GC.app.spawners.length) {
+      GC.app.spawners[index] = lastSpawner;
+    }
+  }
+};
+
+scene.onTap = bind(scene.screen, scene.screen.onTap);
+scene.removeOnTap = bind(scene.screen, scene.screen.removeOnTap);
+
+/**
+  * This collision check will be run each tick. {@link callback} will be called only once per tick
+  * @func scene.onCollision
+  * @arg {Actor|Actor[]|Group|Collidable} a
+  * @arg {Actor|Actor[]|Group|Collidable} b
+  * @arg {onCollisionCallback} callback
+  * @arg {boolean} [allCollisions] - {@link callback} may be called more than once per tick
+  * @see CollisionChecker
+  * @returns {number} collisionCheckID
+  */
+scene.onCollision = function(a, b, callback, allCollisions) {
+  // create a new collision checker
+  var check = new CollisionChecker({
+    a: a,
+    b: b,
+    callback: callback,
+    allCollisions: allCollisions
+  });
+
+  return this.collisions.registerCollision(check);
+};
+
+scene.spawner = {
+  Horizontal: HorizontalSpawner,
+  Vertical: VerticalSpawner,
+  Timed: Spawner
+};
+
+scene.shape = {
+  Rect: Rect,
+  Line: Line
+};
+
+scene.collision = {
+  CollisionChecker: CollisionChecker
+};
+
+scene.animations = [];
+
+scene.clearAnimations = function() {
+  for (var i = 0; i < scene.animations.length; i++) {
+    scene.animations[i].clear();
+  }
+  scene.animations = [];
+};
+
+scene.animate = function(subject, groupId) {
+  var animation = animate(subject, groupId);
+  if (scene.animations.indexOf(animation) === -1) {
+    scene.animations.push(animation);
+    console.log('pushing animation');
+  }
+  return animation;
+};
+
+scene.configureBackground = function(config) {
+  scene.background.reloadConfig(config);
+};
 
 exports = scene;

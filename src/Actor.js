@@ -1,38 +1,35 @@
 import entities.Entity as Entity;
 
+import .ActorView;
+
 /**
- * An object that contains a collection of builtin collision handlers
- */
-var builtin_collision_handlers = {
-  bounce:   function (entity, opts) { this.collisionBounce(entity, opts); },
-  stop:     function (entity, opts) { this.collisionStop(entity, opts);   },
-  gameOver: function (entity, opts) { this.scene.gameOver(entity, opts);  }
-}
-
-
+  * This is the basic entity for all things in a scene game.  If it moves, it's and actor.
+  * @class Actor
+  * @extends Entity
+  * @arg {Object} [opts]
+  * @arg {boolean|Object} [opts.followTouches] - Follow touches on the screen, or follow one or both axis (if argument type is Object)
+  */
 exports = Class(Entity, function() {
+
   var supr = Entity.prototype;
 
-  this.init = function(scene, viewClass, opts) {
-    this.viewClass = viewClass;
+  this.init = function(opts) {
+    this.viewClass = ActorView;
+
     this.opts = opts;
 
     supr.init.call(this, opts);
 
-    if (opts.parent_actor) {
-      this.parent_actor = opts.parent_actor;
-      delete this.opts.parent_actor;
-    }
-
+    this.followTouches = opts.followTouches || {};
     this.destroyed = false;
     this.has_reset = false;
-    this.scene = scene;
     this.config = opts;
-    this.collision_handlers = [];
 
     // Center the entity by default
     this.x = opts.x || scene.screen.width / 2;
     this.y = opts.y || scene.screen.height / 2;
+
+    this.destroyHandlers = [];
   }
 
   this.reset = function(x, y, config) {
@@ -40,30 +37,37 @@ exports = Class(Entity, function() {
     this.y = y || this.y;
     this.config = config || this.config;
 
+    this.destroyHandlers = [];
+
+    this.followTouches = config.followTouches || {};
+
     this.has_reset = true;
     this.destroyed = false;
-    this.config.ax = this.ax;
-    this.config.ay = this.ay;
-    this.config.vx = this.vx;
-    this.config.vy = this.vy;
-    supr.reset.call(this, this.x, this.y, this.config);
+    this.config.autoSize = true;
+    this.config.ax = config.ax || 0;
+    this.config.ay = config.ay || 0;
+    this.config.vx = config.vx || 0;
+    this.config.vy = config.vy || 0;
 
-    this.width  = this.hitBounds.w;
-    this.height = this.hitBounds.h;
+    this.view.resetAllAnimations(this.config);
 
-    if (this.view.resetAllAnimations) {
-      this.view.resetAllAnimations(this.config);
+    if (this.view.hasAnimations) {
 
       // FIXME This is a hack to get around devkit-entities not knowing how to autosize SpriteViews
       //       but knowing how to autosize ImageViews if the config's image field is set.
       this.config.image = this.view.getFrame(this.config.defaultAnimation, 0)._originalURL;
-      supr.reset.call(this, this.x, this.y, this.config);
-
       // The purpose of this is to start animations that could not be started before calling the
       // resetAllAnimations function. These variables are set in play() and loop()
-      this.initial_function.apply(this, this.initial_arguments);
+      this.initial_function && this.initial_function.apply(this, this.initial_arguments);
+    } else {
+      this.config.image = this.config.url;
     }
+
+    supr.reset.call(this, this.x, this.y, this.config);
   }
+
+  // Cached reference to make faster direct calls
+  this.updateEntity = Entity.prototype.update;
 
   this.update = function(dt) {
     if (this.destroyed) {
@@ -71,49 +75,82 @@ exports = Class(Entity, function() {
       return;
     }
 
-    supr.update.call(this, dt);
-
-    // Check for collisions
-    // TODO refactor, multiple collisions?
-    for (var i in this.collision_handlers) {
-      c = this.collision_handlers[i];
-
-      against = c.entity.collidesWith(this);
-      if (against === true) against = c.entity;
-
-      if (against) {
-        c.handler.call(this, against, c.opts);
+    if (this.followTouches) {
+      var currentTouch = scene.screen.getTouch();
+      if (currentTouch && this.followTouches.x) {
+        this.vx = currentTouch ? (currentTouch.x - (this.x - scene.camera.x)) : 0;
+      }
+      if (currentTouch && this.followTouches.y) {
+        this.vy = currentTouch ? (currentTouch.y - (this.y - scene.camera.y)) : 0;
       }
     }
 
-    // Ugh... check for offscreen conditions...
-    if (this.offScreenLeftHandler) {
-      var rightBound  = this.x + this.hitBounds.x + this.hitBounds.w;
-      if (rightBound <= 0) this.offScreenLeftHandler();
-    }
+    this.updateEntity(dt);
+  };
 
-    if (this.offScreenRightHandler) {
-      var leftBound = this.x - this.hitBounds.x;
-      if (leftBound >= scene.screen.width) this.offScreenRightHandler();
-    }
+  /**
+    * Fire {@link callback} when this {@link Actor} is completely inside {@link target}
+    * @func Actor#onEntered
+    * @arg {Actor|Shape|Collidable} target
+    * @arg {function} callback
+    * @returns {number} collisionCheckID
+    */
+  this.onEntered = function(target, callback) {
+    this._registerCollision(target, callback, 'ON_ENTERED');
+  };
 
-    if (this.offScreenTopHandler) {
-      var bottomBound = this.y + this.hitBounds.y + this.hitBounds.h;
-      if (bottomBound <= 0) this.offScreenTopHandler();
-    }
+  /**
+    * Fire {@link callback} when this {@link Actor} is completely outside of {@link target}
+    * @func Actor#onExited
+    * @arg {Actor|Shape|Collidable} target
+    * @arg {function} callback
+    * @returns {number} collisionCheckID
+    */
+  this.onExited = function(target, callback) {
+    this._registerCollision(target, callback, 'ON_EXITED');
+  };
 
-    if (this.offScreenBottomHandler) {
-      var topBound = this.y - this.hitBounds.y;
-      if (topBound >= scene.screen.height) this.offScreenBottomHandler();
-    }
+  this._registerCollision = function(target, callback, type) {
+    return scene.collisions.registerCollision(
+      new scene.collision.CollisionChecker({
+        a: this,
+        b: target,
+        callback: callback,
+        collisionType: type
+      })
+    );
   }
+
+  /**
+    * Set {@link Actor#vx} and {@link Actor#vy} to aim for the specified point, with the specified speed.
+    * @func Actor#headToward
+    * @arg {number} x
+    * @arg {number} y
+    * @arg {number} speed
+    */
+  this.headToward = function(x, y, speed) {};
+
+  /**
+    * Register a new tick handler
+    * @func Actor#onTick
+    * @arg {onTickCallback} callback
+    */
+  this.onTick = function(callback) {};
 
   /**
    * This function destroys the Actor, as in, removes it from the scene
    */
   this.destroy = function() {
+    for (var i = 0; i < this.destroyHandlers.length; i++) {
+      this.destroyHandlers[i]();
+    }
+    if (this.view.hasAnimations) { this.view.stopAnimation(); }
     this.destroyed = true;
-    this.view.removeFromSuperview();
+    if (this.pool) {
+      this.release();
+    } else {
+      this.view.removeFromSuperview();
+    }
   }
 
   /**
@@ -134,66 +171,10 @@ exports = Class(Entity, function() {
   }
 
   /**
-   * collision([collidable-1, collidable-2, ...], handler, [options])
-   * ~ collidable-n    a object or list of objects that can be collided with
-   * ~ handler         a string that identifies a handler or a callback function
-   * ~ options         a list of extra options to be passed to the handler
-   */
-  this.collision = function() {
-    var handler;
-    var args = Array.prototype.slice.call(arguments);
-    opts = args.pop();
-
-    if (typeof(opts) !== 'object') {
-      handler = opts;
-      opts = {};
-    } else {
-      handler = args.pop();
-    }
-
-    if (typeof(handler) === 'string') {
-      handler = builtin_collision_handlers[handler];
-    }
-
-    for (var i in args) {
-      this.collision_handlers.push({
-        entity: args[i],
-        handler: handler,
-        opts: opts
-      });
-    }
-
-    return this;
-  }
-
-  /**
-   * Special handlers for when something goes offscreen on the respective sides
-   */
-  this.offScreenTop    = function(handler) { this.offScreenTopHandler    = handler; return this; }
-  this.offScreenBottom = function(handler) { this.offScreenBottomHandler = handler; return this; }
-  this.offScreenLeft   = function(handler) { this.offScreenLeftHandler   = handler; return this; }
-  this.offScreenRight  = function(handler) { this.offScreenRightHandler  = handler; return this; }
-
-  /**
-   * Performs simple on the screen itself.
-   * TODO generalize to arbitrary bounds
-   */
-  this.wrapLeftRight = function() {
-    var self = this;
-    this.offScreenLeft (function() { self.x += scene.screen.width + self.width; });
-    this.offScreenRight(function() { self.x -= scene.screen.width + self.width; });
-  }
-
-  this.wrapTopBottom = function() {
-    var self = this;
-    this.offScreenTop   (function() { self.y += scene.screen.height + self.height; });
-    this.offScreenBottom(function() { self.y -= scene.screen.height + self.height; });
-  }
-
-  /**
    * play(animation)
    */
   this.play = function(animation) {
+    animation = animation || this.view._opts.defaultAnimation;
     if (this.has_reset) {
       this.view.startAnimation(animation, {
         loop: false,
@@ -214,6 +195,7 @@ exports = Class(Entity, function() {
    * loop(animation)
    */
   this.loop = function(animation) {
+    animation = animation || this.view._opts.defaultAnimation;
     if (this.has_reset) {
       this.view.startAnimation(animation, { loop: true });
       this.view.resume();
@@ -223,29 +205,15 @@ exports = Class(Entity, function() {
     }
 
     return this;
-  }
+  };
 
   /**
-   * The bounce collision handler, so it can be called from a more complicated one
-   *
-   * TODO cleanup
-   */
-  this.collisionBounce = function(entity, opts) {
-    px = this.x
-    py = this.y
-    this.resolveCollidingStateWith(entity)
+    * Register a new destroy handler, will be called after {@link Actor#destroy} has been called.
+    * @func Actor#onDestroy
+    * @arg {function} callback
+    */
+  this.onDestroy = function(callback) {
+    this.destroyHandlers.push(callback);
+  };
 
-    // Check if we are bouncing in a vertical or horizontal manner
-    if (Math.abs(this.x - px) > Math.abs(this.y - py)) {
-      this.vx = -this.vx;
-    } else {
-      this.vy = -this.vy;
-    }
-  }
-
-  this.collisionStop = function(entity, opts) {
-    this.resolveCollidingStateWith(entity);
-    this.vx = 0;
-    this.vy = 0;
-  }
 });

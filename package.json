@@ -7,7 +7,13 @@
   "dependencies": {
     "devkit-entities": "git+ssh://git@github.com/gameclosure/devkit-entities.git",
     "devkit-parallax": "git+ssh://git@github.com/gameclosure/devkit-parallax.git",
+    "community-art": "git@github.com:weebygames/community-art#refactors-redundant-research",
     "accelerometer": "git+ssh://git@github.com/gameclosure/accelerometer.git"
+  },
+  "devDependencies": {
+    "gulp": "^3.8.11",
+    "gulp-jsdoc": "^0.1.4",
+    "gulp-webserver": "^0.9.0"
   },
   "scripts": {},
   "devkit": {

@@ -1,3 +1,6 @@
+import ui.View as View;
+import ui.ImageView as ImageView;
+
 import parallax.Parallax as Parallax;
 
 // The background serves as a generator for this class
@@ -9,18 +12,8 @@ var Layer = Class(function () {
   }
 
   this._setScroll = function(sx, sy) {
-    if (sy && !sx) {
-      this.config.xCanSpawn = false;
-      this.config.xCanRelease = false;
-    }
-
-    if (sx && !sy) {
-      this.config.yCanSpawn = false;
-      this.config.yCanRelease = false;
-    }
-
-    this.config.xMultiplier = sx || 0;
-    this.config.yMultiplier = sy || 0;
+    this.config.xMultiplier = sx || 1;
+    this.config.yMultiplier = sy || 1;
     // TODO fix it so we can set scrolling mid-game
     //this.config.xOffset = -(sx || 0) * this.background.offsetX;
     //this.config.yOffset = -(sy || 0) * this.background.offsetY;
@@ -30,34 +23,63 @@ var Layer = Class(function () {
   // This function doesn't fully work right now
   this.setScroll = function(sx, sy) {
     this._setScroll(sx, sy);
-    this.background.reset();
+    this.background.reloadConfig();
   }
 });
 
-exports = Class(function () {
-  this.init = function(parentView) {
-    this.parallax = new Parallax({ parent: parentView });
+exports = Class(View, function (supr) {
+  /**
+    * The generic background class for a scene game.
+    * @class Background
+    * @arg {Object} [opts]
+    * @extends View
+    */
+  this.init = function(opts) {
+    supr(this, 'init', arguments);
+
+    this.parallax = new Parallax({
+      parent: this
+    });
     this.offsetX = 0;
     this.offsetY = 0;
-    this.autoX = 1;
-    this.autoY = 1;
+    this.autoX = 0;
+    this.autoY = 0;
     this.destroy();
-  }
+  };
 
   this.destroy = function() {
     this.zIndex = -1;
     this.config = [];
-  }
+  };
+
+  this.reloadConfig = function(config) {
+    this.config = config || this.config;
+    this.parallax.reset(this.config);
+  };
 
   this.reset = function() {
-    this.parallax.reset(this.config);
-  }
+    this.config = [];
+    this.reloadConfig();
+    // Clear all subviews, except parallax
+    var subviews = this.getSubviews();
+    var parallaxViews = this.parallax.layerPool._views;
+
+    for (var i = 0; i < subviews.length; ++i) {
+      var subview = subviews[i];
+      if (parallaxViews.indexOf(subview) >= 0) continue;
+      this.removeSubview(subview);
+    }
+  };
 
   this.update = function(dt) {
-    this.offsetX += dt * this.autoX;
-    this.offsetY += dt * this.autoY;
+    this.scroll(dt * this.autoX, dt * this.autoY);
+  };
+
+  this.scroll = function(x, y) {
+    this.offsetX += x;
+    this.offsetY += y;
     this.parallax.update(this.offsetX, this.offsetY);
-  }
+  };
 
   /**
    * autoScroll(autoScroll)
@@ -73,7 +95,7 @@ exports = Class(function () {
     }
     this.autoX = autoX;
     this.autoY = autoY;
-  }
+  };
 
   /**
    * scrollTo(x, y)
@@ -81,26 +103,68 @@ exports = Class(function () {
   this.scrollTo = function(x, y) {
     this.offsetX = x;
     this.offsetY = y;
-  }
+    this.parallax.update(this.offsetX, this.offsetY);
+  };
 
   /**
-   * addLayer(resource, imageViewOpts)
-   */
-  this.addLayer = function(resource, opts0) {
-    if (resource.type !== 'image') {
-      throw 'Background layers must be images, but you gave me a ' + resource.type + '!';
+    * @alias scene.addBackground
+    * @arg {ArtObject} art
+    * @arg {Object} [opts] - Contains options to be applied to the underlying {@link Layer}. If not specified, a static {@link View} is displayed.
+    * @arg {number} [opts.scrollX] - Marks the parallax layer to sroll in the X direction, by the specified amount
+    * @arg {number} [opts.scrollY] - Marks the parallax layer to sroll in the Y direction, by the specified amount
+    * @arg {number} [opts.align] - Either `left`, `right`, `top`, or `bottom`
+    * @returns {Layer|View}
+    */
+  this.addLayer = function(resource, opts) {
+    var imageUrl = (typeof resource === "string") ? resource : resource.url;
+
+    // Static image
+    if (!opts) {
+      var view = new ImageView({
+        superview: this,
+        image: resource.url || resource,
+        x: 0,
+        y: 0,
+        width: this.style.width,
+        height: this.style.height
+      });
+      return view;
     }
 
-    opts0 = opts0 || {};
-    var opts = {
+    opts = opts || {};
+
+    // Automatic repeating
+    if (!opts.repeatX && opts.scrollX) { opts.repeatX = true; }
+    if (!opts.repeatY && opts.scrollY) { opts.repeatY = true; }
+    // Automatic alignment
+    if (opts.align === 'bottom' && opts.y === undefined) { opts.y = this.style.height; }
+    else if (opts.align === 'top' && opts.y === undefined) { opts.y = 0; }
+    else if (opts.align === 'left' && opts.x === undefined) { opts.x = this.style.width; }
+    else if (opts.align === 'right' && opts.x === undefined) { opts.x = 0; }
+
+    // Build pieceOptions
+    var pieceOptions = { image:imageUrl };
+    if (opts.align === 'left' || opts.align === 'right') {
+      pieceOptions.xAlign = opts.align;
+    } else if (opts.align === 'top' || opts.align === 'bottom') {
+      pieceOptions.yAlign = opts.align;
+    }
+    if (opts.x !== undefined) { pieceOptions.x = opts.x; }
+    if (opts.y !== undefined) { pieceOptions.y = opts.y; }
+
+    var config_opts = {
       zIndex: this.zIndex,
-      xGapRange: [0, 0],
-      yGapRange: [0, 0],
-      pieceOptions: [{ image: resource.url }],
+      xCanSpawn: opts.repeatX || false,
+      xCanRelease: opts.repeatX || false,
+      yCanSpawn: opts.repeatY || false,
+      yCanRelease: opts.repeatY || false,
+      pieceOptions: [pieceOptions]
     };
 
-    this.zIndex -= 1;
-    this.config.push(opts);
-    return new Layer(opts, this)._setScroll(opts0.scrollX, opts0.scrollY);
+    this.zIndex = Math.max(this.zIndex - 1, 0);
+    this.config.push(config_opts);
+    var layer = new Layer(config_opts, this);
+    layer._setScroll(opts.scrollX, opts.scrollY)
+    return layer;
   }
 });
