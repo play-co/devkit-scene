@@ -593,17 +593,38 @@ scene.addBackground = function(art, opts) {
   * @func scene.addActor
   * @arg {View} view
   * @arg {Object} [opts] - contains options to be applied to the underlying {@link Actor}
-  * @returns {View}
+  * @returns {Actor}
   */
-scene.addActor = function(resource, opts) {
+/**
+  * @func scene.addActor(2)
+  * @arg {View} view
+  * @arg {number} x
+  * @arg {number} y
+  * @arg {Object} [opts] - contains options to be applied to the underlying {@link Actor}
+  * @returns {Actor}
+  */
+scene.addActor = function(resource, x, y, opts) {
   opts = opts || {};
-  var imageURL = (typeof resource === "string") ? resource : resource.url;
-  opts.url = imageURL;
-  return scene.group.obtain(
-    opts.x || scene.camera.x + scene.screen.width / 2,
-    opts.y || scene.camera.y + scene.screen.height / 2,
-    opts
-  );
+
+  if (typeof x === 'object') {
+    // Function type 1
+    opts = x;
+  } else if (typeof x === 'number' && typeof y === 'number') {
+    // Function type 2
+    opts.x = opts.x !== undefined ? opts.x : x;
+    opts.y = opts.y !== undefined ? opts.y : y;
+  }
+
+  // Default position
+  opts.x = opts.x !== undefined ? opts.x : scene.camera.x + scene.screen.midX;
+  opts.y = opts.y !== undefined ? opts.y : scene.camera.y + scene.screen.midY;
+
+  // Defualt group
+  opts.group = opts.group || scene.group;
+  opts.parent = opts.parent || scene.stage;
+
+  opts.url = (typeof resource === "string") ? resource : resource.url;
+  return opts.group.obtain(opts.x, opts.y, opts);
 };
 
 /**

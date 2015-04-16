@@ -5,6 +5,7 @@ import .Actor;
 /**
   * A group of {@link Actor}s, with various functionality for operating on the group as a whole.
   * @class Group
+  * @see scene.addActor
   */
 exports = Class(EntityPool, function(supr) {
 
@@ -14,13 +15,12 @@ exports = Class(EntityPool, function(supr) {
     supr(this, "init", [opts]);
   };
 
-  this.addActor = function(resource, opts) {
-    var imageURL = (typeof resource === "string") ? resource : resource.url;
-    opts = opts || {};
-    opts.url = imageURL;
-    opts.parent = GC.app.stage;
-    var result = this.obtain(opts.x || 0, opts.y || 0, opts);
-    return result;
+  this.addActor = function(resource, x, y, opts) {
+    // Two function options
+    var optsObj = (typeof x === 'object') ? x : (opts || {});
+    optsObj.group = this;
+
+    return scene.addActor(resource, x, y, optsObj);
   };
 
   // Cache a reference to make faster direct calls

@@ -100,8 +100,8 @@ var CC = Class(function() {
 
     else {
       if (this._collisionTypeObject.collisionFn(a, b)) {
-        if (this._collisionTypeObject.fireCallbackFn(this)
-            && !this._collisionTypeObject.testAfter) {
+        if (!this._collisionTypeObject.testAfter
+            && this._collisionTypeObject.fireCallbackFn(this)) {
           this._callback(a, b);
         }
         return true;

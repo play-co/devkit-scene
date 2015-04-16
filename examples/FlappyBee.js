@@ -9,19 +9,19 @@ scene.splash(function() {
   * @requires scene 0.0.3
   */
 exports = scene(function() {
-
-  var screenH = scene.screen.height;
-  var screenW = scene.screen.width;
-
   scene.addBackground(communityart('flat_forest'), { scrollX: 0.1 });
   scene.addBackground(communityart('foreground'), { scrollX: 0.5, align: 'bottom' });
 
-  var player = scene.addPlayer(communityart('flapping_bee'), { zIndex: 1000, vx: 200, ay: 2000 });
+  var player = scene.addPlayer(communityart('flapping_bee'), {
+    zIndex: 1000,
+    vx: 200,
+    ay: 2000
+  });
   player.loop('flap');
 
   scene.showScore(scene.screen.midX, 10, {color: 'black'});
-  scene.camera.follow(player, new scene.shape.Rect(screenW * 0.2, -screenH, 0, screenH * 3));
-  scene.onCollision(player, scene.camera.bottomWall, function(player, b) {
+  scene.camera.follow(player, new scene.shape.Rect(scene.screen.width * 0.2, -10000, 0, 30000));
+  player.onEntered(scene.camera.bottomWall, function() {
     player.destroy();
   });
 
@@ -31,35 +31,39 @@ exports = scene(function() {
     }
   });
 
-  var logs = scene.addGroup();
-
-  scene.onCollision(player, logs, function() {
+  var obstacles = scene.addGroup();
+  scene.onCollision(player, obstacles, function(player, log) {
     if (player.vx > 0) {
-      player.vx = player.vy = 0;
+      player.vx = 0;
       player.play('crash');
       effects.shake(scene.view);
     }
   });
 
-  scene.onCollision(logs, scene.camera.leftWall, function(log, border) {
-    if (log.getRightViewX() < scene.camera.x) { log.destroy(); }
-  });
-
-  var logSpawner = scene.addSpawner(new scene.spawner.Horizontal(logs,
-    new scene.shape.Line({ x: screenW + 65, y: screenH * 0.25, y2: screenH * 0.75}),
+  scene.addSpawner(new scene.spawner.Horizontal(
+    obstacles,
+    new scene.shape.Line({ x: scene.screen.width + 65, y: scene.screen.height * 0.25, y2: scene.screen.height * 0.75}),
     function (x, y, index) {
 
-      var topLog = logs.addActor(communityart('log'), { x: x, y: y - 150 });
-      var bottomLog = logs.addActor(communityart('log'), { x: x, y: y + 150 });
+      var logArt = communityart('log');
+      var topLog = obstacles.addActor(logArt, x, y - 150 - logArt.h);
+      var bottomLog = obstacles.addActor(logArt, x, y + 150);
 
-      topLog.y -= topLog.viewBounds.h;
+      // EXTRA: Honey for a point
+      // if (Math.random() < 0.1) {
+      //   var honey = scene.addActor(communityart('hdrop'), x + 20, y);
+      //   scene.onCollision(player, honey, function() {
+      //     effects.explode(honey.view);
+      //     honey.destroy();
+      //     scene.addScore(1);
+      //   });
+      // }
 
-      var honey = scene.addActor(communityart('hdrop'), { x: x + 20, y: y });
-      scene.onCollision(player, honey, function() {
-        effects.explode(honey.view);
-        honey.destroy();
+      topLog.onEntered(scene.camera.leftWall, function() {
+        topLog.destroy();
+        bottomLog.destroy();
         scene.addScore(1);
       });
 
-    }, 400, false ));
+    }, 400));
 });

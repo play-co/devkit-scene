@@ -92,7 +92,7 @@ exports = Class(Entity, function() {
   /**
     * Fire {@link callback} when this {@link Actor} is completely inside {@link target}
     * @func Actor#onEntered
-    * @arg {Actor} target
+    * @arg {Actor|Shape|Collidable} target
     * @arg {function} callback
     * @returns {number} collisionCheckID
     */
@@ -103,7 +103,7 @@ exports = Class(Entity, function() {
   /**
     * Fire {@link callback} when this {@link Actor} is completely outside of {@link target}
     * @func Actor#onExited
-    * @arg {Actor} target
+    * @arg {Actor|Shape|Collidable} target
     * @arg {function} callback
     * @returns {number} collisionCheckID
     */
