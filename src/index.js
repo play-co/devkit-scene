@@ -32,7 +32,7 @@ import communityart;
 // Default values
 var DEFAULT_TEXT_WIDTH  = 200;
 var DEFAULT_TEXT_HEIGHT = 50;
-var DEFAULT_TEXT_COLOR  = '#111';
+var DEFAULT_TEXT_COLOR  = '#FFF';
 var DEFAULT_TEXT_FONT   = 'Arial';
 
 // To make speeds 'feel' nicer
@@ -108,7 +108,7 @@ scene = function (newGameFunc) {
        * The superview for all text views.
        * @var {View} scene.textContainer
        */
-      this.textContainer = new View({
+      scene.textContainer = new View({
         parent: this.rootView,
         width:  scene.screen.width,
         height: scene.screen.height,
@@ -171,15 +171,15 @@ scene = function (newGameFunc) {
         this.spawners[i].destroy();
       }
 
-      for (var k in this.extraViews) {
-        this.extraViews[k].removeFromSuperview();
+      for (var k in scene.extraViews) {
+        scene.extraViews[k].removeFromSuperview();
       }
 
       delete this.scoreView;
       scene.background.destroy();
 
       // Clear the tallies
-      this.extraViews = [];
+      scene.extraViews = [];
       this.groups = [];
       this.spawners = [];
       _score = 0;
@@ -361,32 +361,53 @@ scene.stopAccelerometer = function(cb) {
 };
 
 /**
- * addText
- * ~ x      x location
- * ~ y      y location
- * ~ text   text to draw
- * ~ opts   additional opts to pass to the TextView
- *
- * This function perhaps draws text to the screen.
- */
-scene.addText = function(x, y, text, opts) {
+  * Displays text
+  * @func scene.addText
+  * @arg {string} text
+  * @arg {Object} [opts] - contains options to be applied to {@link TextView}
+  * @returns {TextView}
+  */
+/**
+  * @func scene.addText(2)
+  * @arg {string} text
+  * @arg {number} x
+  * @arg {number} y
+  * @arg {Object} [opts] - contains options to be applied to {@link TextView}
+  * @returns {TextView}
+  */
+scene.addText = function(text, x, y, opts) {
+  opts = opts || {};
+
+  if (typeof x === 'object') {
+    // Function type 1
+    opts = x;
+  } else if (typeof x === 'number' && typeof y === 'number') {
+    // Function type 2
+    opts.x = opts.x !== undefined ? opts.x : x;
+    opts.y = opts.y !== undefined ? opts.y : y;
+  }
+
   opts = merge(opts, {
-    superview: GC.app.textContainer,
+    superview: scene.textContainer,
     text: text,
-    x: x,
-    y: y,
+    x: (scene.textContainer.style.width - DEFAULT_TEXT_WIDTH) / 2,
+    y: (scene.textContainer.style.height - DEFAULT_TEXT_HEIGHT) / 2,
     color: _text_color,
     fontFamily: _text_font,
+    // FIXME: opts.center, because width and height might be different
+    anchorX: DEFAULT_TEXT_WIDTH / 2,
+    anchorY: DEFAULT_TEXT_HEIGHT / 2,
     width: DEFAULT_TEXT_WIDTH,
-    height: DEFAULT_TEXT_HEIGHT,
+    height: DEFAULT_TEXT_HEIGHT
   });
+
   var result = new SceneText(opts);
-  GC.app.extraViews.push(result);
+  scene.extraViews.push(result);
   return result;
 };
 
 scene.removeText = function(sceneText) {
-  var extraViews = GC.app.extraViews;
+  var extraViews = scene.extraViews;
   var index = extraViews.indexOf(sceneText);
   if (index !== -1) {
     sceneText.removeFromSuperview();
@@ -531,23 +552,28 @@ scene.removeTimeout = function(timeoutID) {};
   * @func scene.gameOver
   */
 scene.gameOver = function(opts) {
+  opts = opts || {};
+  opts.delay = opts.delay !== undefined ? opts.delay : 2000;
+
   if (_game_running) {
     _game_running = false;
 
-    if (!opts || !opts.no_gameover_screen) {
-      var bgHeight = scene.screen.height;
+    setTimeout(function () {
+      if (!opts.no_gameover_screen) {
+        var bgHeight = scene.screen.height;
 
-      if (_using_score) {
-        scene.horCenterText(bgHeight / 2 - DEFAULT_TEXT_HEIGHT, 'Game over!');
-        scene.horCenterText(bgHeight / 2, 'Your score was ' + _score);
-      } else {
-        scene.centerText('Game over!');
+        if (_using_score) {
+          scene.horCenterText(bgHeight / 2 - DEFAULT_TEXT_HEIGHT, 'Game over!');
+          scene.horCenterText(bgHeight / 2, 'Your score was ' + _score);
+        } else {
+          scene.addText('Game Over!');
+        }
+
+        scene.screen.onTouchOnce(function () {
+          setTimeout(function () { GC.app.reset() });
+        });
       }
-
-      scene.screen.onTouchOnce(function () {
-        GC.app.reset();
-      });
-    }
+    }, opts.delay);
   }
 };
 
@@ -678,6 +704,7 @@ scene.removeSpawner = function(spawner) {
 
 scene.onTap = bind(scene.screen, scene.screen.onTap);
 scene.removeOnTap = bind(scene.screen, scene.screen.removeOnTap);
+scene.onTouchOnce = bind(scene.screen, scene.screen.onTouchOnce);
 
 /**
   * This collision check will be run each tick. {@link callback} will be called only once per tick
@@ -725,13 +752,18 @@ scene.clearAnimations = function() {
   scene.animations = [];
 };
 
-scene.animate = function(subject, groupId) {
-  var animation = animate(subject, groupId);
-  if (scene.animations.indexOf(animation) === -1) {
-    scene.animations.push(animation);
-    console.log('pushing animation');
+/**
+  * @func scene.animate
+  * @arg {View}    subject
+  * @arg {string}  [name]
+  * @returns {Animator} anim
+  */
+scene.animate = function(subject, name) {
+  var anim = animate(subject, name);
+  if (scene.animations.indexOf(anim) === -1) {
+    scene.animations.push(anim);
   }
-  return animation;
+  return anim;
 };
 
 scene.configureBackground = function(config) {
