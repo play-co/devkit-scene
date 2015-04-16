@@ -1,10 +1,12 @@
 import scene, effects, communityart;
 
+var PARALLAX_THEME = 'forest_theme';
+
 scene.setTextColor(0x000);
 
 scene.splash(function() {
   scene.addText('Tap to Start!');
-  scene.addBackground(communityart('flat_forest'));
+  scene.addBackground(communityart(PARALLAX_THEME));
 });
 
 /**
@@ -12,8 +14,7 @@ scene.splash(function() {
   */
 exports = scene(function() {
   // Add backgrounds
-  scene.addBackground(communityart('flat_forest'), { scrollX: 0.1 });
-  scene.addBackground(communityart('foreground'), { scrollX: 0.5, align: 'bottom' });
+  scene.addBackground(communityart(PARALLAX_THEME));
 
   // Show the score
   scene.showScore(scene.screen.midX, 10);
