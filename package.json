@@ -9,7 +9,7 @@
     "devkit-parallax": "https://github.com/gameclosure/devkit-parallax.git#v0.1.5",
     "community-art": "https://github.com/weebygames/community-art#refactors-redundant-research",
     "accelerometer": "https://github.com/gameclosure/accelerometer.git#v3.0.1",
-    "devkit-effects": "https://github.com/gameclosure/devkit-effects#v1.0.0",
+    "devkit-effects": "https://github.com/gameclosure/devkit-effects#v1.0.0"
   },
   "devDependencies": {
     "gulp": "^3.8.11",
