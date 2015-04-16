@@ -1,14 +1,14 @@
 import scene, effects, communityart;
 
-scene.setTextcolor(0x000);
+scene.setTextColor(0x000);
 
 scene.splash(function() {
-  scene.centerText('Flap away, bee: Tap to start!');
+  scene.addText('Tap to Start!');
   scene.addBackground(communityart('flat_forest'));
 });
 
 /**
-  * @requires scene 0.0.3
+  * @requires scene master
   */
 exports = scene(function() {
   // Add backgrounds

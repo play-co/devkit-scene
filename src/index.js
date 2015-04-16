@@ -30,8 +30,8 @@ import .utils;
 import communityart;
 
 // Default values
-var DEFAULT_TEXT_WIDTH  = 200;
-var DEFAULT_TEXT_HEIGHT = 50;
+var DEFAULT_TEXT_WIDTH  = 350;
+var DEFAULT_TEXT_HEIGHT = 75;
 var DEFAULT_TEXT_COLOR  = '#FFF';
 var DEFAULT_TEXT_FONT   = 'Arial';
 
@@ -418,16 +418,6 @@ scene.removeText = function(sceneText) {
   }
 };
 
-scene.horCenterText = function(y, text, opts) {
-  opts = opts || {};
-  opts.width = GC.app.rootView.style.width;
-  scene.addText(0, y, text, opts);
-};
-
-scene.centerText = function(text, opts) {
-  scene.horCenterText(scene.screen.height / 2 - DEFAULT_TEXT_HEIGHT / 2, text, opts);
-};
-
 scene.setTextColor = function(color) {
   // TODO validate?
   _text_color = color;
@@ -449,24 +439,25 @@ scene.setTextFont = function(font) {
   * @arg {Object} [opts] contains options to be applied to the underlying {@link View}
   */
 scene.showScore = function(x, y, color, font, opts) {
-  font = font || 'Arial';
-  color = color || '#111';
+  font = font || _text_font;
+  color = color || _text_color;
 
-  var app = GC.app;
-  if (app.scoreView) return;
+  if (GC.app.scoreView) {
+    return;
+  }
 
-  if (typeof(color) == 'object') {
+  if (typeof(color) === 'object') {
     opts = color;
     color = undefined;
   }
 
-  if (typeof(font) == 'object') {
+  if (typeof(font) === 'object') {
     opts = font;
     font = undefined;
   }
 
-  app.scoreView = new TextView(combine({
-    parent: app.textContainer,
+  GC.app.scoreView = new TextView(combine({
+    parent: GC.app.textContainer,
     x: x,
     y: y,
     width: 200,
@@ -477,7 +468,7 @@ scene.showScore = function(x, y, color, font, opts) {
     horizontalAlign: 'left',
   }, opts || {}));
 
-  app.extraViews.push(app.scoreView);
+  scene.extraViews.push(GC.app.scoreView);
 };
 
 /**
@@ -563,8 +554,8 @@ scene.gameOver = function(opts) {
         var bgHeight = scene.screen.height;
 
         if (_using_score) {
-          scene.horCenterText(bgHeight / 2 - DEFAULT_TEXT_HEIGHT, 'Game over!');
-          scene.horCenterText(bgHeight / 2, 'Your score was ' + _score);
+          scene.addText('Game Over!', { y: bgHeight / 2 - DEFAULT_TEXT_HEIGHT });
+          scene.addText('Score: ' + _score, { y: bgHeight / 2 + 10 });
         } else {
           scene.addText('Game Over!');
         }
