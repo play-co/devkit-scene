@@ -45,14 +45,15 @@ exports = Class(View, function (supr) {
     this.autoX = 0;
     this.autoY = 0;
     this.destroy();
-  }
+  };
 
   this.destroy = function() {
     this.zIndex = -1;
     this.config = [];
-  }
+  };
 
-  this.reloadConfig = function() {
+  this.reloadConfig = function(config) {
+    this.config = config || this.config;
     this.parallax.reset(this.config);
   };
 
@@ -68,17 +69,17 @@ exports = Class(View, function (supr) {
       if (parallaxViews.indexOf(subview) >= 0) continue;
       this.removeSubview(subview);
     }
-  }
+  };
 
   this.update = function(dt) {
     this.scroll(dt * this.autoX, dt * this.autoY);
-  }
+  };
 
   this.scroll = function(x, y) {
     this.offsetX += x;
     this.offsetY += y;
     this.parallax.update(this.offsetX, this.offsetY);
-  }
+  };
 
   /**
    * autoScroll(autoScroll)
@@ -94,7 +95,7 @@ exports = Class(View, function (supr) {
     }
     this.autoX = autoX;
     this.autoY = autoY;
-  }
+  };
 
   /**
    * scrollTo(x, y)

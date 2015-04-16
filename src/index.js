@@ -1,4 +1,5 @@
 import device;
+import animate;
 import ui.View as View;
 import ui.TextView as TextView;
 import ui.ImageView as ImageView;
@@ -23,6 +24,7 @@ import .Group;
 import .Screen;
 import .Camera;
 import .Background;
+import .SceneText;
 import .utils;
 
 import communityart;
@@ -67,6 +69,8 @@ scene = function (newGameFunc) {
      */
     this.initUI = function() {
       this.rootView = this.view;
+
+      this.setScreenDimensions();
 
       /**
         * This is the devkit {@link View} which all backgrounds should be added to.
@@ -147,6 +151,7 @@ scene = function (newGameFunc) {
     this.reset = function(mode) {
       if (mode === undefined) mode = 'default';
 
+      scene.clearAnimations();
       this.setScreenDimensions();
       scene.screen.resetTouches();
       scene.background.reset();
@@ -197,11 +202,11 @@ scene = function (newGameFunc) {
 
       var ds = device.screen;
       var vs = this.rootView.style;
-      var targetWidth = ds.width > ds.height ? 1024 : 576;
+      var targetHeight = ds.width > ds.height ? 576 : 1024;
 
-      vs.width = targetWidth;
-      vs.height = ds.height * (targetWidth / device.width);
-      vs.scale = device.width / targetWidth;
+      vs.scale = device.height / targetHeight;
+      vs.width = device.width / vs.scale;
+      vs.height = targetHeight;
 
       vs.x = (ds.width - vs.width) / 2;
       vs.y = (ds.height - vs.height) / 2;
@@ -365,7 +370,7 @@ scene.stopAccelerometer = function(cb) {
  * This function perhaps draws text to the screen.
  */
 scene.addText = function(x, y, text, opts) {
-  GC.app.extraViews.push(new TextView(combine({
+  opts = merge(opts, {
     superview: GC.app.textContainer,
     text: text,
     x: x,
@@ -374,28 +379,43 @@ scene.addText = function(x, y, text, opts) {
     fontFamily: _text_font,
     width: DEFAULT_TEXT_WIDTH,
     height: DEFAULT_TEXT_HEIGHT,
-  }, opts || {})));
-}
+  });
+  var result = new SceneText(opts);
+  GC.app.extraViews.push(result);
+  return result;
+};
+
+scene.removeText = function(sceneText) {
+  var extraViews = GC.app.extraViews;
+  var index = extraViews.indexOf(sceneText);
+  if (index !== -1) {
+    sceneText.removeFromSuperview();
+    var lastView = extraViews.pop();
+    if (index < extraViews.length) {
+      extraViews[index] = lastView;
+    }
+  }
+};
 
 scene.horCenterText = function(y, text, opts) {
   opts = opts || {};
   opts.width = GC.app.rootView.style.width;
   scene.addText(0, y, text, opts);
-}
+};
 
 scene.centerText = function(text, opts) {
   scene.horCenterText(scene.screen.height / 2 - DEFAULT_TEXT_HEIGHT / 2, text, opts);
-}
+};
 
 scene.setTextColor = function(color) {
   // TODO validate?
   _text_color = color;
-}
+};
 
 scene.setTextFont = function(font) {
   // TODO validate?
   _text_font = font;
-}
+};
 
 /**
   * Set the x and y coordinates in screen space for the score text. The score text remains invisible
@@ -437,7 +457,7 @@ scene.showScore = function(x, y, color, font, opts) {
   }, opts || {}));
 
   app.extraViews.push(app.scoreView);
-}
+};
 
 /**
   * Calling this function will set {@link scene._score} and update the score view.
@@ -452,7 +472,7 @@ scene.setScore = function(score) {
       GC.app.scoreView.setText('' + score);
     }
   }
-}
+};
 
 /**
   * @func scene.addScore
@@ -673,6 +693,28 @@ scene.shape = {
 
 scene.collision = {
   CollisionChecker: CollisionChecker
+};
+
+scene.animations = [];
+
+scene.clearAnimations = function() {
+  for (var i = 0; i < scene.animations.length; i++) {
+    scene.animations[i].clear();
+  }
+  scene.animations = [];
+};
+
+scene.animate = function(subject, groupId) {
+  var animation = animate(subject, groupId);
+  if (scene.animations.indexOf(animation) === -1) {
+    scene.animations.push(animation);
+    console.log('pushing animation');
+  }
+  return animation;
+};
+
+scene.configureBackground = function(config) {
+  scene.background.reloadConfig(config);
 };
 
 
