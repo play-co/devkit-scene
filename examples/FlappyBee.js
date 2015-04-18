@@ -63,10 +63,10 @@ exports = scene(function() {
       // EXTRA: Honey for a point
       if (Math.random() < 0.5) {
         var honey = scene.addActor(communityart('hdrop'), x + 20, y);
-        effects.hover(honey, { loop: true });
-        effects.squish(honey, { loop: true });
+        // effects.hover(honey, { loop: true });
+        // effects.squish(honey, { loop: true });
         scene.onCollision(player, honey, function() {
-          effects.disco(scene, { loop: false });
+          effects.explode(honey);
           honey.destroy();
           scene.addScore(1);
         });
