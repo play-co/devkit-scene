@@ -177,7 +177,7 @@ scene = function (newGameFunc) {
         scene.extraViews[k].removeFromSuperview();
       }
 
-      delete this.scoreView;
+      delete scene._scoreView;
       scene.background.destroy();
 
       // Clear the tallies
@@ -436,41 +436,35 @@ scene.setTextFont = function(font) {
   * @func scene.showScore
   * @arg {number} x
   * @arg {number} y
-  * @arg {String} color
-  * @arg {String} font
   * @arg {Object} [opts] contains options to be applied to the underlying {@link View}
+  * @arg {String} [opts.color]
+  * @arg {String} [opts.font]
   */
-scene.showScore = function(x, y, color, font, opts) {
-  font = font || _text_font;
-  color = color || _text_color;
-
-  if (GC.app.scoreView) {
+scene.showScore = function(x, y, opts) {
+  if (scene._scoreView) {
+    scene._scoreView.style.x = x;
+    scene._scoreView.style.y = y;
+    opts && scene._scoreView.updateOpts(opts);
     return;
   }
 
-  if (typeof(color) === 'object') {
-    opts = color;
-    color = undefined;
-  }
+  opts = opts || {};
+  opts.font = opts.font || _text_font;
+  opts.color = opts.color || _text_color;
 
-  if (typeof(font) === 'object') {
-    opts = font;
-    font = undefined;
-  }
-
-  GC.app.scoreView = new TextView(combine({
-    parent: GC.app.textContainer,
+  scene._scoreView = new TextView(combine({
+    parent: scene.textContainer,
     x: x,
     y: y,
     width: 200,
     height: 75,
-    color: color,
-    fontFamily: font,
+    color: opts.color,
+    fontFamily: opts.font,
     text: scene.getScore(),
     horizontalAlign: 'left',
   }, opts || {}));
 
-  scene.extraViews.push(GC.app.scoreView);
+  scene.extraViews.push(scene._scoreView);
 };
 
 /**
@@ -482,8 +476,8 @@ scene.setScore = function(score) {
   if (_game_running) {
     _score = score;
     _using_score = true;
-    if (GC.app.scoreView) {
-      GC.app.scoreView.setText('' + score);
+    if (scene._scoreView) {
+      scene._scoreView.setText('' + score);
     }
   }
 };
@@ -541,20 +535,24 @@ scene.removeTimeout = function(timeoutID) {};
 
 
 /**
-  * When called, this function will restart the game
+  * When called, this function will restart the game.
   * @func scene.gameOver
+  * @arg {Object} [opts]
+  * @arg {number} [opts.delay] - A delay between when this function is called and when the endgame logic is run.
+  * @arg {boolean} [opts.noGameoverScreen] - Optionally skip the "Game Over" text.
   */
 scene.gameOver = function(opts) {
   opts = opts || {};
-  opts.delay = opts.delay !== undefined ? opts.delay : 2000;
+  opts.delay = opts.delay !== undefined ? opts.delay : 1000;
 
   if (_game_running) {
     _game_running = false;
 
     setTimeout(function () {
-      if (!opts.no_gameover_screen) {
+      if (!opts.noGameoverScreen) {
         var bgHeight = scene.screen.height;
 
+        // TODO: This should be a scene splash ... not random text. Allows the player to set their own game over splash.
         if (_using_score) {
           scene.addText('Game Over!', { y: bgHeight / 2 - DEFAULT_TEXT_HEIGHT });
           scene.addText('Score: ' + _score, { y: bgHeight / 2 + 10 });
