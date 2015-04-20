@@ -158,6 +158,7 @@ scene = function (newGameFunc) {
       if (mode === undefined) mode = 'default';
 
       effects.commit();
+      effects.stop();
       scene.clearAnimations();
       this.setScreenDimensions();
       scene.screen.resetTouches();
