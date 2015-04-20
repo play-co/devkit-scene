@@ -26,17 +26,23 @@ randRange = function(a, b, bipolar) {
   }
 
   var n = Math.random() * (high - low) + low;
-  if (bipolar && Math.random() < .5) n *= -1;
+  if (bipolar && Math.random() < 0.5) {
+    n *= -1;
+  }
   return n;
 };
 
 /**
   * Choose a random int between a and b
   * @arg {number} a
-  * @arg {number} b
+  * @arg {number} [b=0]
+  * @arg {boolean} [bipolar]
   * @returns {int}
   */
-randRangeI = function(a, b) {};
+randRangeI = function(a, b, bipolar) {
+  b = b || 0;
+  return Math.floor(randRange(a, b, bipolar));
+};
 
 /**
  * Merges object b into object a. This is destructive, object a will be changed
