@@ -243,7 +243,6 @@ exports = Class(Entity, function() {
    * This function destroys the Actor, as in, removes it from the scene
    */
   this.destroy = function() {
-    effects.commit(this);
     for (var i = 0; i < this.destroyHandlers.length; i++) {
       this.destroyHandlers[i].call(this);
     }
