@@ -170,7 +170,7 @@ scene = function (newGameFunc) {
       }
 
       for (var j in this.spawners) {
-        this.spawners[i].destroy();
+        this.spawners[j].destroy();
       }
 
       for (var k in scene.extraViews) {
