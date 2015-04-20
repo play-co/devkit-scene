@@ -176,10 +176,6 @@ scene = function (newGameFunc) {
         this.groups[i].destroy();
       }
 
-      for (var j in this.spawners) {
-        this.spawners[j].destroy();
-      }
-
       for (var k in scene.extraViews) {
         scene.extraViews[k].removeFromSuperview();
       }
@@ -190,7 +186,6 @@ scene = function (newGameFunc) {
       // Clear the tallies
       scene.extraViews = [];
       this.groups = [];
-      this.spawners = [];
       _score = 0;
       _on_tick = null;
 
@@ -236,10 +231,6 @@ scene = function (newGameFunc) {
       }
 
       scene.totalDt += dt;
-
-      for (var i = 0; i < this.spawners.length; i++) {
-        this.spawners[i].tick(dt);
-      }
 
       scene.timerManager.update(dt);
 
@@ -547,7 +538,7 @@ scene.addTimeout = function(callback, ms) {
   * @arg {Timer} timeoutInstance
   */
 scene.removeTimeout = function(timeoutInstance) {
-  return this.timerManager.removeTimer(intervalInstance);
+  return this.timerManager.removeTimer(timeoutInstance);
 };
 
 /**
@@ -693,22 +684,22 @@ scene.addGroup = function(opts) {
 };
 
 /**
-  * Helper object for creating and registering new things
-  * @prop {function} spawner - Returns a new {@link Spawner}
+  * Will add a new spawner to the scene's default group.
+  * @arg {Spawner} spawner
+  * @returns {Spawner} spawner
+  * @see {Group#addSpawner}
   */
 scene.addSpawner = function(spawner) {
-  GC.app.spawners.push(spawner);
-  return spawner;
+  return scene.group.addSpawner(spawner);
 };
 
+/**
+  * Will remove a spawner from the scene's default group.
+  * @arg {Spawner} spawner
+  * @see {Group#removeSpawner}
+  */
 scene.removeSpawner = function(spawner) {
-  var index = GC.app.spawners.indexOf(spawner);
-  if (index !== -1) {
-    var lastSpawner = GC.app.spawners.pop();
-    if (index < GC.app.spawners.length) {
-      GC.app.spawners[index] = lastSpawner;
-    }
-  }
+  return scene.group.removeSpawner(spawner);
 };
 
 scene.onTap = bind(scene.screen, scene.screen.onTap);

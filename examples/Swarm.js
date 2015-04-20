@@ -27,7 +27,7 @@ exports = scene(function() {
 
   // Make the spawners
   var enemies = scene.addGroup();
-  var enemySpawner = scene.addSpawner(new scene.spawner.Timed(
+  enemies.addSpawner(new scene.spawner.Timed(
     new scene.shape.Line({ x: 30, y: -100, x2: scene.screen.width - 30 }),
     function (x, y, index) {
       var enemyType = randRangeI(3);
@@ -42,7 +42,7 @@ exports = scene(function() {
   ));
 
   var bullets = scene.addGroup();
-  var bulletSpawner = scene.addSpawner(new scene.spawner.Timed(
+  bullets.addSpawner(new scene.spawner.Timed(
     player,
     function (x, y, index) {
       var bullet = bullets.addActor(communityart('swarm/laser'), x, y, {
@@ -62,7 +62,7 @@ exports = scene(function() {
   });
   scene.onCollision(player, enemies, function() {
     player.destroy();
-    bulletSpawner.destroy();
+    bullets.destroySpawners();
   });
 
   // Add the camera to follow the player
@@ -78,7 +78,7 @@ exports = scene(function() {
     scene.addTimeout(function() { text.destroy() }, 2000);
 
     for (var i = 0; i < (index + 1) * 4; i++) {
-      enemySpawner.spawn();
+      enemies.spawn();
     }
   }, 15 * 1000);
 

@@ -1,7 +1,7 @@
 exports = Class(function() {
 
   /**
-    * Managers {@link Timer} instances.
+    * Manages {@link Timer} instances.
     * @Class TimerManager
     */
   this.init = function() {

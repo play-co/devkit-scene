@@ -41,6 +41,20 @@ exports = Class(function() {
     this._cachedPoint = new Point();
     this._spawnIndex = -1;
     this._lastSpawnTime = scene.totalDt;
+
+    this._manager = null;
+  };
+
+  /**
+    * Set the spawner's manager.  Remove from the current manager if there is one.
+    * @func SpawnerManager#setManager
+    */
+  this.setManager = function(manager) {
+    if (this._manager) {
+      this._manager.removeSpawner(this);
+    }
+
+    this._manager = manager;
   };
 
   /**
@@ -73,18 +87,24 @@ exports = Class(function() {
   };
 
   /**
-    * Called every tick by scene, check to see if we should spawn or not
-    * @func Spawner#tick
+    * Called every update by scene, check to see if we should spawn or not
+    * @func Spawner#update
     */
-  this.tick = function(dt) {
+  this.update = function(dt) {
     if (scene.totalDt - this._lastSpawnTime > this.spawnDelay) {
       this._lastSpawnTime = scene.totalDt;
       this.spawn();
     }
   };
 
+  /**
+    * If the spawner is tracked by a manager, it will be removed from that manager.
+    * @func Spawner#destroy
+    */
   this.destroy = function() {
-    scene.removeSpawner(this);
+    if (this._manager) {
+      this._manager.removeSpawner(this);
+    }
   };
 
 });

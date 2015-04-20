@@ -58,8 +58,12 @@ combine = function(a, b) {
 };
 
 /**
-  * Choose a random element from {@link array}
+  * Choose a random element from {@link array}. Checks for undefined and array length of 0.
   * @arg {array} array
-  * @returns {object} A random element from {@link array}
+  * @returns {object} A random element from the array
   */
-choose = function(array) {};
+choose = function(array) {
+  if (!array || !array.length) return;
+
+  return array[Math.floor(Math.random() * array.length)];
+};
