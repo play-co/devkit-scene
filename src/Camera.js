@@ -155,6 +155,7 @@ exports = Class(Rect, function(supr) {
     * One argument must be a {@link Wall} and one must be an {@link Actor}.
     * @func Camera#bounceOff
     * @type {cameraUpdateFunction}
+    * @todo
     */
   this.bounce = function(actor) {};
   this.bounceX = function(actor) {};
@@ -165,6 +166,7 @@ exports = Class(Rect, function(supr) {
     * One argument must be a {@link Wall} and one must be an {@link Actor}.
     * @func Camera#wrap
     * @type {cameraUpdateFunction}
+    * @todo
     */
   this.wrap = function(actor) {};
   this.wrapX = function(actor) {};

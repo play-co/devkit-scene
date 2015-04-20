@@ -17,6 +17,8 @@ import .ActorView;
   * @arg {number} [opts.followTouches.yMultipier=0.1] - When not instant, this is used for velocity smoothing
   *
   * @arg {cameraUpdateFunction|cameraUpdateFunction[]} [opts.cameraFunction]
+  *
+  * @arg {number} [opts.health]
   */
 exports = Class(Entity, function() {
 
@@ -37,10 +39,10 @@ exports = Class(Entity, function() {
       this.followTouches.yMultiplier = this.followTouches.yMultiplier !== undefined
           ? this.followTouches.yMultiplier : 0.1;
     }
-    this.lastFollowTarget = null;
 
-    // Camera update functions?
-    this.cameraFunction = opts.cameraFunction;
+    this.lastFollowTarget = null;
+    this.cameraFunction = null;
+    this.health = 0;
 
     this.destroyed = false;
     this.has_reset = false;
@@ -73,6 +75,9 @@ exports = Class(Entity, function() {
     if (this.cameraFunction && !Array.isArray(this.cameraFunction)) {
       this.cameraFunction = [this.cameraFunction];
     }
+
+    // Health
+    this.health = this.config.health || 1;
 
     this.has_reset = true;
     this.destroyed = false;
@@ -162,6 +167,28 @@ exports = Class(Entity, function() {
   };
 
   /**
+    * Remove an amount of health, and destroy if dead.
+    * @func Actor#hurt
+    * @arg {number} amount
+    */
+  this.hurt = function(amount) {
+    this.health -= amount;
+
+    if (this.health <= 0) {
+      this.destroy();
+    }
+  };
+
+  /**
+    * Add an amount of health
+    * @func Actor#heal
+    * @arg {number} amount
+    */
+  this.heal = function(amount) {
+    this.health += amount;
+  };
+
+  /**
     * Fire {@link callback} when this {@link Actor} is completely inside {@link target}
     * @func Actor#onEntered
     * @arg {Actor|Shape|Collidable} target
@@ -218,7 +245,7 @@ exports = Class(Entity, function() {
   this.destroy = function() {
     effects.commit(this);
     for (var i = 0; i < this.destroyHandlers.length; i++) {
-      this.destroyHandlers[i]();
+      this.destroyHandlers[i].call(this);
     }
     if (this.view.hasAnimations) { this.view.stopAnimation(); }
     this.destroyed = true;

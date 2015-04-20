@@ -53,16 +53,18 @@ exports = scene(function() {
     },
     75, true
   ));
+  player.onDestroy(function() {
+    bullets.destroySpawners();
+  });
 
   // Collision rules
   scene.onCollision(bullets, enemies, function(bullet, enemy) {
     bullet.destroy();
-    enemy.destroy();
+    enemy.hurt(1);
     scene.addScore(1);
   });
   scene.onCollision(player, enemies, function() {
     player.destroy();
-    bullets.destroySpawners();
   });
 
   // Add the camera to follow the player
@@ -83,30 +85,44 @@ exports = scene(function() {
   }, 15 * 1000);
 
 
-  // // EXTRA: Boss
-  // var bossBullets = scene.addGroup();
-  // scene.onCollision(player, bossBullets, player.destroy);
+  // EXTRA: Boss
+  var bossBullets = scene.addGroup();
+  scene.onCollision(player, bossBullets, function() { player.destroy(); });
 
-  // var spawnBossBullet = function(x, y, index) {
-  //   bossBullets.addActor(communityart('swarm/particleCircle'), x, y, { vy: 25 });
-  // };
+  // spawn the boss after a little while
+  scene.addTimeout(function() {
+    var boss = enemies.addActor(
+      communityart('swarm/enemy_boss'),
+      scene.camera.midX,
+      scene.camera.top + 100,
+      { vy: player.vy, health: 40 }
+    );
 
-  // // spawn him
-  // scene.addTimeout(function() {
-  //   var boss = enemies.addActor(communityart('swarm/enemy_boss'), x, y);
+    // Move the boss left and right
+    // TODO: handle animations!
+    // animation(boss).then({ y: 100 }, 300);
+    // animation(boss, { loop: true })
+    //   .then({ x: 100 }, 1000)
+    //   .then({ x: scene.screen.width - 100 }, 1000);
 
-  //   // Move the boss left and right
-  //   animation(boss).then({ y: 100 }, 300);
-  //   animation(boss, { loop: true })
-  //     .then({ x: 100 }, 1000)
-  //     .then({ x: scene.screen.width - 100 }, 1000);
+    // Add as a spawner to bossBullets
+    bossBullets.addSpawner(new scene.spawner.Timed(
+      boss,
+      function(x, y, index) {
+        var bossBullet = bossBullets.addActor(
+          communityart('swarm/particleCircle'),
+          x + boss.getHitWidth() / 2, y + boss.getHitHeight() / 2,
+          { vy: 500 }
+        );
 
-  //   // Add as a spawner to bossBullets
-  //   var bossBulletSpawner = bossBullets.addSpawner(boss, spawnBossBullet);
+        bossBullet.onEntered(scene.camera.bottomWall, function() { bossBullet.destroy(); });
+      },
+      1000, true
+    ));
 
-  //   // Remove as a spawner, once the boss is dead
-  //   boss.onDestroy(function() {
-  //     bossBullets.removeSpawner(bossBulletSpawner);
-  //   });
-  // }, 60 * 1000 * 2);
+    // Remove as a spawner, once the boss is dead
+    boss.onDestroy(function() {
+      bossBullets.destroySpawners();
+    });
+  }, 45 * 1000);
 });

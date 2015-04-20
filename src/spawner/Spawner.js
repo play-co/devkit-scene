@@ -47,7 +47,8 @@ exports = Class(function() {
 
   /**
     * Set the spawner's manager.  Remove from the current manager if there is one.
-    * @func SpawnerManager#setManager
+    * @func Spawner#setManager
+    * @arg {SpawnerManager} manager
     */
   this.setManager = function(manager) {
     if (this._manager) {

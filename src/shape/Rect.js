@@ -39,7 +39,9 @@ exports = Class(Shape, function(supr) {
     left: this._objpLeft,
     right: this._objpRight,
     top: this._objpTop,
-    bottom: this._objpBottom
+    bottom: this._objpBottom,
+    midX: { get: function() { return this.left + this.width / 2 } },
+    midY: { get: function() { return this.top + this.height / 2 } }
   });
 
   // Mock out some functions for EntityPhysics
