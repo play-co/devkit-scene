@@ -258,6 +258,8 @@ exports = Class(Entity, function() {
 
   /**
    * This function stops all input to the actor
+   * @func Actor#stopInput
+   * @returns {Actor} self
    */
   this.stopInput = function() {
     delete this.view.onInputStart;
