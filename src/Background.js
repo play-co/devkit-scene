@@ -119,11 +119,6 @@ exports = Class(View, function (supr) {
     var isParallaxConfig = false;
     var imageUrl = (typeof resource === "string") ? resource : resource.url;
 
-    if (typeof resource === "object") {
-      opts = opts || {};
-      isParallaxConfig = resource.type === "parallax";
-    }
-
     // Static image
     if (!opts) {
       var view = new ImageView({
@@ -138,6 +133,9 @@ exports = Class(View, function (supr) {
     }
 
     opts = opts || {};
+    if (typeof resource === "object") {
+      isParallaxConfig = resource.type === "parallax";
+    }
 
     if (isParallaxConfig) {
       var config_opts = resource.config;

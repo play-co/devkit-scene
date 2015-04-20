@@ -719,12 +719,21 @@ scene.onCollision = function(a, b, callback, allCollisions) {
   return this.collisions.registerCollision(check);
 };
 
+/** Easy access to spawner classes
+  * @var {Object} scene.spawner
+  * @prop {Timed} scene.spawner.Spawner
+  * @prop {Horizontal} scene.spawner.Horizontal
+  * @prop {Vertical} scene.spawner.Vertical */
 scene.spawner = {
   Horizontal: HorizontalSpawner,
   Vertical: VerticalSpawner,
   Timed: Spawner
 };
 
+/** Easy access to shape classes
+  * @var {Object} scene.shape
+  * @prop {Rect} scene.shape.Rect
+  * @prop {Line} scene.shape.Line */
 scene.shape = {
   Rect: Rect,
   Line: Line

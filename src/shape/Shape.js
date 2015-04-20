@@ -15,7 +15,8 @@ exports = Class(function() {
   /**
     * Returns a random point from somewhere on this shape
     * @func Shape#getPointOn
-    * @returns {Point}
+    * @arg {Point} result - Point to use for storing data on.
+    * @returns {Point} result
     */
   this.getPointOn = function(result) {
     result = result || new Point();

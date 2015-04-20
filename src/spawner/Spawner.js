@@ -31,7 +31,7 @@ exports = Class(function() {
     this.spawnFunction = spawnFunction;
 
     /** @var {number} Spawner#spawnDelay */
-    this.spawnDelay = spawnDelay;
+    this.spawnDelay = spawnDelay !== undefined ? spawnDelay : 500;
     /**
       * When true, {@link Spawner#spawnAt} positions will be considered in-world positions
       * @var {boolean} Spawner#useWorldSpace
@@ -54,12 +54,18 @@ exports = Class(function() {
     * @returns {Point}
     */
   this.getSpawnPoint = function() {
-    var result = this.spawnAt.getPointOn(this._cachedPoint);
-    if (!this.useWorldSpace) {
-      result.x += scene.camera.x;
-      result.y += scene.camera.y;
+    if (this.spawnAt.getPointOn) {
+      this.spawnAt.getPointOn(this._cachedPoint);
+    } else {
+      this._cachedPoint.x = this.spawnAt.x;
+      this._cachedPoint.y = this.spawnAt.y;
     }
-    return result;
+
+    if (!this.useWorldSpace) {
+      this._cachedPoint.x += scene.camera.x;
+      this._cachedPoint.y += scene.camera.y;
+    }
+    return this._cachedPoint;
   };
 
   /**
