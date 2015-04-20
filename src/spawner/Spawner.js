@@ -36,13 +36,17 @@ exports = Class(function() {
       * When true, {@link Spawner#spawnAt} positions will be considered in-world positions
       * @var {boolean} Spawner#useWorldSpace
       */
-    this.useWorldSpace = useWorldSpace || false;
+    this.useWorldSpace = useWorldSpace === true;
 
     this._cachedPoint = new Point();
     this._spawnIndex = -1;
     this._lastSpawnTime = scene.totalDt;
   };
 
+  /**
+    * Get a new spawn point using {@link Spawner#getSpawnPoint} and then call {@link Spawner#spawnFunction}.
+    * @func Spawner#spawn
+    */
   this.spawn = function() {
     var spawnPoint = this.getSpawnPoint();
     this.spawnFunction(spawnPoint.x, spawnPoint.y, this._spawnIndex++);

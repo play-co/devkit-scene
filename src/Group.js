@@ -15,6 +15,11 @@ exports = Class(EntityPool, function(supr) {
     supr(this, "init", [opts]);
   };
 
+  /**
+    * A function which adds an actor to the scene, using this group.
+    * @func Group#addActor
+    * @see Scene.addActor
+    */
   this.addActor = function(resource, x, y, opts) {
     // Two function options
     var optsObj = (typeof x === 'object') ? x : (opts || {});

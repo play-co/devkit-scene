@@ -8,7 +8,15 @@ import .ActorView;
   * @class Actor
   * @extends Entity
   * @arg {Object} [opts]
+  *
   * @arg {boolean|Object} [opts.followTouches] - Follow touches on the screen, or follow one or both axis (if argument type is Object)
+  * @arg {boolean} [opts.followTouches.x]
+  * @arg {boolean} [opts.followTouches.y]
+  * @arg {boolean} [opts.followTouches.instant=false] - causes the actor to be at the touch position instantly, without smoothing
+  * @arg {number} [opts.followTouches.xMultipier=0.1] - When not instant, this is used for velocity smoothing
+  * @arg {number} [opts.followTouches.yMultipier=0.1] - When not instant, this is used for velocity smoothing
+  *
+  * @arg {cameraUpdateFunction|cameraUpdateFunction[]} [opts.cameraFunction]
   */
 exports = Class(Entity, function() {
 
@@ -21,7 +29,19 @@ exports = Class(Entity, function() {
 
     supr.init.call(this, opts);
 
-    this.followTouches = opts.followTouches || {};
+    // Follow touches?
+    this.followTouches = opts.followTouches;
+    if (this.followTouches) {
+      this.followTouches.xMultiplier = this.followTouches.xMultiplier !== undefined
+          ? this.followTouches.xMultiplier : 0.1;
+      this.followTouches.yMultiplier = this.followTouches.yMultiplier !== undefined
+          ? this.followTouches.yMultiplier : 0.1;
+    }
+    this.lastFollowTarget = null;
+
+    // Camera update functions?
+    this.cameraFunction = opts.cameraFunction;
+
     this.destroyed = false;
     this.has_reset = false;
     this.config = opts;
@@ -31,18 +51,28 @@ exports = Class(Entity, function() {
     this.y = opts.y || scene.screen.height / 2;
 
     this.destroyHandlers = [];
+    this.tickHandlers = [];
   }
 
   this.reset = function(x, y, config) {
     effects.commit(this);
 
-    this.x = x || this.x;
-    this.y = y || this.y;
+    this.x = x !== undefined ? x : this.x;
+    this.y = y !== undefined ? y : this.y;
     this.config = config || this.config;
 
     this.destroyHandlers = [];
+    this.tickHandlers = [];
 
-    this.followTouches = config.followTouches || {};
+    // Follow touches
+    this.followTouches = config.followTouches;
+    this.lastFollowTarget = null;
+
+    // Camera functions
+    this.cameraFunction = this.config.cameraFunction;
+    if (this.cameraFunction && !Array.isArray(this.cameraFunction)) {
+      this.cameraFunction = [this.cameraFunction];
+    }
 
     this.has_reset = true;
     this.destroyed = false;
@@ -82,17 +112,53 @@ exports = Class(Entity, function() {
       return;
     }
 
+    // Move toward the current touch or mouse down, if followTouches
     if (this.followTouches) {
       var currentTouch = scene.screen.getTouch();
-      if (currentTouch && this.followTouches.x) {
-        this.vx = currentTouch ? (currentTouch.x - (this.x - scene.camera.x)) : 0;
-      }
-      if (currentTouch && this.followTouches.y) {
-        this.vy = currentTouch ? (currentTouch.y - (this.y - scene.camera.y)) : 0;
+
+      // Make sure we dont just cruise on forever in one direction
+      var targetTouch = (!currentTouch && this.lastFollowTarget)
+        ? this.lastFollowTarget : currentTouch;
+      this.lastFollowTarget = targetTouch;
+
+      if (targetTouch) {
+        // Translate to world coords
+        targetTouch = scene.camera.screenToWorld(targetTouch);
+
+        if (this.followTouches.x) {
+          var dx = targetTouch.x - this.x;
+          this.vx = (this.followTouches.instant
+            ? dx
+            : dx * this.followTouches.xMultiplier) / dt;
+        }
+        if (this.followTouches.y) {
+          var dy = targetTouch.y - this.y;
+          this.vy = (this.followTouches.instant
+            ? dy
+            : dy * this.followTouches.yMultiplier) / dt;
+        }
       }
     }
 
+    // onTick handlers
+    for (var i = 0; i < this.tickHandlers.length; i++) {
+      this.tickHandlers[i].call(this, dt);
+    }
+
     this.updateEntity(dt);
+
+    // camera functions
+    if (this.cameraFunction) {
+      var shouldUpdateView = false;
+      for (var i = 0; i < this.cameraFunction.length; i++) {
+        var flag = this.cameraFunction[i].call(scene.camera, this);
+        shouldUpdateView = shouldUpdateView || flag;
+      }
+
+      if (shouldUpdateView) {
+        this.updateView(dt);
+      }
+    }
   };
 
   /**
@@ -142,7 +208,9 @@ exports = Class(Entity, function() {
     * @func Actor#onTick
     * @arg {onTickCallback} callback
     */
-  this.onTick = function(callback) {};
+  this.onTick = function(callback) {
+    this.tickHandlers.push(callback);
+  };
 
   /**
    * This function destroys the Actor, as in, removes it from the scene

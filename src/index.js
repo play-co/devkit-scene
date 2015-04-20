@@ -626,15 +626,17 @@ scene.addActor = function(resource, x, y, opts) {
   if (typeof x === 'object') {
     // Function type 1
     opts = x;
+    x = undefined;
+    y = undefined;
   } else if (typeof x === 'number' && typeof y === 'number') {
     // Function type 2
-    opts.x = opts.x !== undefined ? opts.x : x;
-    opts.y = opts.y !== undefined ? opts.y : y;
+    opts.x = x;
+    opts.y = y;
   }
 
   // Default position
-  opts.x = opts.x !== undefined ? opts.x : scene.camera.x + scene.screen.midX;
-  opts.y = opts.y !== undefined ? opts.y : scene.camera.y + scene.screen.midY;
+  opts.x = opts.x !== undefined ? opts.x : scene.camera.x + scene.camera.width / 2;
+  opts.y = opts.y !== undefined ? opts.y : scene.camera.y + scene.camera.height / 2;
 
   // Defualt group
   opts.group = opts.group || scene.group;

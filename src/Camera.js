@@ -1,7 +1,7 @@
 import .Actor;
 import .shape.Rect as Rect;
 
-exports = Class(Rect, function() {
+exports = Class(Rect, function(supr) {
 
   /** @var {number} Camera._MAX_SIZE */
   this._MAX_SIZE = 32767;
@@ -12,16 +12,9 @@ exports = Class(Rect, function() {
     * @extends Rect
     */
   this.init = function(width, height) {
+    // Must first define the walls, because of Camera's custom setters on x and y
     this._x = 0;
     this._y = 0;
-
-    /** The camera will keep this {@link Actor} inside of the {@link Camera#movementBounds}
-        @var {Actor} Camera#following **/
-    this.following = null;
-    /** The camera will keep the {@link Camera#following} inside of this {@link Shape} when set.
-        @var {Shape} Camera#movementBounds **/
-    this.movementBounds = null;
-
     /** A collidable element representing the entire space left of the camera.
         @var {Rect} Camera#leftWall **/
     this.leftWall = new Rect(0, 0, this._MAX_SIZE, this._MAX_SIZE);
@@ -34,6 +27,18 @@ exports = Class(Rect, function() {
     /** A collidable element representing the entire space below the camera.
         @var {Rect} Camera#bottomWall **/
     this.bottomWall = new Rect(0, 0, this._MAX_SIZE, this._MAX_SIZE);
+
+
+    // Now initilize super
+    supr(this, 'init', [0, 0, width, height]);
+
+
+    /** The camera will keep this {@link Actor} inside of the {@link Camera#movementBounds}
+        @var {Actor} Camera#following **/
+    this.following = null;
+    /** The camera will keep the {@link Camera#following} inside of this {@link Shape} when set.
+        @var {Shape} Camera#movementBounds **/
+    this.movementBounds = null;
 
     this.resize(width, height);
   };
@@ -106,6 +111,18 @@ exports = Class(Rect, function() {
     }
   });
 
+  /**
+    * Return a point which has been translated to world coordinates
+    * @arg {Point} pt
+    * @returns {Point} worldPt
+    */
+  this.screenToWorld = function(pt) {
+    return {
+      x: pt.x + this.x,
+      y: pt.y + this.y
+    };
+  };
+
   this.update = function(dt) {
     if (!this.following) { return; }
 
@@ -126,22 +143,77 @@ exports = Class(Rect, function() {
   };
 
   /**
+    * Handle some sort of check and update on an actor, based on the camera and actor positions.
+    * @typedef {function} cameraUpdateFunction
+    * @this Scene.camera
+    * @arg {Actor} actor
+    * @returns {boolean} shouldUpdateView
+    */
+
+  /**
     * Determines which wall was hit, and inverts the actors velocity in the respective axis.
     * One argument must be a {@link Wall} and one must be an {@link Actor}.
-    * @func Screen#bounceOff
-    * @type {onCollisionCallback}
-    * @arg {Actor|Wall} actor1
-    * @arg {Actor|wall} actor2
+    * @func Camera#bounceOff
+    * @type {cameraUpdateFunction}
     */
-  this.bounceOff = function(actor1, actor2) {};
+  this.bounce = function(actor) {};
+  this.bounceX = function(actor) {};
+  this.bounceY = function(actor) {};
 
   /**
     * Determines which wall was hit, and wraps the actor around to the other side of the screen.
     * One argument must be a {@link Wall} and one must be an {@link Actor}.
-    * @func Screen#wrap
-    * @type {onCollisionCallback}
-    * @arg {Actor|Wall} actor1
-    * @arg {Actor|Wall} actor2
+    * @func Camera#wrap
+    * @type {cameraUpdateFunction}
     */
-  this.wrap = function(actor1, actor2) {};
+  this.wrap = function(actor) {};
+  this.wrapX = function(actor) {};
+  this.wrapY = function(actor) {};
+
+  /**
+    * Keeps the actor completely in the view of the camera.
+    * @func Camera#fullyOn
+    * @type {cameraUpdateFunction}
+    */
+  this.fullyOn = function(actor) {
+    var flagX = this.fullyOnX(actor);
+    var flagY = this.fullyOnY(actor);
+    return flagX || flagY;
+  };
+  this.fullyOnX = function(actor) {
+    var actorLeft = actor.getMinHitX();
+    var thisLeft = this.getMinHitX();
+    if (actorLeft < thisLeft) {
+      var dx = thisLeft - actorLeft;
+      actor.x += dx;
+      actor.prevX += dx;
+      return true;
+    }
+
+    var actorRight = actor.getMaxHitX();
+    var thisRight = this.getMaxHitX();
+    if (actorRight > thisRight) {
+      var dx = thisRight - actorRight;
+      actor.x += dx;
+      actor.prevX += dx;
+      return true;
+    }
+    return false;
+  };
+  this.fullyOnY = function(actor) {
+    var actorTop = actor.getMinHitY();
+    var thisTop = this.getMinHitY();
+    if (actorTop < thisTop) {
+      actor.y += thisTop - actorTop;
+      return true;
+    }
+
+    var actorBottom = actor.getMaxHitY();
+    var thisBottom = this.getMaxHitY();
+    if (actorBottom > thisBottom) {
+      actor.y += thisBottom - actorBottom;
+      return true;
+    }
+    return false;
+  };
 });
