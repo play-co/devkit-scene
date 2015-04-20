@@ -19,6 +19,9 @@ import .shape.Rect as Rect;
 import .collision.CollisionManager as CollisionManager;
 import .collision.CollisionChecker as CollisionChecker;
 
+import .timer.TimerManager as TimerManager;
+import .timer.Timer as Timer;
+
 import .Actor;
 import .Group;
 import .Screen;
@@ -122,6 +125,8 @@ scene = function (newGameFunc) {
       this.overlay.onInputStart = scene.screen.inputStartHandler.bind(scene.screen);
       this.overlay.onInputSelect = scene.screen.inputStopHandler.bind(scene.screen);
       this.overlay.onInputMove = scene.screen.inputMoveHandler.bind(scene.screen);
+
+      scene.timerManager = new TimerManager();
     }
 
     this.launchUI = function() {
@@ -164,6 +169,8 @@ scene = function (newGameFunc) {
       scene.camera.stopFollowing();
       scene.camera.x = 0;
       scene.camera.y = 0;
+
+      scene.timerManager.reset();
 
       for (var i in this.groups) {
         this.groups[i].destroy();
@@ -234,6 +241,9 @@ scene = function (newGameFunc) {
         this.spawners[i].tick(dt);
       }
 
+      scene.timerManager.update(dt);
+
+      // Convert dt into seconds
       dt *= SCALE_DT;
 
       scene.background.update(dt);
@@ -504,16 +514,20 @@ scene.getScore = function() {
   * @func scene.addInterval
   * @arg {function} callback
   * @arg {number} ms - milliseconds between callback executions
-  * @returns {number} intervalID
+  * @returns {Timer} intervalInstance
   */
-scene.addInterval = function(callback, ms) {};
+scene.addInterval = function(callback, ms) {
+  return this.timerManager.addTimer(new Timer(callback, ms, false));
+};
 
 /**
   * Remove an interval before it has executed. Replacement for `clearInterval`.
   * @func scene.removeInterval
-  * @arg {number} intervalID
+  * @arg {Timer} intervalInstance
   */
-scene.removeInterval = function(intervalID) {};
+scene.removeInterval = function(intervalInstance) {
+  return this.timerManager.removeTimer(intervalInstance);
+};
 
 /**
   * Execute a callback after a specified amount of milliseconds. Callback will only execute once.
@@ -521,18 +535,20 @@ scene.removeInterval = function(intervalID) {};
   * @func scene.addTimeout
   * @arg {function} callback
   * @arg {number} ms - milliseconds until callback is executed
-  * @returns {number} timeoutID
+  * @returns {Timer} timeoutInstance
   */
-scene.addTimeout = function(callback, ms) {};
+scene.addTimeout = function(callback, ms) {
+  return this.timerManager.addTimer(new Timer(callback, ms, true));
+};
 
 /**
   * Remove a timeout before it has executed. Replacement for `clearTimeout`.
   * @func scene.removeTimeout
-  * @arg {number} timeoutID
+  * @arg {Timer} timeoutInstance
   */
-scene.removeTimeout = function(timeoutID) {};
-
-
+scene.removeTimeout = function(timeoutInstance) {
+  return this.timerManager.removeTimer(intervalInstance);
+};
 
 /**
   * When called, this function will restart the game.

@@ -27,7 +27,7 @@ exports = scene(function() {
 
   // Make the spawners
   var enemies = scene.addGroup();
-  scene.addSpawner(new scene.spawner.Timed(
+  var enemySpawner = scene.addSpawner(new scene.spawner.Timed(
     new scene.shape.Line({ x: 30, y: -100, x2: scene.screen.width - 30 }),
     function (x, y, index) {
       var enemyType = randRangeI(3);
@@ -35,7 +35,7 @@ exports = scene(function() {
       var enemy = enemies.addActor(communityart('swarm/enemy_type' + enemyType), x, y, {
         vy: enemySpeeds[enemyType]
       });
-      enemy.onEntered(scene.camera.bottomWall, function() { enemy.destroy });
+      enemy.onEntered(scene.camera.bottomWall, function() { enemy.destroy(); });
 
       this.spawnDelay = randRange(50, 500 - Math.min(index, 450));
     }
@@ -73,14 +73,14 @@ exports = scene(function() {
 
 
   // EXTRA: Ultra swarm
-  // scene.addTimer(function() {
-  //   var text = scene.addText('Ultra swarm!');
-  //   scene.addTimeout(function() { text.destroy() }, 1000);
+  scene.addInterval(function(index) {
+    var text = scene.addText('Ultra swarm!');
+    scene.addTimeout(function() { text.destroy() }, 2000);
 
-  //   for (var i = 0; i < scene.totalDt / (360 * 1000); i++) {
-  //     enemies.spawn();
-  //   }
-  // }, 60 * 1000);
+    for (var i = 0; i < (index + 1) * 4; i++) {
+      enemySpawner.spawn();
+    }
+  }, 15 * 1000);
 
 
   // // EXTRA: Boss
