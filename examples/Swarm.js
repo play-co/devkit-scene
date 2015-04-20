@@ -65,6 +65,10 @@ exports = scene(function() {
   });
   scene.onCollision(player, enemies, function() {
     player.destroy();
+
+    // Clean up the extras
+    ultraSwarmTimer.destroy();
+    bossSpawnTimer.destroy();
   });
 
   // Add the camera to follow the player
@@ -75,7 +79,7 @@ exports = scene(function() {
 
 
   // EXTRA: Ultra swarm
-  scene.addInterval(function(index) {
+  var ultraSwarmTimer = scene.addInterval(function(index) {
     var text = scene.addText('Ultra swarm!');
     scene.addTimeout(function() { text.destroy() }, 2000);
 
@@ -90,7 +94,7 @@ exports = scene(function() {
   scene.onCollision(player, bossBullets, function() { player.destroy(); });
 
   // spawn the boss after a little while
-  scene.addTimeout(function() {
+  var bossSpawnTimer = scene.addTimeout(function() {
     var boss = enemies.addActor(
       communityart('swarm/enemy_boss'),
       scene.camera.midX,

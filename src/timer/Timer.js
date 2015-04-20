@@ -13,6 +13,20 @@ exports = Class(function() {
 
     this._msCounter = 0;
     this._callCount = 0;
+    this._manager = null;
+  };
+
+  /**
+    * Set the timer's manager.  Remove from the current manager if there is one.
+    * @func Timer#setManager
+    * @arg {TimerManager} manager
+    */
+  this.setManager = function(manager) {
+    if (this._manager) {
+      this._manager.removeTimer(this);
+    }
+
+    this._manager = manager;
   };
 
   /**
@@ -35,5 +49,15 @@ exports = Class(function() {
     }
 
     return false;
+  };
+
+  /**
+    * If the timer is tracked by a manager, it will be removed from that manager.
+    * @func Timer#destroy
+    */
+  this.destroy = function() {
+    if (this._manager) {
+      this._manager.removeTimer(this);
+    }
   };
 });
