@@ -235,7 +235,11 @@ exports = Class(Entity, function() {
     * @arg {number} y
     * @arg {number} speed
     */
-  this.headToward = function(x, y, speed) {};
+  this.headToward = function(x, y, speed) {
+    var targetAngle = Math.atan2(y - this.y, x - this.x);
+    this.vx = speed * Math.cos(targetAngle);
+    this.vy = speed * Math.sin(targetAngle);
+  };
 
   /**
     * Register a new tick handler

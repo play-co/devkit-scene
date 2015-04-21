@@ -72,19 +72,29 @@ exports = Class(function() {
     * @func Spawner#getSpawnPoint
     * @returns {Point}
     */
-  this.getSpawnPoint = function() {
-    if (this.spawnAt.getPointOn) {
-      this.spawnAt.getPointOn(this._cachedPoint);
+  this.getSpawnPoint = function(spawnAt) {
+
+    spawnAt = spawnAt || this.spawnAt;
+
+    if (Array.isArray(spawnAt)) {
+      var randomSpawnAt = spawnAt[Math.floor(Math.random() * spawnAt.length)];
+      return this.getSpawnPoint(randomSpawnAt);
+    }
+
+    if (spawnAt.getPointOn) {
+      spawnAt.getPointOn(this._cachedPoint);
     } else {
-      this._cachedPoint.x = this.spawnAt.x;
-      this._cachedPoint.y = this.spawnAt.y;
+      this._cachedPoint.x = spawnAt.x;
+      this._cachedPoint.y = spawnAt.y;
     }
 
     if (!this.useWorldSpace) {
       this._cachedPoint.x += scene.camera.x;
       this._cachedPoint.y += scene.camera.y;
     }
+
     return this._cachedPoint;
+
   };
 
   /**

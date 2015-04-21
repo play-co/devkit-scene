@@ -28,7 +28,6 @@ exports = Class(Rect, function(supr) {
         @var {Rect} Camera#bottomWall **/
     this.bottomWall = new Rect(0, 0, this._MAX_SIZE, this._MAX_SIZE);
 
-
     // Now initilize super
     supr(this, 'init', [0, 0, width, height]);
 
