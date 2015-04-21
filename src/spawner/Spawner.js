@@ -8,6 +8,7 @@ exports = Class(function() {
     * @arg {number} x
     * @arg {number} y
     * @arg {number} index - the index (since beginning of game) of the currently spawned element
+    * @arg {Spawner} spawner - the spawner instance
     * @this {Spawner}
     * @return {Actor|Actor[]} newly spawned actor/s
     */
@@ -64,7 +65,7 @@ exports = Class(function() {
     */
   this.spawn = function() {
     var spawnPoint = this.getSpawnPoint();
-    this.spawnFunction(spawnPoint.x, spawnPoint.y, this._spawnIndex++);
+    this.spawnFunction(spawnPoint.x, spawnPoint.y, this._spawnIndex++, this);
   };
 
   /**
