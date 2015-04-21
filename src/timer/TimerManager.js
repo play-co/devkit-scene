@@ -35,6 +35,7 @@ exports = Class(function() {
     * @returns {Timer} timer
     */
   this.addTimer = function(timer) {
+    timer.setManager(this);
     this.timers.push(timer);
     return timer;
   };
