@@ -1,12 +1,12 @@
 /**
   * Jump up the platforms, dont fall off the bottom
   * @see https://play.google.com/store/apps/details?id=au.com.phil&hl=en
-  * @requires scene 0.0.1
+  * @requires scene 0.1.9
   */
 import scene, communityart;
 
 exports = scene(function() {
-  // Make the actor and background
+  // Add the background and the player
   var background = scene.addBackground(communityart('bg'));
 
   var player = scene.addPlayer(communityart('jumper'), {
@@ -17,9 +17,7 @@ exports = scene(function() {
     cameraFunction: scene.camera.wrapX
   });
 
-  scene.onAccelerometer(function(e) {
-    player.vx = -e.tilt * 3000;
-  });
+  scene.onAccelerometer(function(e) { player.vx = -e.tilt * 3000; });
 
   // Show the game score
   scene.showScore(10, 10);
@@ -28,9 +26,7 @@ exports = scene(function() {
 
   var platformSpawnFunction = function(x, y, index) {
     var platform = platforms.addActor(communityart('platform'), { isAnchored: true, x: x, y: y });
-    platform.onEntered(scene.camera.bottomWall, function() {
-      platform.destroy();
-    });
+    platform.onEntered(scene.camera.bottomWall, function() { platform.destroy(); });
   };
 
   // Make the spawner
@@ -45,13 +41,9 @@ exports = scene(function() {
   // Player collision rules
   scene.onCollision(player, platforms, function (player, platform) {
     if (player.vy < 0) { return; }
-    var deltaY = player.y - player.yPrev;
-    var previousplayerBottom = player.getBottomHitY() - deltaY;
-
-    var hitPlatformBottom = player.getBottomHitY() - (player.y - player.yPrev)
-
-
-    if (previousplayerBottom < platform.getTopHitY()) {
+    // If last frame's player collision bottom was above the platform, hop
+    var lastCollisionBottom = player.getBottomHitY() - (player.y - player.yPrev);
+    if (lastCollisionBottom < platform.getTopHitY()) {
       player.vy = -1350;
     }
   });
@@ -59,8 +51,7 @@ exports = scene(function() {
   player.onEntered(scene.camera.bottomWall, function() { player.destroy(); });
 
   // Add the camera to follow the player
-  scene.camera.follow(
-    player,
+  scene.camera.follow( player,
     new scene.shape.Rect(-200, scene.screen.midY, scene.screen.width + 400, scene.screen.height - 100)
   );
 
