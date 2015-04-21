@@ -169,7 +169,15 @@ exports = Class(Rect, function(supr) {
     * @todo
     */
   this.wrap = function(actor) {};
-  this.wrapX = function(actor) {};
+
+  this.wrapX = function(actor) {
+    if (actor.getLeftHitX() > scene.camera.right) {
+      actor.x = scene.camera.left - (actor.getRightHitX() - actor.x);
+    } else if (actor.getRightHitX() < scene.camera.x) {
+      actor.x = scene.camera.right + actor.hitBounds.x;
+    }
+  };
+
   this.wrapY = function(actor) {};
 
   /**

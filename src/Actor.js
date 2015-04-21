@@ -31,14 +31,7 @@ exports = Class(Entity, function() {
 
     supr.init.call(this, opts);
 
-    // Follow touches?
-    this.followTouches = opts.followTouches;
-    if (this.followTouches) {
-      this.followTouches.xMultiplier = this.followTouches.xMultiplier !== undefined
-          ? this.followTouches.xMultiplier : 0.1;
-      this.followTouches.yMultiplier = this.followTouches.yMultiplier !== undefined
-          ? this.followTouches.yMultiplier : 0.1;
-    }
+    this.updateFollowTouches(opts.followTouches);
 
     this.lastFollowTarget = null;
     this.cameraFunction = null;
@@ -58,6 +51,8 @@ exports = Class(Entity, function() {
 
   this.reset = function(x, y, config) {
     effects.commit(this);
+
+    this.updateFollowTouches(config.followTouches);
 
     this.x = x !== undefined ? x : this.x;
     this.y = y !== undefined ? y : this.y;
@@ -107,6 +102,18 @@ exports = Class(Entity, function() {
     this.view.style.anchorX = config.anchorX || this.view.style.width / 2;
     this.view.style.anchorY = config.anchorY || this.view.style.height / 2;
   }
+
+  this.updateFollowTouches = function(opts) {
+    // Follow touches?
+    this.followTouches = opts;
+
+    if (this.followTouches) {
+      this.followTouches.xMultiplier = this.followTouches.xMultiplier !== undefined
+          ? this.followTouches.xMultiplier : 0.1;
+      this.followTouches.yMultiplier = this.followTouches.yMultiplier !== undefined
+          ? this.followTouches.yMultiplier : 0.1;
+    }
+  };
 
   // Cached reference to make faster direct calls
   this.updateEntity = Entity.prototype.update;

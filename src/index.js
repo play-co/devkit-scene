@@ -337,9 +337,10 @@ scene.onAccelerometer = function(cb) {
 
     accelerometer.on('devicemotion', function (evt) {
 
-      var x = -evt.x;
-      var y = -evt.y;
-      var z = -evt.z;
+      var x = (evt.accelerationIncludingGravity.x - evt.acceleration.x) / 10;
+      var y = (evt.accelerationIncludingGravity.y - evt.acceleration.y) / 10;
+      var z = (evt.accelerationIncludingGravity.z - evt.acceleration.z) / 10;
+
       var accelObj = {
         x: x,
         y: y,
