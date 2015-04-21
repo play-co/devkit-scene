@@ -623,35 +623,11 @@ scene.addBackground = function(art, opts) {
 /**
   * @func scene.addActor(2)
   * @arg {View} view
-  * @arg {number} x
-  * @arg {number} y
   * @arg {Object} [opts] - contains options to be applied to the underlying {@link Actor}
   * @returns {Actor}
   */
-scene.addActor = function(resource, x, y, opts) {
-  opts = opts || {};
-
-  if (typeof x === 'object') {
-    // Function type 1
-    opts = x;
-    x = undefined;
-    y = undefined;
-  } else if (typeof x === 'number' && typeof y === 'number') {
-    // Function type 2
-    opts.x = x;
-    opts.y = y;
-  }
-
-  // Default position
-  opts.x = opts.x !== undefined ? opts.x : scene.camera.x + scene.camera.width / 2;
-  opts.y = opts.y !== undefined ? opts.y : scene.camera.y + scene.camera.height / 2;
-
-  // Defualt group
-  opts.group = opts.group || scene.group;
-  opts.parent = opts.parent || scene.stage;
-
-  opts.url = (typeof resource === "string") ? resource : resource.url;
-  return opts.group.obtain(opts.x, opts.y, opts);
+scene.addActor = function(resource, opts) {
+  return scene.group.addActor(resource, opts);
 };
 
 /**

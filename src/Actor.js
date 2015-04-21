@@ -332,4 +332,8 @@ exports = Class(Entity, function() {
     this.destroyHandlers.push(callback);
   };
 
+  Object.defineProperty(this, "currentAnimation", {
+    get: function() { return this.view.hasAnimations ? this.view._currentAnimationName : ""; }
+  });
+
 });
