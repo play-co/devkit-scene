@@ -8,7 +8,6 @@ var CC = Class(function() {
 
   /**
     * Called when a collision occurs
-    * NOTE: opts.collisionType is not fully implemented yet... only works with {@link Actor}
     * @callback onCollisionCallback
     * @arg {Actor} a
     * @arg {Actor} b

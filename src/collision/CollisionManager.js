@@ -1,11 +1,12 @@
 import .CollisionChecker;
+import .ColliderMap;
 
 /**
-  * Responsible for updating, and manging collision checks.
-  * Collisions are registered as 2 things, `a` and `b`; the check is the run every tick to see if
+  * Responsible for updating and managing collision checks.
+  * Collisions are registered as 2 things, `a` and `b`. The check is run every tick to see if
   * `a` and `b` have collided.
   * {@link CollisionManager#stop}, {@link CollisionManager#start}, {@link CollisionManager#remove}
-  * are exposed in case you want to control the collisions manually, however the Collision Manager is
+  * are exposed in case you want to control the collisions manually; however, the Collision Manager is
   * smart about running collisions. If a group, `a` or `b`, is a single {@link Actor} or an array of
   * {@link Actor}s, then the collision manager will automatically remove the check when actors in question
   * are destroyed.
@@ -18,8 +19,13 @@ exports = Class(function(supr) {
   };
 
   this.reset = function() {
+    this._colliderMap = new ColliderMap();
     this._collisionChecks = [];
+    this._collisionChecksToAdd = [];
+    this._collisionChecksToRemove = [];
+    this._collidersToRemove = [];
     this.collisionCheckID = -1;
+    this._processing = false;
   };
 
   /**
@@ -28,28 +34,38 @@ exports = Class(function(supr) {
     * @returns {number} collisionCheckID
     */
   this.registerCollision = function(collisionChecker) {
+
     this.collisionCheckID++;
 
     // create a new collision checker
     collisionChecker.onRegistered({ collisionCheckID: this.collisionCheckID });
 
-    // append to the internal collision checks array
-    this._collisionChecks.push(collisionChecker) - 1;
+    if (this._processing) {
+      this._collisionChecksToAdd.push(collisionChecker);
+    } else {
+      this._addCollisionCheck(collisionChecker);
+    }
 
     return this.collisionCheckID;
   };
 
   this.update = function(dt) {
+
+    this._removeColliders();
+    this._addDeferredCollisionChecks();
+
+    this._processing = true;
     // Iterate backwards so we can prune dead checks on the fly
     for (var i = this._collisionChecks.length - 1; i >= 0; i--) {
       var success = this._collisionChecks[i].run();
       if (success === false) {
-        // Dead check, remove it by popping the last check off of the stack
-        // and replacing the dead one. This changes the order of checks.
-        var lastCheck = this._collisionChecks.pop();
-        if (i < this._collisionChecks.length) { this._collisionChecks[i] = lastCheck; }
+        // Dead check, remove it
+        this._removeByIndex(i);
       }
     }
+
+    this._processing = false;
+
   };
 
   /**
@@ -57,7 +73,17 @@ exports = Class(function(supr) {
     * @func CollisionManager#remove
     * @arg {number} collisionCheck
     */
-  this.remove = function(collisionCheck) {};
+  this.remove = function(collisionCheck) {
+    if (this._processing && this._collisionChecksToRemove.indexOf(collisionCheck) !== -1) {
+      this._collisionChecksToRemove.push(collisionCheck);
+      return;
+    }
+    var index = this._collisionChecks.indexOf(collisionCheck);
+    if (index !== -1) {
+      this._removeByIndex(index);
+      this._colliderMap.remove(collisionCheck);
+    }
+  };
 
   /**
     * Temporarily stop a collision from being checked, do not unregister it.
@@ -72,5 +98,44 @@ exports = Class(function(supr) {
     * @arg {number} collisionCheckID
     */
   this.start = function(collisionCheckID) {};
+
+  this.removeCollisionsContaining = function(collider) {
+    if (this._collidersToRemove.indexOf(collider) === -1 ) {
+      this._collidersToRemove.push(collider);
+    }
+  };
+
+  this._addCollisionCheck = function(collisionChecker) {
+    // append to the internal collision checks array
+    this._collisionChecks.push(collisionChecker);
+    this._colliderMap.insert(collisionChecker);
+  };
+
+  this._removeColliders = function() {
+    if (this._collidersToRemove.length === 0) { return; }
+
+    for (var i = 0; i < this._collidersToRemove.length; i++) {
+      var checksOnCollider = this._colliderMap.getCollisionChecksOn(this._collidersToRemove[i]);
+      if (checksOnCollider === null) { continue; }
+      for (var j = 0; j < checksOnCollider.length; j++) {
+        this.remove(checksOnCollider[j]);
+      }
+    }
+
+    this._collidersToRemove.length = 0;
+  };
+
+  this._addDeferredCollisionChecks = function() {
+    while(this._collisionChecksToAdd.length > 0) {
+      this._addCollisionCheck(this._collisionChecksToAdd.pop());
+    }
+  };
+
+  this._removeByIndex = function(index) {
+    // Remove check by popping the last check off of the stack and
+    // moving it to this index. This changes the order of checks.
+    var lastCheck = this._collisionChecks.pop();
+    if (index < this._collisionChecks.length) { this._collisionChecks[index] = lastCheck; }
+  };
 
 });
