@@ -125,6 +125,11 @@ exports = Class(Rect, function(supr) {
   this.update = function(dt) {
     if (!this.following) { return; }
 
+    if (this.following.destroyed) {
+      this.stopFollowing();
+      return;
+    }
+
     var x = this.following.x - this._x;
     var y = this.following.y - this._y;
 

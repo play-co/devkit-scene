@@ -43,6 +43,8 @@ exports = Class(function() {
     this._spawnIndex = -1;
     this._lastSpawnTime = scene.totalDt;
 
+    this.active = true;
+
     this._manager = null;
   };
 
@@ -103,6 +105,7 @@ exports = Class(function() {
     * @func Spawner#update
     */
   this.update = function(dt) {
+    if (!this.active) { return; }
     if (scene.totalDt - this._lastSpawnTime > this.spawnDelay) {
       this._lastSpawnTime = scene.totalDt;
       this.spawn();

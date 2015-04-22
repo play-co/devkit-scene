@@ -101,6 +101,8 @@ scene = function (newGameFunc) {
         infinite: true
       });
 
+      scene.stage = this.stage;
+
       /**
        * The root group for all objects created on the scene instead of
        * on their own group.
@@ -733,6 +735,7 @@ scene.animations = [];
 
 scene.clearAnimations = function() {
   for (var i = 0; i < scene.animations.length; i++) {
+    scene.animations[i].commit();
     scene.animations[i].clear();
   }
   scene.animations = [];
