@@ -8,6 +8,7 @@ exports = Class(function() {
     * @arg {number} x
     * @arg {number} y
     * @arg {number} index - the index (since beginning of game) of the currently spawned element
+    * @arg {Spawner} spawner - the spawner instance
     * @this {Spawner}
     * @return {Actor|Actor[]} newly spawned actor/s
     */
@@ -42,6 +43,8 @@ exports = Class(function() {
     this._spawnIndex = -1;
     this._lastSpawnTime = scene.totalDt;
 
+    this.active = true;
+
     this._manager = null;
   };
 
@@ -64,7 +67,7 @@ exports = Class(function() {
     */
   this.spawn = function() {
     var spawnPoint = this.getSpawnPoint();
-    this.spawnFunction(spawnPoint.x, spawnPoint.y, this._spawnIndex++);
+    this.spawnFunction(spawnPoint.x, spawnPoint.y, this._spawnIndex++, this);
   };
 
   /**
@@ -72,19 +75,29 @@ exports = Class(function() {
     * @func Spawner#getSpawnPoint
     * @returns {Point}
     */
-  this.getSpawnPoint = function() {
-    if (this.spawnAt.getPointOn) {
-      this.spawnAt.getPointOn(this._cachedPoint);
+  this.getSpawnPoint = function(spawnAt) {
+
+    spawnAt = spawnAt || this.spawnAt;
+
+    if (Array.isArray(spawnAt)) {
+      var randomSpawnAt = spawnAt[Math.floor(Math.random() * spawnAt.length)];
+      return this.getSpawnPoint(randomSpawnAt);
+    }
+
+    if (spawnAt.getPointOn) {
+      spawnAt.getPointOn(this._cachedPoint);
     } else {
-      this._cachedPoint.x = this.spawnAt.x;
-      this._cachedPoint.y = this.spawnAt.y;
+      this._cachedPoint.x = spawnAt.x;
+      this._cachedPoint.y = spawnAt.y;
     }
 
     if (!this.useWorldSpace) {
       this._cachedPoint.x += scene.camera.x;
       this._cachedPoint.y += scene.camera.y;
     }
+
     return this._cachedPoint;
+
   };
 
   /**
@@ -92,6 +105,7 @@ exports = Class(function() {
     * @func Spawner#update
     */
   this.update = function(dt) {
+    if (!this.active) { return; }
     if (scene.totalDt - this._lastSpawnTime > this.spawnDelay) {
       this._lastSpawnTime = scene.totalDt;
       this.spawn();

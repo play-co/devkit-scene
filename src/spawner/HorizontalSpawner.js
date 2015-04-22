@@ -12,7 +12,7 @@ exports = Class(Spawner, function(supr) {
     this._lastSpawnTime = scene.camera.x;
   };
 
-  this.tick = function() {
+  this.update = function() {
     if (Math.abs(scene.camera.x - this._lastSpawnTime) > this.spawnDelay) {
       this._lastSpawnTime = scene.camera.x;
       this.spawn();

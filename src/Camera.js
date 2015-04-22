@@ -28,7 +28,6 @@ exports = Class(Rect, function(supr) {
         @var {Rect} Camera#bottomWall **/
     this.bottomWall = new Rect(0, 0, this._MAX_SIZE, this._MAX_SIZE);
 
-
     // Now initilize super
     supr(this, 'init', [0, 0, width, height]);
 
@@ -126,6 +125,11 @@ exports = Class(Rect, function(supr) {
   this.update = function(dt) {
     if (!this.following) { return; }
 
+    if (this.following.destroyed) {
+      this.stopFollowing();
+      return;
+    }
+
     var x = this.following.x - this._x;
     var y = this.following.y - this._y;
 
@@ -169,7 +173,15 @@ exports = Class(Rect, function(supr) {
     * @todo
     */
   this.wrap = function(actor) {};
-  this.wrapX = function(actor) {};
+
+  this.wrapX = function(actor) {
+    if (actor.getLeftHitX() > scene.camera.right) {
+      actor.x = scene.camera.left - (actor.getRightHitX() - actor.x);
+    } else if (actor.getRightHitX() < scene.camera.x) {
+      actor.x = scene.camera.right + actor.hitBounds.x;
+    }
+  };
+
   this.wrapY = function(actor) {};
 
   /**

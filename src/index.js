@@ -101,6 +101,8 @@ scene = function (newGameFunc) {
         infinite: true
       });
 
+      scene.stage = this.stage;
+
       /**
        * The root group for all objects created on the scene instead of
        * on their own group.
@@ -338,9 +340,10 @@ scene.onAccelerometer = function(cb) {
 
     accelerometer.on('devicemotion', function (evt) {
 
-      var x = -evt.x;
-      var y = -evt.y;
-      var z = -evt.z;
+      var x = (evt.accelerationIncludingGravity.x - evt.acceleration.x) / 10;
+      var y = (evt.accelerationIncludingGravity.y - evt.acceleration.y) / 10;
+      var z = (evt.accelerationIncludingGravity.z - evt.acceleration.z) / 10;
+
       var accelObj = {
         x: x,
         y: y,
@@ -623,35 +626,11 @@ scene.addBackground = function(art, opts) {
 /**
   * @func scene.addActor(2)
   * @arg {View} view
-  * @arg {number} x
-  * @arg {number} y
   * @arg {Object} [opts] - contains options to be applied to the underlying {@link Actor}
   * @returns {Actor}
   */
-scene.addActor = function(resource, x, y, opts) {
-  opts = opts || {};
-
-  if (typeof x === 'object') {
-    // Function type 1
-    opts = x;
-    x = undefined;
-    y = undefined;
-  } else if (typeof x === 'number' && typeof y === 'number') {
-    // Function type 2
-    opts.x = x;
-    opts.y = y;
-  }
-
-  // Default position
-  opts.x = opts.x !== undefined ? opts.x : scene.camera.x + scene.camera.width / 2;
-  opts.y = opts.y !== undefined ? opts.y : scene.camera.y + scene.camera.height / 2;
-
-  // Defualt group
-  opts.group = opts.group || scene.group;
-  opts.parent = opts.parent || scene.stage;
-
-  opts.url = (typeof resource === "string") ? resource : resource.url;
-  return opts.group.obtain(opts.x, opts.y, opts);
+scene.addActor = function(resource, opts) {
+  return scene.group.addActor(resource, opts);
 };
 
 /**
@@ -757,6 +736,7 @@ scene.animations = [];
 
 scene.clearAnimations = function() {
   for (var i = 0; i < scene.animations.length; i++) {
+    scene.animations[i].commit();
     scene.animations[i].clear();
   }
   scene.animations = [];

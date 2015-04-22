@@ -27,12 +27,15 @@ exports = Class(EntityPool, function(supr) {
     * @func Group#addActor
     * @see scene.addActor
     */
-  this.addActor = function(resource, x, y, opts) {
-    // Two function options
-    var optsObj = (typeof x === 'object') ? x : (opts || {});
-    optsObj.group = this;
-
-    return scene.addActor(resource, x, y, optsObj);
+  this.addActor = function(resource, opts) {
+    opts = opts || {};
+    opts.parent = opts.parent || GC.app.stage;
+    opts.x = opts.x === undefined ? scene.camera.x + scene.camera.width / 2 : opts.x;
+    opts.y = opts.y === undefined ? scene.camera.y + scene.camera.height / 2 : opts.y;
+    opts.url = (typeof resource === "string") ? resource : resource.url;
+    var result = this.obtain(opts.x, opts.y, opts);
+    result.group = this;
+    return result;
   };
 
   /**

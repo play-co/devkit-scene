@@ -1,54 +1,62 @@
 /**
   * Jump up the platforms, dont fall off the bottom
   * @see https://play.google.com/store/apps/details?id=au.com.phil&hl=en
-  * @requires scene 0.0.1
+  * @requires scene 0.1.9
   */
-import scene, art;
+import scene, communityart;
 
 exports = scene(function() {
-  // Make the actor and background
-  var background = scene.addBackground(art('bg'));
-  var jumper = scene.addActor(art('jumper'), {
-    ay: 15,
+  // Add the background and the player
+  var background = scene.addBackground(communityart('bg'));
+
+  var player = scene.addPlayer(communityart('jumper'), {
+    ay: 2000,
+    vy: -2400,
     followTouches: { x: true },
-    zIndex: 10
+    zIndex: 10,
+    cameraFunction: scene.camera.wrapX
   });
-  scene.onAccelerometer(function(e) {
-    jumper.ax = -e.twist * 10;
-  });
+
+  scene.onAccelerometer(function(e) { player.vx = -e.tilt * 3000; });
 
   // Show the game score
   scene.showScore(10, 10);
 
-  // Make the spawner
-  var platformSpawner = scene.addSpawner(new scene.spawner.Vertical(
-    new scene.shape.Line({ x: 30, y: -100, x2: scene.screen.width - 200 }),
-    function (x, y, index) {
-      var platform = scene.addActor(art('platform'), { isAnchored: true });
-      platform.onContainedBy(scene.screen.bottom, platform.destroy);
+  var platforms = scene.addGroup();
 
-      this.spawnDelay = randRange(150, 200);
-      return platform;
-    }
-  ));
+  var platformSpawnFunction = function(x, y, index) {
+    var platform = platforms.addActor(communityart('platform'), { isAnchored: true, x: x, y: y });
+    platform.onEntered(scene.camera.bottomWall, function() { platform.destroy(); });
+  };
+
+  // Make the spawner
+  var platformSpawner = scene.addSpawner(
+    new scene.spawner.Vertical(
+      new scene.shape.Rect(30, -300, scene.screen.width - 200, 200),
+      platformSpawnFunction,
+      200
+    )
+  );
 
   // Player collision rules
-  scene.onCollision(jumper, platformSpawner, function (jumper, platform) {
-    if (jumper.collidedBottom) {
-      jumper.vy = randRange(-80, -110);
+  scene.onCollision(player, platforms, function (player, platform) {
+    if (player.vy < 0) { return; }
+    // If last frame's player collision bottom was above the platform, hop
+    var lastCollisionBottom = player.getBottomHitY() - (player.y - player.yPrev);
+    if (lastCollisionBottom < platform.getTopHitY()) {
+      player.vy = -1350;
     }
   });
-  scene.onCollision(jumper, [scene.screen.left, scene.screen.right], scene.screen.wrap);
-  scene.onCollision(jumper, scene.screen.bottom, scene.gameOver);
+
+  player.onEntered(scene.camera.bottomWall, function() { player.destroy(); });
 
   // Add the camera to follow the player
-  scene.cam.update({
-    follow: jumper,
-    movementBounds: new scene.shape.Rect(0, scene.screen.midY, scene.screen.width, scene.screen.height - 100)
-  });
+  scene.camera.follow( player,
+    new scene.shape.Rect(-200, scene.screen.midY, scene.screen.width + 400, scene.screen.height - 100)
+  );
 
   // Update the score
   scene.onTick(function() {
-    scene.setScore(Math.floor(scene.cam.x));
+    scene.setScore(Math.floor(-scene.camera.y));
   });
 });
