@@ -26,30 +26,16 @@ exports = Class(Entity, function() {
 
   this.init = function(opts) {
     this.viewClass = ActorView;
-
-    this.opts = opts;
-
     supr.init.call(this, opts);
-
-    this.updateFollowTouches(opts.followTouches);
-
-    this.lastFollowTarget = null;
-    this.cameraFunction = null;
-    this.health = 0;
-
-    this.destroyed = false;
-    this.has_reset = false;
-    this.config = opts;
-
-    // Center the entity by default
-    this.x = opts.x || scene.screen.width / 2;
-    this.y = opts.y || scene.screen.height / 2;
-
-    this.destroyHandlers = [];
-    this.tickHandlers = [];
+    this.reset(0, 0, opts);
   }
 
   this.reset = function(x, y, config) {
+
+    this.lastFollowTarget = null;
+
+    this.destroyHandlers = [];
+    this.tickHandlers = [];
     effects.commit(this);
 
     this.updateFollowTouches(config.followTouches);
@@ -98,10 +84,38 @@ exports = Class(Entity, function() {
 
     supr.reset.call(this, this.x, this.y, this.config);
 
-    // default center anchor
-    this.view.style.anchorX = config.anchorX || this.view.style.width / 2;
-    this.view.style.anchorY = config.anchorY || this.view.style.height / 2;
+    // The following is complete hackery, and will only remain in place until Entities.js is refactored
+    // with better view support
+
+    this.unscaledHitBounds = this.hitBounds;
+    this.hitBounds = {};
+
+    // Setting scale here will automatically apply the scaled bounds to the new hitBounds object
+    this.scale = config.scale !== undefined ? config.scale : 1;
+
+    var vs = this.view.style;
+
+    vs.scale = this.scale;
+
+    this.viewBounds.x = 0;
+    this.viewBounds.y = 0;
+
+    if (this.isCircle) {
+      vs.anchorX = this.viewBounds.w / 2;
+      vs.anchorY = this.viewBounds.h / 2;
+    } else {
+      vs.anchorX = 0;
+      vs.anchorY = 0;
+    }
+    vs.offsetX = -vs.anchorX;
+    vs.offsetY = -vs.anchorY;
   }
+
+  this.applyScaledBounds = function(sourceBounds, targetBounds, scale) {
+    for (var i in sourceBounds) {
+      targetBounds[i] = sourceBounds[i] * scale;
+    }
+  };
 
   this.updateFollowTouches = function(opts) {
     // Follow touches?
@@ -335,5 +349,25 @@ exports = Class(Entity, function() {
   Object.defineProperty(this, "currentAnimation", {
     get: function() { return this.view.hasAnimations ? this.view._currentAnimationName : ""; }
   });
+
+  Object.defineProperty(this, "opacity", {
+    get: function() { return this.view.style.opacity; },
+    set: function(value) { this.view.style.opacity = value; }
+  });
+
+  Object.defineProperty(this, "scale", {
+    get: function() { return this.view.style.scale },
+    set: function(value) {
+      this.view.style.scale = value;
+      this.applyScaledBounds(this.unscaledHitBounds, this.hitBounds, value);
+    }
+  });
+
+  this.showHitBounds = function() {
+    supr.showHitBounds.call(this);
+    this.hitBoundsView.style.offsetX = -this.view.style.offsetX * this.view.style.scale;
+    this.hitBoundsView.style.offsetY = -this.view.style.offsetY * this.view.style.scale;
+    this.hitBoundsView.style.scale = 1 / this.view.style.scale;
+  };
 
 });

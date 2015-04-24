@@ -16,6 +16,8 @@ import .spawner.Spawner as Spawner;
 import .shape.Line as Line;
 import .shape.Rect as Rect;
 
+import .state.StateManager as StateManager;
+
 import .collision.CollisionManager as CollisionManager;
 import .collision.CollisionChecker as CollisionChecker;
 
@@ -194,7 +196,7 @@ scene = function (newGameFunc) {
 
       // Let's reboot the fun!
       var currentMode = _modes[mode]
-      currentMode.fun(currentMode.opts);
+      currentMode.fun(scene.state._gameObject, currentMode.opts);
 
       scene.background.reloadConfig();
 
@@ -269,6 +271,11 @@ scene.camera = new Camera(scene.screen.width, scene.screen.height);
   * @var {CollisionManager} scene.collisions
   */
 scene.collisions = new CollisionManager();
+
+/**
+  * @var {StateManager} scene.state
+  */
+scene.state = new StateManager();
 
 /**
   * There can be only one player. {@link scene.gameOver} is automatically called when the player is destroyed.
@@ -658,7 +665,7 @@ scene.addPlayer = function(resource, opts) {
   * @returns {@link Group}
   */
 scene.addGroup = function(opts) {
-  var result = new Group({superview: GC.app.stage});
+  var result = new Group({ superview: GC.app.stage,  });
   GC.app.groups.push(result);
   return result;
 };
@@ -732,14 +739,19 @@ scene.collision = {
   CollisionChecker: CollisionChecker
 };
 
-scene.animations = [];
+scene.animationGroups = [ "scene" ];
 
 scene.clearAnimations = function() {
-  for (var i = 0; i < scene.animations.length; i++) {
-    scene.animations[i].commit();
-    scene.animations[i].clear();
+  for (var i = 0; i < scene.animationGroups.length; i++) {
+    var group = animate.getGroup(scene.animationGroups[i]);
+    if (!group) { continue; }
+    var animations = group._anims;
+    for (var j = 0; j < animations.length; j++) {
+      animations[i].commit();
+      animations[i].clear();
+    }
   }
-  scene.animations = [];
+  scene.animationGroups.length = 1;
 };
 
 /**
@@ -748,16 +760,19 @@ scene.clearAnimations = function() {
   * @arg {string}  [name]
   * @returns {Animator} anim
   */
-scene.animate = function(subject, name) {
-  var anim = animate(subject, name);
-  if (scene.animations.indexOf(anim) === -1) {
-    scene.animations.push(anim);
+scene.animate = function(subject, groupId) {
+  groupId = groupId ? "scene" : "scene_" + groupId;
+  var anim = animate(subject, groupId);
+  if (groupId !== "scene" && scene.animationGroups.indexOf(groupId) === -1) {
+    scene.animationGroups.push(groupId);
   }
   return anim;
 };
 
+
 scene.configureBackground = function(config) {
   scene.background.reloadConfig(config);
 };
+
 
 exports = scene;

@@ -49,6 +49,8 @@ exports = Class(Shape, function(supr) {
   this.getMaxHitX = function() { return this.right + this.hitOffset.x; };
   this.getMinHitY = function() { return this.top + this.hitOffset.y; };
   this.getMaxHitY = function() { return this.bottom + this.hitOffset.y; };
+  this.getHitWidth = function() { return this.width; }
+  this.getHitHeight = function() { return this.height; }
 
   this.getPointOn = function(result) {
     result = result || new Point();
