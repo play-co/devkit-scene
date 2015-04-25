@@ -73,10 +73,14 @@ exports = Class(function() {
   };
 
   this._runStateExitFunctions = function() {
-    for (var i = 0; i < this._exitFunctions; i++ ) {
+    for (var i = 0; i < this._exitFunctions.length; i++ ) {
       this._exitFunctions[i]();
     }
     this._exitFunctions.length = 0;
   };
+
+  Object.defineProperty(this, "currentState", {
+    get: function() { return this._state; }
+  });
 
 });

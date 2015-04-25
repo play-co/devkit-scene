@@ -23,9 +23,9 @@ import .ActorView;
 exports = Class(Entity, function() {
 
   var supr = Entity.prototype;
+  this.viewClass = ActorView;
 
   this.init = function(opts) {
-    this.viewClass = ActorView;
     supr.init.call(this, opts);
     this.reset(0, 0, opts);
   }
@@ -109,6 +109,8 @@ exports = Class(Entity, function() {
     }
     vs.offsetX = -vs.anchorX;
     vs.offsetY = -vs.anchorY;
+
+    this.resetView(config);
   }
 
   this.applyScaledBounds = function(sourceBounds, targetBounds, scale) {

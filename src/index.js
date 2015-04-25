@@ -665,7 +665,9 @@ scene.addPlayer = function(resource, opts) {
   * @returns {@link Group}
   */
 scene.addGroup = function(opts) {
-  var result = new Group({ superview: GC.app.stage,  });
+  opts = opts || {};
+  opts.superview = GC.app.stage;
+  var result = new Group(opts);
   GC.app.groups.push(result);
   return result;
 };
