@@ -16,6 +16,11 @@ exports = Class(function() {
     this._states[name] = initializer;
   };
 
+  this.reset = function() {
+    this.enter("");
+    this._gameObject = {};
+  };
+
   /**
     * You can only register exit functions inside the state function currently running.
     * All onExitStates are cleared on a state change
@@ -37,7 +42,7 @@ exports = Class(function() {
       warning = "WARNING: Trying to enter state '" + name + "' when already in this state. Ignoring.";
     } else if (this._enteringState) {
       warning = "WARNING: Trying to enter state '" + name + "'' while in the process of entering another state. Ignoring."
-    } else if (!this._states[name]) {
+    } else if (name !== "" && !this._states[name]) {
       warning = "WARNING: Cannot enter state '" + name + "', state not found. Ignoring.";
     }
 
@@ -46,7 +51,7 @@ exports = Class(function() {
       return;
     }
 
-    runInitializer = runInitializer === undefined ? true : runInitializer;
+    runInitializer = runInitializer === undefined ? name !== "" : runInitializer;
     clearScene = clearScene || false;
 
     this._enteringState = true;

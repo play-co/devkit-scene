@@ -161,6 +161,8 @@ scene = function (newGameFunc) {
     this.reset = function(mode) {
       if (mode === undefined) mode = 'default';
 
+      scene.state.reset();
+
       effects.commit();
       effects.stop();
       scene.clearAnimations();
@@ -748,9 +750,10 @@ scene.clearAnimations = function() {
     var group = animate.getGroup(scene.animationGroups[i]);
     if (!group) { continue; }
     var animations = group._anims;
-    for (var j = 0; j < animations.length; j++) {
-      animations[i].commit();
-      animations[i].clear();
+    for (var key in animations) {
+      animations[key].commit();
+      animations[key].clear();
+      delete animations[key];
     }
   }
   scene.animationGroups.length = 1;
@@ -763,7 +766,7 @@ scene.clearAnimations = function() {
   * @returns {Animator} anim
   */
 scene.animate = function(subject, groupId) {
-  groupId = groupId ? "scene" : "scene_" + groupId;
+  groupId = groupId === undefined ? "scene" : "scene_" + groupId;
   var anim = animate(subject, groupId);
   if (groupId !== "scene" && scene.animationGroups.indexOf(groupId) === -1) {
     scene.animationGroups.push(groupId);
