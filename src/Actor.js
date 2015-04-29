@@ -254,6 +254,7 @@ exports = Class(Entity, function() {
    * This function destroys the Actor, as in, removes it from the scene
    */
   this.destroy = function() {
+    scene.collisions.removeCollisionsContaining(this);
     for (var i = 0; i < this.destroyHandlers.length; i++) {
       this.destroyHandlers[i].call(this);
     }
