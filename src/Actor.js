@@ -110,6 +110,8 @@ exports = Class(Entity, function() {
     vs.offsetX = -vs.anchorX;
     vs.offsetY = -vs.anchorY;
 
+    this.view.setFramerate( config.frameRate !== undefined ? config.frameRate : 30 );
+
     this.resetView(config);
   }
 
@@ -305,12 +307,13 @@ exports = Class(Entity, function() {
   /**
    * play(animation)
    */
-  this.play = function(animation) {
+  this.play = function(animation, onComplete) {
     animation = animation || this.view._opts.defaultAnimation;
     if (this.has_reset) {
       this.view.startAnimation(animation, {
         loop: false,
         callback: function () {
+          if (onComplete) { onComplete(); }
           this.view.pause();
         }.bind(this)
       });

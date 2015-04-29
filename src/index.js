@@ -31,6 +31,7 @@ import .Camera;
 import .Background;
 import .SceneText;
 import .utils;
+import .SceneAudioManager;
 
 import communityart;
 import effects;
@@ -244,13 +245,13 @@ scene = function (newGameFunc) {
       // Convert dt into seconds
       dt *= SCALE_DT;
 
+      scene.collisions.update();
       scene.background.update(dt);
       scene.group.update(dt);
       for (var i = 0; i < this.groups.length; i++) {
         this.groups[i].update(dt);
       }
       scene.camera.update(dt);
-      scene.collisions.update();
       this.stage.style.x = -scene.camera.x;
       this.stage.style.y = -scene.camera.y;
       scene.background.scrollTo(-scene.camera.x, -scene.camera.y);
@@ -774,6 +775,13 @@ scene.animate = function(subject, groupId) {
   return anim;
 };
 
+scene.audio = new SceneAudioManager();
+scene.addSound = bind(scene.audio, "addSound");
+scene.addSoundGroup = bind(scene.audio, "addSoundGroup");
+scene.addMusic = bind(scene.audio, "addMusic");
+scene.playSound = bind(scene.audio,"playSound");
+scene.playMusic = bind(scene.audio,"playMusic");
+scene.stopMusic = bind(scene.audio,"stopMusic");
 
 scene.configureBackground = function(config) {
   scene.background.reloadConfig(config);
