@@ -17,7 +17,7 @@ exports = Class(function() {
   };
 
   this.reset = function() {
-    this.enter("");
+    if (this._state !== "") { this.enter(""); }
     this._gameObject = {};
   };
 

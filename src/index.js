@@ -1,5 +1,6 @@
 import device;
 import animate;
+import animate.transitions as transitions;
 import ui.View as View;
 import ui.TextView as TextView;
 import ui.ImageView as ImageView;
@@ -32,6 +33,8 @@ import .Background;
 import .SceneText;
 import .utils;
 import .SceneAudioManager;
+import .ScaleManager;
+import .ui.UIView as UIView;
 
 import communityart;
 import effects;
@@ -77,7 +80,13 @@ scene = function (newGameFunc) {
     this.initUI = function() {
       this.rootView = this.view;
 
-      this.setScreenDimensions();
+      /**
+        * The devkit {@link View} which contains the entire scene.
+        * @var {View} scene.view
+        */
+      scene.view = this.rootView;
+
+      scene.updateScreenDimensions();
 
       /**
         * This is the devkit {@link View} which all backgrounds should be added to.
@@ -90,12 +99,6 @@ scene = function (newGameFunc) {
       });
 
       /**
-        * The devkit {@link View} which contains the entire scene.
-        * @var {View} scene.view
-        */
-      scene.view = this.rootView;
-
-      /**
         * This is the devkit {@link View} which all actors should be added to.
         * @var {View} scene.stage
         */
@@ -105,6 +108,8 @@ scene = function (newGameFunc) {
       });
 
       scene.stage = this.stage;
+
+      scene.ui = new UIView({ superview: scene.view, infinite: true });
 
       /**
        * The root group for all objects created on the scene instead of
@@ -162,12 +167,13 @@ scene = function (newGameFunc) {
     this.reset = function(mode) {
       if (mode === undefined) mode = 'default';
 
+      scene.ui.reset();
       scene.state.reset();
 
       effects.commit();
       effects.stop();
       scene.clearAnimations();
-      this.setScreenDimensions();
+      scene.updateScreenDimensions();
       scene.screen.resetTouches();
       scene.background.reset();
 
@@ -208,29 +214,6 @@ scene = function (newGameFunc) {
     }
 
     /**
-     * setScreenDimensions
-     */
-    this.setScreenDimensions = function() {
-
-      var ds = device.screen;
-      var vs = this.rootView.style;
-      var targetHeight = ds.width > ds.height ? 576 : 1024;
-
-      vs.scale = device.height / targetHeight;
-      vs.width = device.width / vs.scale;
-      vs.height = targetHeight;
-
-      vs.x = (ds.width - vs.width) / 2;
-      vs.y = (ds.height - vs.height) / 2;
-      vs.anchorX = vs.width / 2;
-      vs.anchorY = vs.height / 2;
-
-      scene.camera.resize(vs.width, vs.height);
-      scene.screen.width = vs.width;
-      scene.screen.height = vs.height;
-    };
-
-    /**
      * tick tock
      */
     this.tick = function(dt) {
@@ -258,6 +241,34 @@ scene = function (newGameFunc) {
     }
   });
 
+};
+
+scene.SCALE_MODE = ScaleManager.SCALE_MODE;
+scene.scaleManager = new ScaleManager(576, 1024, scene.SCALE_MODE.LOCK_WIDTH);
+
+scene.setScaleOptions = function(width, height, scaleMode) {
+  scene.scaleManager.resize(width, height, scaleMode);
+  scene.updateScreenDimensions();
+};
+
+/**
+ * updateScreenDimensions
+ */
+scene.updateScreenDimensions = function() {
+
+  scene.camera.resize(scene.scaleManager.width, scene.scaleManager.height);
+  scene.screen.width = scene.scaleManager.width;
+  scene.screen.height = scene.scaleManager.height;
+
+  if (!scene.view) { return; }
+
+  scene.scaleManager.scaleView(scene.view);
+
+  var vs = scene.view.style;
+  vs.x = (device.width - vs.width) / 2;
+  vs.y = (device.height - vs.height) / 2;
+  vs.anchorX = vs.width / 2;
+  vs.anchorY = vs.height / 2;
 };
 
 /**
@@ -774,6 +785,8 @@ scene.animate = function(subject, groupId) {
   }
   return anim;
 };
+
+scene.transitions = transitions;
 
 scene.audio = new SceneAudioManager();
 scene.addSound = bind(scene.audio, "addSound");
