@@ -574,30 +574,32 @@ scene.removeTimeout = function(timeoutInstance) {
   * @arg {boolean} [opts.noGameoverScreen] - Optionally skip the "Game Over" text.
   */
 scene.gameOver = function(opts) {
+
+  if (_game_running === false ) { return; }
+
   opts = opts || {};
   opts.delay = opts.delay !== undefined ? opts.delay : 1000;
 
-  if (_game_running) {
-    _game_running = false;
+  _game_running = false;
 
-    setTimeout(function () {
-      if (!opts.noGameoverScreen) {
-        var bgHeight = scene.screen.height;
+  setTimeout(function () {
+    if (!opts.noGameoverScreen) {
+      var bgHeight = scene.screen.height;
 
-        // TODO: This should be a scene splash ... not random text. Allows the player to set their own game over splash.
-        if (_using_score) {
-          scene.addText('Game Over!', { y: bgHeight / 2 - DEFAULT_TEXT_HEIGHT });
-          scene.addText('Score: ' + _score, { y: bgHeight / 2 + 10 });
-        } else {
-          scene.addText('Game Over!');
-        }
-
-        scene.screen.onTouchOnce(function () {
-          setTimeout(function () { GC.app.reset() });
-        });
+      // TODO: This should be a scene splash ... not random text. Allows the player to set their own game over splash.
+      if (_using_score) {
+        scene.addText('Game Over!', { y: bgHeight / 2 - DEFAULT_TEXT_HEIGHT });
+        scene.addText('Score: ' + _score, { y: bgHeight / 2 + 10 });
+      } else {
+        scene.addText('Game Over!');
       }
-    }, opts.delay);
-  }
+
+      scene.screen.onTouchOnce(function () {
+        setTimeout(function () { GC.app.reset() });
+      });
+    }
+  }, opts.delay);
+
 };
 
 /**
@@ -800,5 +802,8 @@ scene.configureBackground = function(config) {
   scene.background.reloadConfig(config);
 };
 
+scene.reset = function() {
+  GC.app.reset();
+};
 
 exports = scene;

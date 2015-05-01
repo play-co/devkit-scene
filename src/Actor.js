@@ -274,7 +274,7 @@ exports = Class(Entity, function() {
   this.destroy = function() {
     scene.collisions.removeCollisionsContaining(this);
     for (var i = 0; i < this.destroyHandlers.length; i++) {
-      this.destroyHandlers[i].call(this);
+      this.destroyHandlers[i](this);
     }
     if (this.view.hasAnimations) { this.view.stopAnimation(); }
     this.destroyed = true;
