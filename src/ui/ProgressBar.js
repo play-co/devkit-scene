@@ -31,6 +31,8 @@ exports = Class(SceneImageView, function(supr) {
 
     this._value = 0;
     this._setFillValue(0);
+
+    this.animObject = {};
   };
 
   this.getValue = function() { return this._value; }
@@ -40,7 +42,7 @@ exports = Class(SceneImageView, function(supr) {
     animationDuration = animationDuration || 0;
     var startValue = this._value;
     var target = this;
-    scene.animate(this, 'fillbar').now({}, animationDuration, scene.transitions.linear, function(tt, t) {
+    scene.animate(this.animObject).now({}, animationDuration, scene.transitions.linear, function(tt, t) {
       target._setFillValue(startValue * (1-tt) + value * tt);
     });
     this._value = value;
