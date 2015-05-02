@@ -2,7 +2,7 @@ import ..Actor as Actor;
 import ..Group as Group;
 import ..shape.Shape as Shape;
 
-import entities.EntityPhysics as EntityPhysics;
+import entities.physics as EntityPhysics;
 
 var CC = Class(function() {
 

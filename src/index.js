@@ -168,7 +168,6 @@ scene = function (newGameFunc) {
       if (mode === undefined) mode = 'default';
 
       scene.ui.reset();
-      scene.state.reset();
 
       effects.commit();
       effects.stop();
@@ -177,8 +176,7 @@ scene = function (newGameFunc) {
       scene.screen.resetTouches();
       scene.background.reset();
 
-      scene.collisions.reset();
-      scene.group.destroy();
+      scene.group.destroy(false);
       scene.player = null;
       scene.camera.stopFollowing();
       scene.camera.x = 0;
@@ -187,7 +185,7 @@ scene = function (newGameFunc) {
       scene.timerManager.reset();
 
       for (var i in this.groups) {
-        this.groups[i].destroy();
+        this.groups[i].destroy(false);
       }
 
       for (var k in scene.extraViews) {
@@ -197,11 +195,15 @@ scene = function (newGameFunc) {
       delete scene._scoreView;
       scene.background.destroy();
 
+      scene.collisions.reset();
+
       // Clear the tallies
       scene.extraViews = [];
       this.groups = [];
       _score = 0;
       _on_tick = null;
+
+      scene.state.reset();
 
       // Let's reboot the fun!
       var currentMode = _modes[mode]

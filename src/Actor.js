@@ -23,96 +23,39 @@ import .ActorView;
 exports = Class(Entity, function() {
 
   var supr = Entity.prototype;
-  this.viewClass = ActorView;
 
   this.init = function(opts) {
     supr.init.call(this, opts);
-    this.reset(0, 0, opts);
+    this.reset(opts);
   }
 
-  this.reset = function(x, y, config) {
+  this.reset = function(config) {
+
+    supr.reset.call(this, config);
 
     this.lastFollowTarget = null;
-
     this.destroyHandlers = [];
     this.tickHandlers = [];
     effects.commit(this);
 
+    // Follow touches
     this.updateFollowTouches(config.followTouches);
 
-    this.x = x !== undefined ? x : this.x;
-    this.y = y !== undefined ? y : this.y;
-    this.config = config || this.config;
-
-    this.destroyHandlers = [];
-    this.tickHandlers = [];
-
-    // Follow touches
-    this.followTouches = config.followTouches;
-    this.lastFollowTarget = null;
-
     // Camera functions
-    this.cameraFunction = this.config.cameraFunction;
+    this.cameraFunction = config.cameraFunction;
     if (this.cameraFunction && !Array.isArray(this.cameraFunction)) {
       this.cameraFunction = [this.cameraFunction];
     }
 
     // Health
-    this.health = this.config.health || 1;
+    this.health = config.health || 1;
 
-    this.has_reset = true;
     this.destroyed = false;
-    this.config.autoSize = true;
-    this.config.ax = config.ax || 0;
-    this.config.ay = config.ay || 0;
-    this.config.vx = config.vx || 0;
-    this.config.vy = config.vy || 0;
+    config.autoSize = true;
 
-    this.view.resetAllAnimations(this.config);
-
-    if (this.view.hasAnimations) {
-
-      // FIXME This is a hack to get around devkit-entities not knowing how to autosize SpriteViews
-      //       but knowing how to autosize ImageViews if the config's image field is set.
-      this.config.image = this.view.getFrame(this.config.defaultAnimation, 0)._originalURL;
-      // The purpose of this is to start animations that could not be started before calling the
-      // resetAllAnimations function. These variables are set in play() and loop()
-      this.initial_function && this.initial_function.apply(this, this.initial_arguments);
-    } else {
-      this.config.image = this.config.url;
-    }
-
-    supr.reset.call(this, this.x, this.y, this.config);
-
-    // The following is complete hackery, and will only remain in place until Entities.js is refactored
-    // with better view support
-
-    this.unscaledHitBounds = this.hitBounds;
-    this.hitBounds = {};
-
-    // Setting scale here will automatically apply the scaled bounds to the new hitBounds object
+    this.unscaledHitBounds = this.model.hitBounds;
     this.scale = config.scale !== undefined ? config.scale : 1;
-
-    var vs = this.view.style;
-
-    vs.scale = this.scale;
-
-    this.viewBounds.x = 0;
-    this.viewBounds.y = 0;
-
-    if (this.isCircle) {
-      vs.anchorX = this.viewBounds.w / 2;
-      vs.anchorY = this.viewBounds.h / 2;
-    } else {
-      vs.anchorX = 0;
-      vs.anchorY = 0;
-    }
-    vs.offsetX = -vs.anchorX;
-    vs.offsetY = -vs.anchorY;
-
-    this.view.setFramerate( config.frameRate !== undefined ? config.frameRate : 30 );
-
-    this.resetView(config);
+    this.view.setFramerate(config.frameRate !== undefined ? config.frameRate : 30);
   }
 
   this.applyScaledBounds = function(sourceBounds, targetBounds, scale) {
@@ -142,40 +85,13 @@ exports = Class(Entity, function() {
       return;
     }
 
-    // Move toward the current touch or mouse down, if followTouches
-    if (this.followTouches) {
-      var currentTouch = scene.screen.getTouch();
-
-      // Make sure we dont just cruise on forever in one direction
-      var targetTouch = (!currentTouch && this.lastFollowTarget)
-        ? this.lastFollowTarget : currentTouch;
-      this.lastFollowTarget = targetTouch;
-
-      if (targetTouch) {
-        // Translate to world coords
-        targetTouch = scene.camera.screenToWorld(targetTouch);
-
-        if (this.followTouches.x) {
-          var dx = targetTouch.x - this.x;
-          this.vx = (this.followTouches.instant
-            ? dx
-            : dx * this.followTouches.xMultiplier) / dt;
-        }
-        if (this.followTouches.y) {
-          var dy = targetTouch.y - this.y;
-          this.vy = (this.followTouches.instant
-            ? dy
-            : dy * this.followTouches.yMultiplier) / dt;
-        }
-      }
-    }
+    this.followTouch();
+    this.updateEntity(dt);
 
     // onTick handlers
     for (var i = 0; i < this.tickHandlers.length; i++) {
       this.tickHandlers[i].call(this, dt);
     }
-
-    this.updateEntity(dt);
 
     // camera functions
     if (this.cameraFunction) {
@@ -187,6 +103,35 @@ exports = Class(Entity, function() {
 
       if (shouldUpdateView) {
         this.updateView(dt);
+      }
+    }
+  };
+
+  this.followTouch = function() {
+    // Move toward the current touch or mouse down, if followTouches
+    if (!this.followTouches) { return; }
+    var currentTouch = scene.screen.getTouch();
+
+    // Make sure we dont just cruise on forever in one direction
+    var targetTouch = (!currentTouch && this.lastFollowTarget)
+      ? this.lastFollowTarget : currentTouch;
+    this.lastFollowTarget = targetTouch;
+
+    if (targetTouch) {
+      // Translate to world coords
+      targetTouch = scene.camera.screenToWorld(targetTouch);
+
+      if (this.followTouches.x) {
+        var dx = targetTouch.x - this.x;
+        this.vx = (this.followTouches.instant
+          ? dx
+          : dx * this.followTouches.xMultiplier) / dt;
+      }
+      if (this.followTouches.y) {
+        var dy = targetTouch.y - this.y;
+        this.vy = (this.followTouches.instant
+          ? dy
+          : dy * this.followTouches.yMultiplier) / dt;
       }
     }
   };
@@ -271,18 +216,17 @@ exports = Class(Entity, function() {
   /**
    * This function destroys the Actor, as in, removes it from the scene
    */
-  this.destroy = function() {
+  this.destroy = function(runDestroyHandlers) {
+    runDestroyHandlers = runDestroyHandlers !== undefined ? runDestroyHandlers : true;
     scene.collisions.removeCollisionsContaining(this);
-    for (var i = 0; i < this.destroyHandlers.length; i++) {
-      this.destroyHandlers[i](this);
+    if (runDestroyHandlers) {
+      for (var i = 0; i < this.destroyHandlers.length; i++) {
+        this.destroyHandlers[i](this);
+      }
     }
     if (this.view.hasAnimations) { this.view.stopAnimation(); }
     this.destroyed = true;
-    if (this.pool) {
-      this.release();
-    } else {
-      this.view.removeFromSuperview();
-    }
+    supr.destroy.call(this);
   }
 
   /**
@@ -309,19 +253,15 @@ exports = Class(Entity, function() {
    */
   this.play = function(animation, onComplete) {
     animation = animation || this.view._opts.defaultAnimation;
-    if (this.has_reset) {
-      this.view.startAnimation(animation, {
-        loop: false,
-        callback: function () {
-          if (onComplete) { onComplete(); }
-          this.view.pause();
-        }.bind(this)
-      });
-      this.view.resume();
-    } else {
-      this.initial_function = this.play;
-      this.initial_arguments = Array.prototype.slice.call(arguments);
-    }
+
+    this.view.startAnimation(animation, {
+      loop: false,
+      callback: function () {
+        if (onComplete) { onComplete(); }
+        this.view.pause();
+      }.bind(this)
+    });
+    this.view.resume();
 
     return this;
   }
@@ -331,14 +271,8 @@ exports = Class(Entity, function() {
    */
   this.loop = function(animation) {
     animation = animation || this.view._opts.defaultAnimation;
-    if (this.has_reset) {
-      this.view.startAnimation(animation, { loop: true });
-      this.view.resume();
-    } else {
-      this.initial_function = this.loop;
-      this.initial_arguments = Array.prototype.slice.call(arguments);
-    }
-
+    this.view.startAnimation(animation, { loop: true });
+    this.view.resume();
     return this;
   };
 
@@ -364,15 +298,15 @@ exports = Class(Entity, function() {
     get: function() { return this.view.style.scale },
     set: function(value) {
       this.view.style.scale = value;
-      this.applyScaledBounds(this.unscaledHitBounds, this.hitBounds, value);
+      this.applyScaledBounds(this.unscaledHitBounds, this.model.hitBounds, value);
     }
   });
 
   this.showHitBounds = function() {
-    supr.showHitBounds.call(this);
-    this.hitBoundsView.style.offsetX = -this.view.style.offsetX * this.view.style.scale;
-    this.hitBoundsView.style.offsetY = -this.view.style.offsetY * this.view.style.scale;
-    this.hitBoundsView.style.scale = 1 / this.view.style.scale;
+    this.view.showHitBounds();
+    // this.view.hitBoundsView.style.offsetX = -this.view.style.offsetX * this.view.style.scale;
+    // this.view.hitBoundsView.style.offsetY = -this.view.style.offsetY * this.view.style.scale;
+    // this.view.hitBoundsView.style.scale = 1 / this.view.style.scale;
   };
 
 });
