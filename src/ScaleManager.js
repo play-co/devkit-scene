@@ -3,7 +3,7 @@ import device;
 var ScaleManager = exports = Class(function() {
 
   this.init = function(width, height, scaleMode) {
-    this.resize(width, height);
+    this.resize(width, height, scaleMode);
   };
 
   this.resize = function(width, height, scaleMode) {

@@ -139,7 +139,7 @@ CC.COLLISION_FUNCTIONS = {
     }
   },
   ON_ENTERED: {
-    collisionFn: function(a, b) { return EntityPhysics.insideOf(a, b); },
+    collisionFn: function(a, b) { return EntityPhysics.isInside(a, b); },
     testAfter: true,
     fireCallbackFn: function(collisionChecker) {
       return !collisionChecker.lastCollisionState && collisionChecker.collisionState;

@@ -92,6 +92,8 @@ scene = function (newGameFunc) {
         * This is the devkit {@link View} which all backgrounds should be added to.
         * @var {Background} scene.background
         */
+      console.log("DIMENSIONS:", scene.screen.width, scene.screen.height);
+
       scene.background = new Background({
         parent: this.rootView,
         width: scene.screen.width,
@@ -246,7 +248,7 @@ scene = function (newGameFunc) {
 };
 
 scene.SCALE_MODE = ScaleManager.SCALE_MODE;
-scene.scaleManager = new ScaleManager(576, 1024, scene.SCALE_MODE.LOCK_WIDTH);
+scene.scaleManager = new ScaleManager(576, 1024, scene.SCALE_MODE.LOCK_HEIGHT);
 
 scene.setScaleOptions = function(width, height, scaleMode) {
   scene.scaleManager.resize(width, height, scaleMode);

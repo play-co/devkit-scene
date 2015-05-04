@@ -85,7 +85,7 @@ exports = Class(Entity, function() {
       return;
     }
 
-    this.followTouch();
+    this.followTouch(dt);
     this.updateEntity(dt);
 
     // onTick handlers
@@ -102,12 +102,12 @@ exports = Class(Entity, function() {
       }
 
       if (shouldUpdateView) {
-        this.updateView(dt);
+        this.view.update(dt);
       }
     }
   };
 
-  this.followTouch = function() {
+  this.followTouch = function(dt) {
     // Move toward the current touch or mouse down, if followTouches
     if (!this.followTouches) { return; }
     var currentTouch = scene.screen.getTouch();
