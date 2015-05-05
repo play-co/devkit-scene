@@ -175,14 +175,20 @@ exports = Class(Rect, function(supr) {
   this.wrap = function(actor) {};
 
   this.wrapX = function(actor) {
-    if (actor.getLeftHitX() > scene.camera.right) {
-      actor.x = scene.camera.left - (actor.getRightHitX() - actor.x);
-    } else if (actor.getRightHitX() < scene.camera.x) {
-      actor.x = scene.camera.right + actor.hitBounds.x;
+    if (actor.getViewMinX() > scene.camera.right) {
+      actor.x = scene.camera.left - actor.view.style.offsetX - actor.getViewWidth();
+    } else if (actor.getViewMaxX() < scene.camera.x) {
+      actor.x = scene.camera.right - actor.view.style.offsetX;
     }
   };
 
-  this.wrapY = function(actor) {};
+  this.wrapY = function(actor) {
+    if (actor.getViewMinY() > scene.camera.bottom) {
+      actor.y = scene.camera.top - actor.view.style.offsetY - actor.getViewHeight();
+    } else if (actor.getViewMaxY() < scene.camera.top) {
+      actor.y = scene.camera.bottom - actor.view.style.offsetY;
+    }
+  };
 
   /**
     * Keeps the actor completely in the view of the camera.
@@ -195,8 +201,8 @@ exports = Class(Rect, function(supr) {
     return flagX || flagY;
   };
   this.fullyOnX = function(actor) {
-    var actorLeft = actor.getMinHitX();
-    var thisLeft = this.getMinHitX();
+    var actorLeft = actor.getViewMinX();
+    var thisLeft = this.x;
     if (actorLeft < thisLeft) {
       var dx = thisLeft - actorLeft;
       actor.x += dx;
@@ -204,8 +210,8 @@ exports = Class(Rect, function(supr) {
       return true;
     }
 
-    var actorRight = actor.getMaxHitX();
-    var thisRight = this.getMaxHitX();
+    var actorRight = actor.getViewMaxX();
+    var thisRight = this.right;
     if (actorRight > thisRight) {
       var dx = thisRight - actorRight;
       actor.x += dx;
@@ -215,15 +221,15 @@ exports = Class(Rect, function(supr) {
     return false;
   };
   this.fullyOnY = function(actor) {
-    var actorTop = actor.getMinHitY();
-    var thisTop = this.getMinHitY();
+    var actorTop = actor.getViewMinY();
+    var thisTop = this.top;
     if (actorTop < thisTop) {
       actor.y += thisTop - actorTop;
       return true;
     }
 
-    var actorBottom = actor.getMaxHitY();
-    var thisBottom = this.getMaxHitY();
+    var actorBottom = actor.getViewMaxY();
+    var thisBottom = this.bottom;
     if (actorBottom > thisBottom) {
       actor.y += thisBottom - actorBottom;
       return true;

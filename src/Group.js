@@ -15,7 +15,7 @@ exports = Class(EntityPool, function(supr) {
     */
   this.init = function(opts) {
     opts = opts || {};
-    opts.ctor = Actor;
+    opts.ctor = opts.ctor || Actor;
     supr(this, "init", [opts]);
 
     /** @var {SpawnerManager} Group#_spawnerManager */
@@ -29,11 +29,15 @@ exports = Class(EntityPool, function(supr) {
     */
   this.addActor = function(resource, opts) {
     opts = opts || {};
+    if (typeof resource === "string") {
+      opts.url = resource;
+    } else {
+      opts = merge(opts, resource);
+    }
     opts.parent = opts.parent || GC.app.stage;
     opts.x = opts.x === undefined ? scene.camera.x + scene.camera.width / 2 : opts.x;
     opts.y = opts.y === undefined ? scene.camera.y + scene.camera.height / 2 : opts.y;
-    opts.url = (typeof resource === "string") ? resource : resource.url;
-    var result = this.obtain(opts.x, opts.y, opts);
+    var result = this.obtain(opts);
     result.group = this;
     return result;
   };
@@ -98,9 +102,13 @@ exports = Class(EntityPool, function(supr) {
     * @see {Group#destroySpawners}
     * @see {Group#releaseAll}
     */
-  this.destroy = function() {
+  this.destroy = function(runDestroyHandlers) {
+    runDestroyHandlers = runDestroyHandlers !== undefined ? runDestroyHandlers : true;
     this.destroySpawners();
-    this.releaseAll();
+    var entities = this.entities;
+    for (var i = this._freeIndex - 1; i >= 0; i--) {
+      entities[i].destroy(runDestroyHandlers);
+    }
   };
 
 });

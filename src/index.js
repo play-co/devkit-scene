@@ -1,5 +1,6 @@
 import device;
 import animate;
+import animate.transitions as transitions;
 import ui.View as View;
 import ui.TextView as TextView;
 import ui.ImageView as ImageView;
@@ -16,6 +17,8 @@ import .spawner.Spawner as Spawner;
 import .shape.Line as Line;
 import .shape.Rect as Rect;
 
+import .state.StateManager as StateManager;
+
 import .collision.CollisionManager as CollisionManager;
 import .collision.CollisionChecker as CollisionChecker;
 
@@ -29,6 +32,9 @@ import .Camera;
 import .Background;
 import .SceneText;
 import .utils;
+import .SceneAudioManager;
+import .ScaleManager;
+import .ui.UIView as UIView;
 
 import communityart;
 import effects;
@@ -74,23 +80,25 @@ scene = function (newGameFunc) {
     this.initUI = function() {
       this.rootView = this.view;
 
-      this.setScreenDimensions();
-
-      /**
-        * This is the devkit {@link View} which all backgrounds should be added to.
-        * @var {Background} scene.background
-        */
-      scene.background = new Background({
-        parent: this.rootView,
-        width: scene.screen.width,
-        height: scene.screen.height
-      });
-
       /**
         * The devkit {@link View} which contains the entire scene.
         * @var {View} scene.view
         */
       scene.view = this.rootView;
+
+      scene.updateScreenDimensions();
+
+      /**
+        * This is the devkit {@link View} which all backgrounds should be added to.
+        * @var {Background} scene.background
+        */
+      console.log("DIMENSIONS:", scene.screen.width, scene.screen.height);
+
+      scene.background = new Background({
+        parent: this.rootView,
+        width: scene.screen.width,
+        height: scene.screen.height
+      });
 
       /**
         * This is the devkit {@link View} which all actors should be added to.
@@ -102,6 +110,8 @@ scene = function (newGameFunc) {
       });
 
       scene.stage = this.stage;
+
+      scene.ui = new UIView({ superview: scene.view, infinite: true });
 
       /**
        * The root group for all objects created on the scene instead of
@@ -159,15 +169,16 @@ scene = function (newGameFunc) {
     this.reset = function(mode) {
       if (mode === undefined) mode = 'default';
 
+      scene.ui.reset();
+
       effects.commit();
       effects.stop();
       scene.clearAnimations();
-      this.setScreenDimensions();
+      scene.updateScreenDimensions();
       scene.screen.resetTouches();
       scene.background.reset();
 
-      scene.collisions.reset();
-      scene.group.destroy();
+      scene.group.destroy(false);
       scene.player = null;
       scene.camera.stopFollowing();
       scene.camera.x = 0;
@@ -176,7 +187,7 @@ scene = function (newGameFunc) {
       scene.timerManager.reset();
 
       for (var i in this.groups) {
-        this.groups[i].destroy();
+        this.groups[i].destroy(false);
       }
 
       for (var k in scene.extraViews) {
@@ -186,44 +197,25 @@ scene = function (newGameFunc) {
       delete scene._scoreView;
       scene.background.destroy();
 
+      scene.collisions.reset();
+
       // Clear the tallies
       scene.extraViews = [];
       this.groups = [];
       _score = 0;
       _on_tick = null;
 
+      scene.state.reset();
+
       // Let's reboot the fun!
       var currentMode = _modes[mode]
-      currentMode.fun(currentMode.opts);
+      currentMode.fun(scene.state._gameObject, currentMode.opts);
 
       scene.background.reloadConfig();
 
       // The curtain rises, and Act 1 begins!
       _game_running = true;
     }
-
-    /**
-     * setScreenDimensions
-     */
-    this.setScreenDimensions = function() {
-
-      var ds = device.screen;
-      var vs = this.rootView.style;
-      var targetHeight = ds.width > ds.height ? 576 : 1024;
-
-      vs.scale = device.height / targetHeight;
-      vs.width = device.width / vs.scale;
-      vs.height = targetHeight;
-
-      vs.x = (ds.width - vs.width) / 2;
-      vs.y = (ds.height - vs.height) / 2;
-      vs.anchorX = vs.width / 2;
-      vs.anchorY = vs.height / 2;
-
-      scene.camera.resize(vs.width, vs.height);
-      scene.screen.width = vs.width;
-      scene.screen.height = vs.height;
-    };
 
     /**
      * tick tock
@@ -240,19 +232,47 @@ scene = function (newGameFunc) {
       // Convert dt into seconds
       dt *= SCALE_DT;
 
+      scene.collisions.update();
       scene.background.update(dt);
       scene.group.update(dt);
       for (var i = 0; i < this.groups.length; i++) {
         this.groups[i].update(dt);
       }
       scene.camera.update(dt);
-      scene.collisions.update();
       this.stage.style.x = -scene.camera.x;
       this.stage.style.y = -scene.camera.y;
       scene.background.scrollTo(-scene.camera.x, -scene.camera.y);
     }
   });
 
+};
+
+scene.SCALE_MODE = ScaleManager.SCALE_MODE;
+scene.scaleManager = new ScaleManager(576, 1024, scene.SCALE_MODE.LOCK_HEIGHT);
+
+scene.setScaleOptions = function(width, height, scaleMode) {
+  scene.scaleManager.resize(width, height, scaleMode);
+  scene.updateScreenDimensions();
+};
+
+/**
+ * updateScreenDimensions
+ */
+scene.updateScreenDimensions = function() {
+
+  scene.camera.resize(scene.scaleManager.width, scene.scaleManager.height);
+  scene.screen.width = scene.scaleManager.width;
+  scene.screen.height = scene.scaleManager.height;
+
+  if (!scene.view) { return; }
+
+  scene.scaleManager.scaleView(scene.view);
+
+  var vs = scene.view.style;
+  vs.x = (device.width - vs.width) / 2;
+  vs.y = (device.height - vs.height) / 2;
+  vs.anchorX = vs.width / 2;
+  vs.anchorY = vs.height / 2;
 };
 
 /**
@@ -269,6 +289,11 @@ scene.camera = new Camera(scene.screen.width, scene.screen.height);
   * @var {CollisionManager} scene.collisions
   */
 scene.collisions = new CollisionManager();
+
+/**
+  * @var {StateManager} scene.state
+  */
+scene.state = new StateManager();
 
 /**
   * There can be only one player. {@link scene.gameOver} is automatically called when the player is destroyed.
@@ -553,30 +578,32 @@ scene.removeTimeout = function(timeoutInstance) {
   * @arg {boolean} [opts.noGameoverScreen] - Optionally skip the "Game Over" text.
   */
 scene.gameOver = function(opts) {
+
+  if (_game_running === false ) { return; }
+
   opts = opts || {};
   opts.delay = opts.delay !== undefined ? opts.delay : 1000;
 
-  if (_game_running) {
-    _game_running = false;
+  _game_running = false;
 
-    setTimeout(function () {
-      if (!opts.noGameoverScreen) {
-        var bgHeight = scene.screen.height;
+  setTimeout(function () {
+    if (!opts.noGameoverScreen) {
+      var bgHeight = scene.screen.height;
 
-        // TODO: This should be a scene splash ... not random text. Allows the player to set their own game over splash.
-        if (_using_score) {
-          scene.addText('Game Over!', { y: bgHeight / 2 - DEFAULT_TEXT_HEIGHT });
-          scene.addText('Score: ' + _score, { y: bgHeight / 2 + 10 });
-        } else {
-          scene.addText('Game Over!');
-        }
-
-        scene.screen.onTouchOnce(function () {
-          setTimeout(function () { GC.app.reset() });
-        });
+      // TODO: This should be a scene splash ... not random text. Allows the player to set their own game over splash.
+      if (_using_score) {
+        scene.addText('Game Over!', { y: bgHeight / 2 - DEFAULT_TEXT_HEIGHT });
+        scene.addText('Score: ' + _score, { y: bgHeight / 2 + 10 });
+      } else {
+        scene.addText('Game Over!');
       }
-    }, opts.delay);
-  }
+
+      scene.screen.onTouchOnce(function () {
+        setTimeout(function () { GC.app.reset() });
+      });
+    }
+  }, opts.delay);
+
 };
 
 /**
@@ -658,7 +685,9 @@ scene.addPlayer = function(resource, opts) {
   * @returns {@link Group}
   */
 scene.addGroup = function(opts) {
-  var result = new Group({superview: GC.app.stage});
+  opts = opts || {};
+  opts.superview = GC.app.stage;
+  var result = new Group(opts);
   GC.app.groups.push(result);
   return result;
 };
@@ -732,14 +761,20 @@ scene.collision = {
   CollisionChecker: CollisionChecker
 };
 
-scene.animations = [];
+scene.animationGroups = [ "scene" ];
 
 scene.clearAnimations = function() {
-  for (var i = 0; i < scene.animations.length; i++) {
-    scene.animations[i].commit();
-    scene.animations[i].clear();
+  for (var i = 0; i < scene.animationGroups.length; i++) {
+    var group = animate.getGroup(scene.animationGroups[i]);
+    if (!group) { continue; }
+    var animations = group._anims;
+    for (var key in animations) {
+      animations[key].commit();
+      animations[key].clear();
+      delete animations[key];
+    }
   }
-  scene.animations = [];
+  scene.animationGroups.length = 1;
 };
 
 /**
@@ -748,16 +783,32 @@ scene.clearAnimations = function() {
   * @arg {string}  [name]
   * @returns {Animator} anim
   */
-scene.animate = function(subject, name) {
-  var anim = animate(subject, name);
-  if (scene.animations.indexOf(anim) === -1) {
-    scene.animations.push(anim);
+scene.animate = function(subject, groupId) {
+  groupId = groupId === undefined ? "scene" : "scene_" + groupId;
+  var anim = animate(subject, groupId);
+  if (groupId !== "scene" && scene.animationGroups.indexOf(groupId) === -1) {
+    scene.animationGroups.push(groupId);
   }
   return anim;
 };
 
+scene.transitions = transitions;
+
+scene.audio = new SceneAudioManager();
+scene.addSound = bind(scene.audio, "addSound");
+scene.addSoundGroup = bind(scene.audio, "addSoundGroup");
+scene.addMusic = bind(scene.audio, "addMusic");
+scene.playSound = bind(scene.audio,"playSound");
+scene.playMusic = bind(scene.audio,"playMusic");
+scene.stopMusic = bind(scene.audio,"stopMusic");
+
 scene.configureBackground = function(config) {
+  if (config.config) { config = config.config };
   scene.background.reloadConfig(config);
+};
+
+scene.reset = function() {
+  GC.app.reset();
 };
 
 exports = scene;
