@@ -2,7 +2,7 @@
 
 ### The examples
 
-This is the coolest and easiest way to make games with devkit.  Check out some of the examples at [github examples](https://github.com/weebygames/devkit-scene/tree/spec/examples)!
+This is the coolest and easiest way to make games with devkit.  Check out some of the examples at [github examples](https://github.com/gameclosure/devkit-scene/tree/spec/examples)!
 
 ### The docs
 

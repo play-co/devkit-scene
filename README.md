@@ -9,7 +9,7 @@ Installation and Usage
 
 To install the scene module into your devkit2 project, execute:
 
-    devkit install https://github.com/weebygames/devkit-scene
+    devkit install https://github.com/gameclosure/devkit-scene
 
 Then, to use the scene module change your `Application.js` to fit the following:
 
