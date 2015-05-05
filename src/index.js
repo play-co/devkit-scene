@@ -803,6 +803,7 @@ scene.playMusic = bind(scene.audio,"playMusic");
 scene.stopMusic = bind(scene.audio,"stopMusic");
 
 scene.configureBackground = function(config) {
+  if (config.config) { config = config.config };
   scene.background.reloadConfig(config);
 };
 
