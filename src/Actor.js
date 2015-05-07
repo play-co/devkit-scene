@@ -26,7 +26,7 @@ exports = Class(Entity, function() {
 
   this.init = function(opts) {
     supr.init.call(this, opts);
-    this.reset(opts);
+    //this.reset(opts);
   }
 
   this.reset = function(config) {
@@ -56,6 +56,10 @@ exports = Class(Entity, function() {
     this.unscaledHitBounds = this.model.hitBounds;
     this.scale = config.scale !== undefined ? config.scale : 1;
     this.view.setFramerate(config.frameRate !== undefined ? config.frameRate : 30);
+
+    this.rotation = config.rotation || 0;
+    this.flipX = config.flipX || false;
+    this.flipY = config.flipY || false;
   }
 
   this.applyScaledBounds = function(sourceBounds, targetBounds, scale) {
@@ -276,6 +280,10 @@ exports = Class(Entity, function() {
     return this;
   };
 
+  this.getSpeed = function() {
+    return Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+  };
+
   /**
     * Register a new destroy handler, will be called after {@link Actor#destroy} has been called.
     * @func Actor#onDestroy
@@ -300,6 +308,21 @@ exports = Class(Entity, function() {
       this.view.style.scale = value;
       this.applyScaledBounds(this.unscaledHitBounds, this.model.hitBounds, value);
     }
+  });
+
+  Object.defineProperty(this, "flipX", {
+    get: function() { return this.view.style.flipX },
+    set: function(value) { this.view.style.flipX = value; }
+  });
+
+  Object.defineProperty(this, "flipY", {
+    get: function() { return this.view.style.flipY },
+    set: function(value) { this.view.style.flipY = value; }
+  });
+
+  Object.defineProperty(this, "rotation", {
+    get: function() { return this.view.style.r },
+    set: function(value) { this.view.style.r = value; }
   });
 
   this.showHitBounds = function() {

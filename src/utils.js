@@ -67,3 +67,41 @@ choose = function(array) {
 
   return array[Math.floor(Math.random() * array.length)];
 };
+
+/**
+  * Randomize the elements in an {@link array}.
+  * @arg {array} Array
+  * @returns {array} The shuffled Array
+  */
+shuffle = function(array) {
+  var currentIndex = array.length;
+  var temporaryValue;
+  var randomIndex;
+
+  while (currentIndex > 0) {
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
+  }
+
+  return array;
+};
+
+/**
+  * Choose a random element from {@link object}.
+  * @arg {object} obj
+  * @returns {object} A random element from the object
+  */
+pickRandomProperty = function(obj) {
+  var result;
+  var count = 0;
+  for (var prop in obj) {
+    count++;
+    if (Math.random() < 1 / count) {
+      result = prop;
+    }
+  }
+  return obj[result];
+};
