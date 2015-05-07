@@ -761,20 +761,26 @@ scene.collision = {
   CollisionChecker: CollisionChecker
 };
 
-scene.animationGroups = [ "scene" ];
+// TODO: seems like this calls for ... another manager!
+scene.animationGroups = null;
 
 scene.clearAnimations = function() {
-  for (var i = 0; i < scene.animationGroups.length; i++) {
-    var group = animate.getGroup(scene.animationGroups[i]);
-    if (!group) { continue; }
-    var animations = group._anims;
-    for (var key in animations) {
-      animations[key].commit();
-      animations[key].clear();
-      delete animations[key];
+  if (scene.animationGroups) {
+    // Clear old animaion groups
+    for (var i = 0; i < scene.animationGroups.length; i++) {
+      var group = animate.getGroup(scene.animationGroups[i]);
+      if (!group) { continue; }
+      var animations = group._anims;
+      for (var key in animations) {
+        animations[key].commit();
+        animations[key].clear();
+        delete animations[key];
+      }
     }
   }
-  scene.animationGroups.length = 1;
+
+  // Reset array
+  scene.animationGroups = ['scene'];
 };
 
 /**
