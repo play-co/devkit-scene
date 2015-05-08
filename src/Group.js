@@ -34,10 +34,10 @@ exports = Class(EntityPool, function(supr) {
     } else {
       opts = merge(opts, resource);
     }
-    opts.parent = opts.parent || GC.app.stage;
     opts.x = opts.x === undefined ? scene.camera.x + scene.camera.width / 2 : opts.x;
     opts.y = opts.y === undefined ? scene.camera.y + scene.camera.height / 2 : opts.y;
     var result = this.obtain(opts);
+    GC.app.stage.addSubview(result.view);
     result.group = this;
     return result;
   };

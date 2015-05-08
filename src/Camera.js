@@ -18,15 +18,19 @@ exports = Class(Rect, function(supr) {
     /** A collidable element representing the entire space left of the camera.
         @var {Rect} Camera#leftWall **/
     this.leftWall = new Rect(0, 0, this._MAX_SIZE, this._MAX_SIZE);
+    this.leftWall.fixed = true;
     /** A collidable element representing the entire space right of the camera.
         @var {Rect} Camera#rightWall **/
     this.rightWall = new Rect(0, 0, this._MAX_SIZE, this._MAX_SIZE);
+    this.rightWall.fixed = true;
     /** A collidable element representing the entire space above the camera.
         @var {Rect} Camera#topWall **/
     this.topWall = new Rect(0, 0, this._MAX_SIZE, this._MAX_SIZE);
+    this.topWall.fixed = true;
     /** A collidable element representing the entire space below the camera.
         @var {Rect} Camera#bottomWall **/
     this.bottomWall = new Rect(0, 0, this._MAX_SIZE, this._MAX_SIZE);
+    this.bottomWall.fixed = true;
 
     // Now initilize super
     supr(this, 'init', [0, 0, width, height]);

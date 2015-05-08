@@ -35,6 +35,8 @@ import .utils;
 import .SceneAudioManager;
 import .ScaleManager;
 import .ui.UIView as UIView;
+import .ui.SceneImageView as SceneImageView;
+import .ui.SceneScoreView as SceneScoreView;
 
 import communityart;
 import effects;
@@ -198,6 +200,8 @@ scene = function (newGameFunc) {
       scene.background.destroy();
 
       scene.collisions.reset();
+
+      scene.stage.removeAllSubviews();
 
       // Clear the tallies
       scene.extraViews = [];
@@ -816,5 +820,32 @@ scene.configureBackground = function(config) {
 scene.reset = function() {
   GC.app.reset();
 };
+
+scene.addImage = function(resource, x, y, width, height) {
+
+  resource = typeof resource === 'object' ? resource : { image: resource };
+  if (!resource.image) { resource.image = resource.url; }
+
+  var viewOpts = merge({
+    autoSize: true,
+    superview: scene.stage,
+    x: x,
+    y: y
+  }, resource);
+
+  var viewClass = (viewOpts.scaleMethod === undefined) ? SceneImageView : SceneImageScaleView;
+  var result = new viewClass(viewOpts);
+
+  if (width !== undefined) { result.width = width; }
+  if (height !== undefined) { result.height = height; }
+
+  return result;
+};
+
+scene.addScoreText = function(resource, x, y, width, height) {
+  var opts = merge({ superview: scene.stage, x: x, y: y, width: width, height: height, format: SceneScoreView.FORMAT_SCORE }, resource);
+  return new SceneScoreView(opts);
+};
+
 
 exports = scene;

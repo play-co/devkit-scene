@@ -8,7 +8,12 @@ var viewProperties = [
   "visible",
   "scale",
   "scaleX",
-  "scaleY"
+  "scaleY",
+  "flipX",
+  "flipY",
+  "zIndex",
+  "anchorX",
+  "anchorY"
 ];
 
 var PropertyUtil = exports = {

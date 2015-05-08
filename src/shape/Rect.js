@@ -18,7 +18,6 @@ exports = Class(Shape, function(supr) {
     this.width = width || 0;
     /** @var {number} Rect#height */
     this.height = height || 0;
-
     this.hitOffset = { x: 0, y: 0 };
   };
 
