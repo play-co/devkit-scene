@@ -829,48 +829,67 @@ scene.reset = function() {
  * @param  {String|Object} resource - resource key to be resolved by community art, or opts
  * @param  {Number} x
  * @param  {Number} y
- * @param  {Number} [width]
- * @param  {Number} [height]
+ * @param  {Object} [opts]
  * @return {View} imageView
  */
-scene.addImage = function(resource, x, y, width, height) {
-  var opts = communityart.getResource(resource, 'ImageView');
-  if (!opts.image) {
-    opts.image = opts.url;
+/**
+ * @method scene.addImage(2)
+ * @param  {String|Object} resource
+ * @param  {Number} x
+ * @param  {Number} y
+ * @param  {Number} width
+ * @param  {Number} height
+ * @param  {Object} [opts]
+ * @return {View} imageView
+ */
+scene.addImage = function(resource, x, y, width, height, opts) {
+  var resourceOpts = communityart.getResource(resource, 'ImageView');
+  if (!resourceOpts.image) {
+    resourceOpts.image = resourceOpts.url;
   }
 
+  // Check for signature (1)
+  if (typeof width === 'object') {
+    opts = width;
+  } else {
+    opts = opts || {};
+    opts.width = width;
+    opts.height = height;
+  }
+
+  opts.superview = opts.superview || scene.stage;
+  opts.autoSize = opts.autoSize !== undefined ? opts.autoSize : true;
+  opts.x = x;
+  opts.y = y;
+
   // Set up the view
-  var viewOpts = merge({
-    autoSize: true,
-    superview: scene.stage,
-    x: x,
-    y: y
-  }, opts);
+  var viewOpts = merge(opts, resourceOpts);
 
   var viewClass = (viewOpts.scaleMethod === undefined) ? SceneImageView : SceneImageScaleView;
   var result = new viewClass(viewOpts);
-
-  if (width !== undefined) { result.width = width; }
-  if (height !== undefined) { result.height = height; }
 
   return result;
 };
 
 /**
+  * @method scene.addScoreText
   * @param  {String|Object} resource - resource key to be resolved by community art, or opts
-  * */
-scene.addScoreText = function(resource, x, y, width, height) {
+  * @param {Number} x
+  * @param {Number} y
+  * @param {Object} opts
+  * @returns {SceneScoreView}
+  */
+scene.addScoreText = function(resource, x, y, opts) {
   var resourceOpts = communityart.getResource(resource, 'ScoreView');
-  var opts = merge({
-    superview: scene.stage,
-    x: x,
-    y: y,
-    width: width,
-    height: height,
-    format: SceneScoreView.FORMAT_SCORE
-  }, resourceOpts);
+  opts = opts || {};
 
-  return new SceneScoreView(opts);
+  opts.superview = opts.superview || scene.stage;
+  opts.x = x;
+  opts.y = y;
+  opts.format = opts.format || SceneScoreView.FORMAT_SCORE;
+
+  var viewOpts = merge(opts, resourceOpts);
+  return new SceneScoreView(viewOpts);
 };
 
 
