@@ -1,4 +1,4 @@
-
+import communityart;
 import entities.EntityPool as EntityPool;
 import .Actor;
 
@@ -25,19 +25,25 @@ exports = Class(EntityPool, function(supr) {
   /**
     * A function which adds an actor to the scene, using this group.
     * @func Group#addActor
+    * @param  {String|Object} resource - resource key to be resolved by community art, or opts
+    * @param  {Object} [opts]
     * @see scene.addActor
     */
   this.addActor = function(resource, opts) {
+    var resourceOpts = communityart.getResource(resource, 'Actor');
+
     opts = opts || {};
-    if (typeof resource === "string") {
-      opts.url = resource;
-    } else {
-      opts = merge(opts, resource);
-    }
+    opts = merge(opts, resourceOpts);
+
+    // set some defaults
     opts.x = opts.x === undefined ? scene.camera.x + scene.camera.width / 2 : opts.x;
     opts.y = opts.y === undefined ? scene.camera.y + scene.camera.height / 2 : opts.y;
+
+    // obtain a new actor
     var result = this.obtain(opts);
-    GC.app.stage.addSubview(result.view);
+
+    // add the actor to the group
+    scene.stage.addSubview(result.view);
     result.group = this;
     return result;
   };

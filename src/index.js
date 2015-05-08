@@ -650,8 +650,8 @@ scene.addBackground = function(art, opts) {
 /**
   * Create a new actor that will be automatically updated each tick
   * @func scene.addActor
-  * @arg {View} view
-  * @arg {Object} [opts] - contains options to be applied to the underlying {@link Actor}
+  * @param  {String|Object} resource - resource key to be resolved by community art, or opts
+  * @param {Object} [opts] - contains options to be applied to the underlying {@link Actor}
   * @returns {Actor}
   */
 /**
@@ -669,12 +669,15 @@ scene.addActor = function(resource, opts) {
   * @func scene.addPlayer
   *
   * @see scene.addActor
-  * @arg {View} view
-  * @arg {Object} [opts] - contains options to be applied to the underlying {@link Actor}
+  * @param  {String|Object} resource - resource key to be resolved by community art, or opts
+  * @param {Object} [opts] - contains options to be applied to the underlying {@link Actor}
   * @returns {View} - The newly set player
   */
 scene.addPlayer = function(resource, opts) {
-  if (scene.player) { throw new Error("You can only add one player!"); }
+  if (scene.player) {
+    throw new Error("You can only add one player!");
+  }
+
   scene.player = scene.addActor(resource, opts);
   scene.player.onDestroy(function() {
     scene.gameOver();
@@ -821,17 +824,28 @@ scene.reset = function() {
   GC.app.reset();
 };
 
+/**
+ * @method scene.addImage
+ * @param  {String|Object} resource - resource key to be resolved by community art, or opts
+ * @param  {Number} x
+ * @param  {Number} y
+ * @param  {Number} [width]
+ * @param  {Number} [height]
+ * @return {View} imageView
+ */
 scene.addImage = function(resource, x, y, width, height) {
+  var opts = communityart.getResource(resource, 'ImageView');
+  if (!opts.image) {
+    opts.image = opts.url;
+  }
 
-  resource = typeof resource === 'object' ? resource : { image: resource };
-  if (!resource.image) { resource.image = resource.url; }
-
+  // Set up the view
   var viewOpts = merge({
     autoSize: true,
     superview: scene.stage,
     x: x,
     y: y
-  }, resource);
+  }, opts);
 
   var viewClass = (viewOpts.scaleMethod === undefined) ? SceneImageView : SceneImageScaleView;
   var result = new viewClass(viewOpts);
@@ -842,8 +856,20 @@ scene.addImage = function(resource, x, y, width, height) {
   return result;
 };
 
+/**
+  * @param  {String|Object} resource - resource key to be resolved by community art, or opts
+  * */
 scene.addScoreText = function(resource, x, y, width, height) {
-  var opts = merge({ superview: scene.stage, x: x, y: y, width: width, height: height, format: SceneScoreView.FORMAT_SCORE }, resource);
+  var resourceOpts = communityart.getResource(resource, 'ScoreView');
+  var opts = merge({
+    superview: scene.stage,
+    x: x,
+    y: y,
+    width: width,
+    height: height,
+    format: SceneScoreView.FORMAT_SCORE
+  }, resourceOpts);
+
   return new SceneScoreView(opts);
 };
 
