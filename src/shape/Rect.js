@@ -12,8 +12,6 @@ import .Shape;
   */
 exports = Class(Shape, function(supr) {
 
-  this.fixed = true;
-
   this.init = function(x, y, width, height) {
     supr(this, "init", [x, y]);
     /** @var {number} Rect#width */

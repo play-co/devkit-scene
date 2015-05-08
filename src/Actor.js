@@ -26,6 +26,8 @@ exports = Class(Entity, function() {
 
   this.init = function(opts) {
     supr.init.call(this, opts);
+    // TODO: this is a workaround for an enties / scene problem with resetting
+    // //      without opts. review entities and the need for calling reset on init.
     //this.reset(opts);
   }
 

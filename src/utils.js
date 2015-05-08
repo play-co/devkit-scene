@@ -60,7 +60,7 @@ combine = function(a, b) {
 /**
   * Choose a random element from {@link array}. Checks for undefined and array length of 0.
   * @arg {array} array
-  * @returns {object} A random element from the array
+  * @returns {object} randomElement A random element from the array
   */
 choose = function(array) {
   if (!array || !array.length) return;
@@ -90,18 +90,11 @@ shuffle = function(array) {
 };
 
 /**
-  * Choose a random element from {@link object}.
-  * @arg {object} obj
-  * @returns {object} A random element from the object
+  * Choose a random element using the key array returned from Object.keys
+  * @arg {Object} object
+  * @returns {Object} objectProperty A random element from the object
   */
 pickRandomProperty = function(obj) {
-  var result;
-  var count = 0;
-  for (var prop in obj) {
-    count++;
-    if (Math.random() < 1 / count) {
-      result = prop;
-    }
-  }
+  var result = choose(Object.keys(obj));
   return obj[result];
 };
