@@ -1,6 +1,6 @@
 import ..Actor as Actor;
 import ..Group as Group;
-import ..shape.Shape as Shape;
+import entities.shapes.Shape as Shape;
 
 import entities.physics as EntityPhysics;
 

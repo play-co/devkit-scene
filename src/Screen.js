@@ -1,5 +1,5 @@
 import .Actor;
-import .shape.Rect as Rect;
+import entities.shapes.Rect as Rect;
 
 /**
   * @class Screen
@@ -7,7 +7,12 @@ import .shape.Rect as Rect;
 exports = Class(Rect, function(supr) {
 
   this.init = function(width, height) {
-    supr(this, "init", [0, 0, width, height]);
+    var suprOpts = {
+      width: width,
+      height: height
+    };
+    supr(this, "init", [suprOpts]);
+
     this.resetTouches();
   };
 

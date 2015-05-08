@@ -1,5 +1,5 @@
 import .Actor;
-import .shape.Rect as Rect;
+import entities.shapes.Rect as Rect;
 
 exports = Class(Rect, function(supr) {
 
@@ -15,26 +15,38 @@ exports = Class(Rect, function(supr) {
     // Must first define the walls, because of Camera's custom setters on x and y
     this._x = 0;
     this._y = 0;
+
+    this.wallOffsets = {
+      left: { x: 0, y: 0 },
+      top: { x: 0, y: 0 },
+      right: { x: 0, y: 0 },
+      bottom: { x: 0, y: 0 }
+    };
+
+    var wallOpts = { width: this._MAX_SIZE, height: this._MAX_SIZE };
     /** A collidable element representing the entire space left of the camera.
         @var {Rect} Camera#leftWall **/
-    this.leftWall = new Rect(0, 0, this._MAX_SIZE, this._MAX_SIZE);
+    this.leftWall = new Rect(wallOpts);
     this.leftWall.fixed = true;
     /** A collidable element representing the entire space right of the camera.
         @var {Rect} Camera#rightWall **/
-    this.rightWall = new Rect(0, 0, this._MAX_SIZE, this._MAX_SIZE);
+    this.rightWall = new Rect(wallOpts);
     this.rightWall.fixed = true;
     /** A collidable element representing the entire space above the camera.
         @var {Rect} Camera#topWall **/
-    this.topWall = new Rect(0, 0, this._MAX_SIZE, this._MAX_SIZE);
+    this.topWall = new Rect(wallOpts);
     this.topWall.fixed = true;
     /** A collidable element representing the entire space below the camera.
         @var {Rect} Camera#bottomWall **/
-    this.bottomWall = new Rect(0, 0, this._MAX_SIZE, this._MAX_SIZE);
+    this.bottomWall = new Rect(wallOpts);
     this.bottomWall.fixed = true;
 
     // Now initilize super
-    supr(this, 'init', [0, 0, width, height]);
-
+    var suprOpts = {
+      width: width,
+      height: height
+    };
+    supr(this, 'init', [suprOpts]);
 
     /** The camera will keep this {@link Actor} inside of the {@link Camera#movementBounds}
         @var {Actor} Camera#following **/
@@ -50,17 +62,21 @@ exports = Class(Rect, function(supr) {
     this.width = width;
     this.height = height;
 
-    this.leftWall.hitOffset.x = -this._MAX_SIZE;
-    this.leftWall.hitOffset.y = -this._MAX_SIZE / 2;
+    this.wallOffsets.left.x = -this._MAX_SIZE;
+    this.wallOffsets.left.y = -this._MAX_SIZE / 2;
 
-    this.topWall.hitOffset.x = -this._MAX_SIZE / 2;
-    this.topWall.hitOffset.y = -this._MAX_SIZE;
+    this.wallOffsets.top.x = -this._MAX_SIZE / 2;
+    this.wallOffsets.top.y = -this._MAX_SIZE;
 
-    this.rightWall.hitOffset.x = width;
-    this.rightWall.hitOffset.y = -this._MAX_SIZE / 2;
+    this.wallOffsets.right.x = width;
+    this.wallOffsets.right.y = -this._MAX_SIZE / 2;
 
-    this.bottomWall.hitOffset.x = -this._MAX_SIZE / 2;
-    this.bottomWall.hitOffset.y = height;
+    this.wallOffsets.bottom.x = -this._MAX_SIZE / 2;
+    this.wallOffsets.bottom.y = height;
+
+    // Trigger the setters to update wall positions
+    this.x = this.x;
+    this.y = this.y;
   };
 
   /**
@@ -72,7 +88,7 @@ exports = Class(Rect, function(supr) {
   this.follow = function(target, movementBounds) {
     this.following = target;
     this.movementBounds = movementBounds
-      || new Rect(this._x + this.width / 2, this._y + this.height / 2, 0, 0);
+      || new Rect({ x: this._x + this.width / 2, y: this._y + this.height / 2 });
   };
 
   /**
@@ -96,20 +112,22 @@ exports = Class(Rect, function(supr) {
       get: function() { return this._x; },
       set: function(value) {
         this._x = value;
-        this.leftWall.x = value;
-        this.rightWall.x = value;
-        this.topWall.x = value;
-        this.bottomWall.x = value;
+
+        this.leftWall.x = this.wallOffsets.left.x + value;
+        this.rightWall.x = this.wallOffsets.right.x + value;
+        this.topWall.x = this.wallOffsets.top.x + value;
+        this.bottomWall.x = this.wallOffsets.bottom.x + value;
       }
     },
     y: {
       get: function() { return this._y; },
       set: function(value) {
         this._y = value;
-        this.leftWall.y = value;
-        this.rightWall.y = value;
-        this.topWall.y = value;
-        this.bottomWall.y = value;
+
+        this.leftWall.y = this.wallOffsets.left.y + value;
+        this.rightWall.y = this.wallOffsets.right.y + value;
+        this.topWall.y = this.wallOffsets.top.y + value;
+        this.bottomWall.y = this.wallOffsets.bottom.y + value;
       }
     }
   });

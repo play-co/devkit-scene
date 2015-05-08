@@ -14,8 +14,8 @@ import .spawner.HorizontalSpawner as HorizontalSpawner;
 import .spawner.VerticalSpawner as VerticalSpawner;
 import .spawner.Spawner as Spawner;
 
-import .shape.Line as Line;
-import .shape.Rect as Rect;
+import entities.shapes.Line as Line;
+import entities.shapes.Rect as Rect;
 
 import .state.StateManager as StateManager;
 
