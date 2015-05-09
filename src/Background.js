@@ -1,3 +1,4 @@
+import communityart;
 import ui.View as View;
 import ui.ImageView as ImageView;
 
@@ -117,13 +118,13 @@ exports = Class(View, function (supr) {
     */
   this.addLayer = function(resource, opts) {
     var isParallaxConfig = false;
-    var imageUrl = (typeof resource === "string") ? resource : resource.url;
+    var resourceOpts = communityart.getResource(resource, 'Parallax');
 
     // Static image
     if (!opts) {
       var view = new ImageView({
         superview: this,
-        image: resource.url || resource,
+        image: resourceOpts.url,
         x: 0,
         y: 0,
         width: this.style.width,
@@ -133,12 +134,10 @@ exports = Class(View, function (supr) {
     }
 
     opts = opts || {};
-    if (typeof resource === "object") {
-      isParallaxConfig = resource.type === "parallax";
-    }
+    isParallaxConfig = resourceOpts.type === "parallax";
 
     if (isParallaxConfig) {
-      var config_opts = resource.config;
+      var config_opts = resourceOpts.config;
       for (var l in config_opts) {
         var layerConfig = config_opts[l];
         var layer = new Layer(layerConfig, this);
@@ -156,7 +155,7 @@ exports = Class(View, function (supr) {
       else if (opts.align === 'right' && opts.x === undefined) { opts.x = 0; }
 
       // Build pieceOptions
-      var pieceOptions = { image:imageUrl };
+      var pieceOptions = { image: resourceOpts.url };
       if (opts.align === 'left' || opts.align === 'right') {
         pieceOptions.xAlign = opts.align;
       } else if (opts.align === 'top' || opts.align === 'bottom') {
