@@ -102,6 +102,27 @@ exports = Class(EntityPool, function(supr) {
     this.updatePool(dt);
   };
 
+  this.getClosest = function(x, y, ignore) {
+    var closestDist = 0;
+    var closestEnt = null;
+    this.forEachActiveEntity(function(e) {
+      if (e === ignore) {
+        return;
+      }
+
+      var dx = x - e.x;
+      var dy = y - e.y;
+      var dist = dx * dx + dy * dy;
+
+      if (!closestEnt || dist < closestDist) {
+        closestDist = dist;
+        closestEnt = e;
+      }
+    });
+
+    return closestEnt;
+  };
+
   /**
     * Destroys everything related to the group
     * @func Group#destroy

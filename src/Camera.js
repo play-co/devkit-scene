@@ -28,18 +28,26 @@ exports = Class(Rect, function(supr) {
         @var {Rect} Camera#leftWall **/
     this.leftWall = new Rect(wallOpts);
     this.leftWall.fixed = true;
+    this.leftWall.wallName = 'left';
     /** A collidable element representing the entire space right of the camera.
         @var {Rect} Camera#rightWall **/
     this.rightWall = new Rect(wallOpts);
     this.rightWall.fixed = true;
+    this.rightWall.wallName = 'right';
     /** A collidable element representing the entire space above the camera.
         @var {Rect} Camera#topWall **/
     this.topWall = new Rect(wallOpts);
     this.topWall.fixed = true;
+    this.topWall.wallName = 'top';
     /** A collidable element representing the entire space below the camera.
         @var {Rect} Camera#bottomWall **/
     this.bottomWall = new Rect(wallOpts);
     this.bottomWall.fixed = true;
+    this.bottomWall.wallName = 'bottom';
+
+    /** An array of all the walls for easy reference.
+        @var {Rect[]} Camera#walls **/
+    this.walls = [this.leftWall, this.rightWall, this.topWall, this.bottomWall];
 
     // Now initilize super
     var suprOpts = {
@@ -197,17 +205,17 @@ exports = Class(Rect, function(supr) {
   this.wrap = function(actor) {};
 
   this.wrapX = function(actor) {
-    if (actor.getViewMinX() > scene.camera.right) {
+    if (actor.viewMinX > scene.camera.right) {
       actor.x = scene.camera.left - actor.view.style.offsetX - actor.getViewWidth();
-    } else if (actor.getViewMaxX() < scene.camera.x) {
+    } else if (actor.viewMaxX < scene.camera.x) {
       actor.x = scene.camera.right - actor.view.style.offsetX;
     }
   };
 
   this.wrapY = function(actor) {
-    if (actor.getViewMinY() > scene.camera.bottom) {
+    if (actor.viewMinY > scene.camera.bottom) {
       actor.y = scene.camera.top - actor.view.style.offsetY - actor.getViewHeight();
-    } else if (actor.getViewMaxY() < scene.camera.top) {
+    } else if (actor.viewMaxY < scene.camera.top) {
       actor.y = scene.camera.bottom - actor.view.style.offsetY;
     }
   };
@@ -223,7 +231,7 @@ exports = Class(Rect, function(supr) {
     return flagX || flagY;
   };
   this.fullyOnX = function(actor) {
-    var actorLeft = actor.getViewMinX();
+    var actorLeft = actor.viewMinX;
     var thisLeft = this.x;
     if (actorLeft < thisLeft) {
       var dx = thisLeft - actorLeft;
@@ -232,7 +240,7 @@ exports = Class(Rect, function(supr) {
       return true;
     }
 
-    var actorRight = actor.getViewMaxX();
+    var actorRight = actor.viewMaxX;
     var thisRight = this.right;
     if (actorRight > thisRight) {
       var dx = thisRight - actorRight;
@@ -243,14 +251,14 @@ exports = Class(Rect, function(supr) {
     return false;
   };
   this.fullyOnY = function(actor) {
-    var actorTop = actor.getViewMinY();
+    var actorTop = actor.viewMinY;
     var thisTop = this.top;
     if (actorTop < thisTop) {
       actor.y += thisTop - actorTop;
       return true;
     }
 
-    var actorBottom = actor.getViewMaxY();
+    var actorBottom = actor.viewMaxY;
     var thisBottom = this.bottom;
     if (actorBottom > thisBottom) {
       actor.y += thisBottom - actorBottom;

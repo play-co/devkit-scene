@@ -32,6 +32,12 @@ randRange = function(a, b, bipolar) {
   return n;
 };
 
+dist = function(x, y, x2, y2) {
+  var dx = x - x2;
+  var dy = y - y2;
+  return Math.sqrt(dx * dx + dy * dy);
+};
+
 /**
   * Choose a random int between a and b
   * @arg {number} a

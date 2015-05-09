@@ -26,9 +26,6 @@ exports = Class(Entity, function() {
 
   this.init = function(opts) {
     supr.init.call(this, opts);
-    // TODO: this is a workaround for an enties / scene problem with resetting
-    // //      without opts. review entities and the need for calling reset on init.
-    //this.reset(opts);
   }
 
   this.reset = function(config) {
@@ -39,6 +36,8 @@ exports = Class(Entity, function() {
     this.destroyHandlers = [];
     this.tickHandlers = [];
     effects.commit(this);
+
+    this.dtExisted = 0;
 
     // Follow touches
     this.updateFollowTouches(config.followTouches);
@@ -90,6 +89,8 @@ exports = Class(Entity, function() {
       console.warn('Will not update destroyed Actor.');
       return;
     }
+
+    this.dtExisted += dt;
 
     this.followTouch(dt);
     this.updateEntity(dt);
@@ -208,6 +209,11 @@ exports = Class(Entity, function() {
     var targetAngle = Math.atan2(y - this.y, x - this.x);
     this.vx = speed * Math.cos(targetAngle);
     this.vy = speed * Math.sin(targetAngle);
+  };
+
+  this.rotateAt = function(x, y, offset) {
+    var targetAngle = Math.atan2(y - this.y, x - this.x) + Math.PI / 2;
+    this.view.style.r = targetAngle + (offset || 0);
   };
 
   /**

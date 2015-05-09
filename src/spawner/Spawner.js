@@ -84,8 +84,8 @@ exports = Class(function() {
       return this.getSpawnPoint(randomSpawnAt);
     }
 
-    if (spawnAt.getPointOn) {
-      spawnAt.getPointOn(this._cachedPoint);
+    if (spawnAt.getRandomPoint) {
+      this._cachedPoint = spawnAt.getRandomPoint();
     } else {
       this._cachedPoint.x = spawnAt.x;
       this._cachedPoint.y = spawnAt.y;
