@@ -23,6 +23,8 @@ exports = scene(function() {
     ax: 10,
     zIndex: 10
   });
+  // TODO: need a better way to store 'onGround' other than the current tick dt :/
+  player.onGround = 0;
 
   // Show the game score
   scene.showScore(10, 10);
@@ -63,11 +65,21 @@ exports = scene(function() {
       // Move the player out of the platform
       var dy = player.shape.bounds.maxY - platform.shape.bounds.minY;
       player.y -= dy;
+      player.onGround = scene.totalDt;
     }
   }, true);
 
+  player.onTick(function() {
+    if (player.onGround !== scene.totalDt) {
+      player.onGround = 0;
+    }
+  });
+
   scene.screen.onDown(function() {
-    player.vy = -1400;
+    if (player.onGround > 0) {
+      player.onGround = 0;
+      player.vy = -1400;
+    }
   });
 
   player.onEntered(scene.camera.bottomWall, function() { player.destroy(); });
@@ -75,8 +87,8 @@ exports = scene(function() {
   // Add the camera to follow the player
   scene.camera.follow(player,
     new scene.shape.Rect({
-      x: 0, y: 0,
-      width: scene.screen.width * 0.25, height: scene.screen.height * 2
+      x: 0, y: -1000,
+      width: scene.screen.width * 0.25, height: 2000 + scene.screen.height
     })
   );
 
