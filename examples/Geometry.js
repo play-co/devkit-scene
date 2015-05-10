@@ -135,6 +135,8 @@ exports = scene(function() {
   }, true);
 
   scene.onCollision(enemies, player, function(enemy) {
+    if (player.destroyed) return;
+
     enemy.destroy();
     player.hurt(1);
     effects.shake(background, { scale: 0.5 });

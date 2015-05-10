@@ -191,9 +191,25 @@ exports = Class(Rect, function(supr) {
     * @type {cameraUpdateFunction}
     * @todo
     */
-  this.bounce = function(actor) {};
-  this.bounceX = function(actor) {};
-  this.bounceY = function(actor) {};
+  this.bounce = function(actor) {
+    var flagX = this.bounceX(actor);
+    var flagY = this.bounceY(actor);
+    return flagX || flagY;
+  };
+  this.bounceX = function(actor) {
+    if (actor.viewMaxX >= this.right || actor.viewMinX <= this.left) {
+      actor.vx *= -1;
+      return true;
+    }
+    return false;
+  };
+  this.bounceY = function(actor) {
+    if (actor.viewMaxY >= this.bottom || actor.viewMinY <= this.top) {
+      actor.vy *= -1;
+      return true;
+    }
+    return false;
+  };
 
   /**
     * Determines which wall was hit, and wraps the actor around to the other side of the screen.
@@ -202,22 +218,32 @@ exports = Class(Rect, function(supr) {
     * @type {cameraUpdateFunction}
     * @todo
     */
-  this.wrap = function(actor) {};
+  this.wrap = function(actor) {
+    var flagX = this.wrapX(actor);
+    var flagY = this.wrapY(actor);
+    return flagX || flagY;
+  };
 
   this.wrapX = function(actor) {
-    if (actor.viewMinX > scene.camera.right) {
-      actor.x = scene.camera.left - actor.view.style.offsetX - actor.getViewWidth();
-    } else if (actor.viewMaxX < scene.camera.x) {
-      actor.x = scene.camera.right - actor.view.style.offsetX;
+    if (actor.viewMinX > this.right) {
+      actor.x = this.left - actor.view.style.offsetX - actor.getViewWidth();
+      return true;
+    } else if (actor.viewMaxX < this.x) {
+      actor.x = this.right - actor.view.style.offsetX;
+      return true;
     }
+    return false;
   };
 
   this.wrapY = function(actor) {
-    if (actor.viewMinY > scene.camera.bottom) {
-      actor.y = scene.camera.top - actor.view.style.offsetY - actor.getViewHeight();
-    } else if (actor.viewMaxY < scene.camera.top) {
-      actor.y = scene.camera.bottom - actor.view.style.offsetY;
+    if (actor.viewMinY > this.bottom) {
+      actor.y = this.top - actor.view.style.offsetY - actor.getViewHeight();
+      return true;
+    } else if (actor.viewMaxY < this.top) {
+      actor.y = this.bottom - actor.view.style.offsetY;
+      return true;
     }
+    return false;
   };
 
   /**

@@ -26,6 +26,14 @@ exports = Class(function() {
     get: function() { return this._isDown; }
   });
 
+  Object.defineProperty(this, 'x', {
+    get: function() { return this.pos.x; }
+  });
+
+  Object.defineProperty(this, 'y', {
+    get: function() { return this.pos.y; }
+  });
+
   /**
    * @callback TouchCallback
    * @param {Point} point - Location of the touch event

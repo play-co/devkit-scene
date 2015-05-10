@@ -20,15 +20,14 @@ import effects;
 exports = function(inherits) {
   return Class(inherits, function() {
 
-    var supr = inherits.prototype;
+    var suprPrototype = inherits.prototype;
 
     this.init = function(opts) {
-      supr.init.call(this, opts);
+      suprPrototype.init.call(this, opts);
     }
 
     this.reset = function(config) {
-
-      supr.reset.call(this, config);
+      suprPrototype.reset.call(this, config);
 
       this.lastFollowTarget = null;
       this.destroyHandlers = [];
@@ -69,6 +68,10 @@ exports = function(inherits) {
 
     this.updateFollowTouches = function(opts) {
       // Follow touches?
+      if (opts && typeof opts === 'boolean') {
+        opts = { x: true, y: true };
+      }
+
       this.followTouches = opts;
 
       if (this.followTouches) {
@@ -80,7 +83,7 @@ exports = function(inherits) {
     };
 
     // Cached reference to make faster direct calls
-    this.updateEntity = supr.update;
+    this.updateEntity = suprPrototype.update;
 
     this.update = function(dt) {
       if (this.destroyed) {
@@ -115,7 +118,9 @@ exports = function(inherits) {
     this.followTouch = function(dt) {
       // Move toward the current touch or mouse down, if followTouches
       if (!this.followTouches) { return; }
-      var currentTouch = scene.screen.getTouch();
+      // We are dividing by dt in here, cannot have dt of 0
+      if (dt === 0) { return; }
+      var currentTouch = scene.screen.defaultTouch;
 
       // Make sure we dont just cruise on forever in one direction
       var targetTouch = (!currentTouch && this.lastFollowTarget)
@@ -236,7 +241,7 @@ exports = function(inherits) {
       }
       if (this.view.hasAnimations) { this.view.stopAnimation(); }
       this.destroyed = true;
-      supr.destroy.call(this);
+      suprPrototype.destroy.call(this);
     }
 
     /**
@@ -245,7 +250,7 @@ exports = function(inherits) {
      * @returns {Actor} self
      */
     this.stopInput = function() {
-      delete this.view.onInputStart;
+      scene.screen.removeOnDown(this._inputCb);
       return this;
     }
 
@@ -254,7 +259,11 @@ exports = function(inherits) {
      * ~ callback function for an onTouch event
      */
     this.onTouch = function(cb) {
-      this.view.onInputStart = cb;
+      this._inputCb = scene.screen.onDown(function(pt) {
+        if (this.model.shape.contains(pt.x, pt.y)) {
+          cb();
+        }
+      }.bind(this));
       return this;
     }
 

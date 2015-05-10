@@ -118,7 +118,7 @@ scene = function (newGameFunc) {
         * @method scene.addImage
         * @see BaseView#addImage
         */
-      scene.addImage = scene.stage.addImage;
+      scene.addImage = bind(scene.stage, scene.stage.addImage);
 
       scene.ui = new UIView({
         superview: scene.view,
@@ -197,6 +197,7 @@ scene = function (newGameFunc) {
       scene.camera.x = 0;
       scene.camera.y = 0;
 
+      scene.totalDt = 0;
       scene.timerManager.reset();
 
       for (var i in this.groups) {
@@ -241,6 +242,7 @@ scene = function (newGameFunc) {
       }
 
       scene.totalDt += dt;
+      scene.totaApplDt += dt;
 
       scene.timerManager.update(dt);
 
@@ -319,6 +321,10 @@ scene.player = null;
 /** The total number of milliseconds that have elapsed since the start of the game.
   * @var {number} scene.totalDt */
 scene.totalDt = 0;
+
+/** The total number of milliseconds that have elapsed since the start of the app.
+  * @var {number} scene.totalAppDt */
+scene.totalAppDt = 0;
 
 
 /**

@@ -7,9 +7,9 @@ import scene, communityart;
 
 exports = scene(function() {
   // Add the background and the player
-  var background = scene.addBackground(communityart('bg'));
+  var background = scene.addBackground(communityart('abduction/bg'));
 
-  var player = scene.addPlayer(communityart('jumper'), {
+  var player = scene.addPlayer(communityart('abduction/player'), {
     ay: 2000,
     vy: -2400,
     followTouches: { x: true },
@@ -25,14 +25,14 @@ exports = scene(function() {
   var platforms = scene.addGroup();
 
   var platformSpawnFunction = function(x, y, index) {
-    var platform = platforms.addActor(communityart('platform'), { isAnchored: true, x: x, y: y });
+    var platform = platforms.addActor(communityart('abduction/platform'), { isAnchored: true, x: x, y: y });
     platform.onEntered(scene.camera.bottomWall, function() { platform.destroy(); });
   };
 
   // Make the spawner
   var platformSpawner = scene.addSpawner(
     new scene.spawner.Vertical(
-      new scene.shape.Rect(30, -300, scene.screen.width - 200, 200),
+      new scene.shape.Rect({ x: 75, y: -300, width: scene.screen.width - 75, height: 200}),
       platformSpawnFunction,
       200
     )
@@ -42,17 +42,20 @@ exports = scene(function() {
   scene.onCollision(player, platforms, function (player, platform) {
     if (player.vy < 0) { return; }
     // If last frame's player collision bottom was above the platform, hop
-    var lastCollisionBottom = player.getBottomHitY() - (player.y - player.yPrev);
-    if (lastCollisionBottom < platform.getTopHitY()) {
+    var lastCollisionBottom = player.shape.bounds.maxY - (player.y - player.previousY);
+    if (lastCollisionBottom < platform.shape.bounds.minY) {
       player.vy = -1350;
     }
-  });
+  }, true);
 
   player.onEntered(scene.camera.bottomWall, function() { player.destroy(); });
 
   // Add the camera to follow the player
-  scene.camera.follow( player,
-    new scene.shape.Rect(-200, scene.screen.midY, scene.screen.width + 400, scene.screen.height - 100)
+  scene.camera.follow(player,
+    new scene.shape.Rect({
+      x: -400, y: scene.screen.center.y,
+      width: scene.screen.width + 800, height: scene.screen.height
+    })
   );
 
   // Update the score

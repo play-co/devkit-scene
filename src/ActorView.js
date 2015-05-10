@@ -4,7 +4,7 @@ exports = Class(SpriteView, function(supr) {
 
   this.init = function(opts) {
     opts = opts || {};
-    opts.autoSize = true;
+    opts.autoSize = opts.autoSize !== undefined ? opts.autoSize : (!opts.width && !opts.height);
     this.updateHasAnimationFlag(opts);
     if (!this.hasAnimations) {
       opts.image = opts.url;

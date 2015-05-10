@@ -1,22 +1,22 @@
 import scene, effects, communityart;
 
 /**
-  * @requires scene 0.1.9
+  * @requires scene x.x.x
   */
 exports = scene(function() {
 
   // Add the background
-  scene.addBackground(communityart('swarm/bg1'));
+  scene.addBackground(communityart('swarm/bg'));
 
   // Show the game score
   scene.showScore(10, 10);
 
   // Add the player
-  var player = scene.addPlayer(communityart('spaceship'), {
+  var player = scene.addPlayer(communityart('swarm/spaceship'), {
+    zIndex: 50,
     vy: -250,
     followTouches: { x: true, xMultiplier: 0.3 },
-    cameraFunction: scene.camera.fullyOn,
-    defaultAnimation: 'fly'
+    cameraFunction: scene.camera.fullyOn
   });
 
   player.onTick(function(dt) {
@@ -30,7 +30,10 @@ exports = scene(function() {
 
   // Add the camera to follow the player
   scene.camera.follow(player,
-    new scene.shape.Rect(0, scene.screen.height - 100, scene.screen.width, scene.screen.height - 100)
+    new scene.shape.Rect({
+      x: 0, y: scene.screen.height - 100,
+      width: scene.screen.width, height: scene.screen.height - 100
+    })
   );
 
   // Make the spawners
@@ -79,8 +82,8 @@ exports = scene(function() {
   // A function we call to send the boss flying left and right
   var loopBossMovement = function(boss) {
     scene.animate(boss).clear()
-      .then({ x: 0 }, 1000)
-      .then({ x: scene.camera.width - 200 }, 1000)
+      .then({ x: 100 }, 1000)
+      .then({ x: scene.camera.width - 100 }, 1000)
       .then(function() { loopBossMovement(boss); });
   };
 
@@ -92,7 +95,7 @@ exports = scene(function() {
       x: scene.camera.x + scene.camera.width / 2 - 100,
       y: scene.camera.y - 200,
       vy: player.vy / 2,
-      health: 100
+      health: 80
     });
 
     var bossBullets = scene.addSpawner(new scene.spawner.Timed(boss, function(x, y) {
@@ -118,11 +121,13 @@ exports = scene(function() {
       effects.explode(boss);
       effects.shake(GC.app);
       enemySpawner.active = true;
-      bossTimer = scene.addTimeout(triggerBoss, 15000);
+
+      bossSpawnTime *= 1.5;
+      bossTimer = scene.addTimeout(triggerBoss, bossSpawnTime);
     });
 
   };
 
-  bossTimer = scene.addTimeout(triggerBoss, 15000);
-
+  var bossSpawnTime = 20 * 1000;
+  bossTimer = scene.addTimeout(triggerBoss, bossSpawnTime);
 });

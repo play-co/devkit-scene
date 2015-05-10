@@ -28,7 +28,7 @@ exports = scene(function() {
     // target.r += 0.025;
     // target.y += (100 - target.y) * 0.01;
 
-    var currentTouch = scene.screen.getTouch();
+    var currentTouch = scene.screen.defaultTouch;
     var touchingTarget = !!(currentTouch && target.shape.contains(currentTouch.x, currentTouch.y));
     text.setText('Touching: ' + touchingTarget);
   });
