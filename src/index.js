@@ -144,11 +144,12 @@ scene = function (newGameFunc) {
         zIndex: 100000
       });
 
+      // An overlay to catch inputs.  Bind things to this
       this.overlay = new View({ parent: this.rootView, infinite: true });
-      // bind our screen functions to the overlay
-      this.overlay.onInputStart = scene.screen.inputStartHandler.bind(scene.screen);
-      this.overlay.onInputSelect = scene.screen.inputStopHandler.bind(scene.screen);
-      this.overlay.onInputMove = scene.screen.inputMoveHandler.bind(scene.screen);
+      var touchManager = scene.screen.touchManager;
+      this.overlay.onInputStart = bind(touchManager, touchManager.downHandler);
+      this.overlay.onInputSelect = bind(touchManager, touchManager.upHandler);
+      this.overlay.onInputMove = bind(touchManager, touchManager.moveHandler);
 
       scene.timerManager = new TimerManager();
     }
@@ -167,9 +168,9 @@ scene = function (newGameFunc) {
 
         // start the game when you click
         self = this
-        scene.screen.onTouchOnce(function() {
+        scene.screen.onDown(function() {
           self.reset('default');
-        })
+        }, true);
       } else {
         this.reset();
       }
@@ -187,7 +188,7 @@ scene = function (newGameFunc) {
       effects.stop();
       scene.clearAnimations();
       scene.updateScreenDimensions();
-      scene.screen.resetTouches();
+      scene.screen.reset();
       scene.background.reset();
 
       scene.group.destroy(false);
@@ -612,9 +613,9 @@ scene.gameOver = function(opts) {
         scene.addText('Game Over!');
       }
 
-      scene.screen.onTouchOnce(function () {
+      scene.screen.onDown(function () {
         setTimeout(function () { GC.app.reset() });
-      });
+      }, true);
     }
   }, opts.delay);
 
@@ -732,10 +733,6 @@ scene.addSpawner = function(spawner) {
 scene.removeSpawner = function(spawner) {
   return scene.group.removeSpawner(spawner);
 };
-
-scene.onTap = bind(scene.screen, scene.screen.onTap);
-scene.removeOnTap = bind(scene.screen, scene.screen.removeOnTap);
-scene.onTouchOnce = bind(scene.screen, scene.screen.onTouchOnce);
 
 /**
   * This collision check will be run each tick. {@link callback} will be called only once per tick

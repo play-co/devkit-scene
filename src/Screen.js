@@ -1,11 +1,15 @@
 import .Actor;
 import entities.shapes.Rect as Rect;
 
-/**
-  * @class Screen
-  */
+import .input.TouchManager as TouchManager;
+
 exports = Class(Rect, function(supr) {
 
+  /**
+    * @class Screen
+    * @param {Number} width
+    * @param {Number} height
+    */
   this.init = function(width, height) {
     var suprOpts = {
       width: width,
@@ -13,120 +17,47 @@ exports = Class(Rect, function(supr) {
     };
     supr(this, "init", [suprOpts]);
 
-    this.resetTouches();
+    /** @var {TouchManager} Screen#touchManager */
+    this.touchManager = new TouchManager();
+
+    /**
+     * A number of shortcut methods are provided on screen, which are calling the corresponding method on the default touch instance.
+     * If you want to attach functionality to other touches as well, you can access them from {@link Screen#touchManager}
+     * @var {TouchInstance} Screen#defaultTouch
+     */
+    this.defaultTouch = this.touchManager.touchInstances[0];
+    /** @method Screen#onDown
+        @see    TouchInstance#onDown */
+    this.onDown       = bind(this.defaultTouch, this.defaultTouch.onDown);
+    /** @method Screen#removeOnDown
+        @see    TouchInstance#removeOnDown */
+    this.removeOnDown = bind(this.defaultTouch, this.defaultTouch.removeOnDown);
+
+    /** @method Screen#onUp
+        @see    TouchInstance#onUp */
+    this.onUp         = bind(this.defaultTouch, this.defaultTouch.onUp);
+    /** @method Screen#removeOnDown
+        @see    TouchInstance#removeOnDown */
+    this.removeOnUp   = bind(this.defaultTouch, this.defaultTouch.removeOnUp);
+
+    /** @method Screen#onMove
+        @see    TouchInstance#onMove */
+    this.onMove       = bind(this.defaultTouch, this.defaultTouch.onMove);
+    /** @method Screen#removeOnMove
+        @see    TouchInstance#removeOnMove */
+    this.removeOnMove = bind(this.defaultTouch, this.defaultTouch.removeOnMove);
+
+    /** @method Screen#onTap
+        @see    TouchInstance#onTap */
+    this.onTap        = bind(this.defaultTouch, this.defaultTouch.onTap);
+    /** @method Screen#removeOnTap
+        @see    TouchInstance#removeOnTap */
+    this.removeOnTap  = bind(this.defaultTouch, this.defaultTouch.removeOnTap);
   };
 
-  Object.defineProperties(this, {
-    midX: { get: function() { return this.width * 0.5; } },
-    midY: { get: function() { return this.height * 0.5; } }
-  });
-
-  this.resetTouches = function() {
-    this.onTouchCallbacks = [];
-    this.onTapCallbacks = [];
-    this.singleTouchCallbacks = [];
-    this.offTouchCallbacks = [];
-    this.activeTouches = {};
-  };
-
-  // TODO: move this to an event system instead of a bunch of fixed functions
-  this.onTouch = function(cb) {
-    return this.onTouchCallbacks.push(cb) - 1;
-  };
-
-  /**
-    * @alias scene.onTap
-    * @arg {function} callback
-    * @returns {function} callback
-    */
-  this.onTap = function(cb) {
-    this.onTapCallbacks.push(cb);
-    return cb;
-  };
-
-  /**
-    * @alias scene.removeOnTap
-    * @arg {function} callback - The callback used with {@link scene.onTap}
-    */
-  this.removeOnTap = function(cb) {
-    var i = this.onTapCallbacks.indexOf(cb);
-    if (i >= 0) {
-      this.onTapCallbacks.splice(i, 1);
-    }
-  };
-
-  this.removeOnTouch = function(cb) {
-    var i = this.onTouchCallbacks.indexOf(cb);
-    if (i >= 0) {
-      this.onTouchCallbacks.splice(i, 1);
-    }
-  };
-
-  this.inputStartHandler = function(event, point) {
-    var i;
-    for (i in this.onTouchCallbacks) {
-      this.onTouchCallbacks[i](event.id, point);
-    }
-    for (i in this.onTapCallbacks) {
-      this.onTapCallbacks[i](event.id, point);
-    }
-    while (this.singleTouchCallbacks.length > 0) {
-      this.singleTouchCallbacks.shift()(event.id, point);
-    }
-    this.activeTouches[event.id] = { x: point.x, y: point.y };
-  };
-
-  this.onTouchMove = function(cb) {
-    return this.touchMoveCallbacks.push(cb) - 1;
-  };
-
-  this.removeOnTouchMove = function(cb) {
-    var i = this.touchMoveCallbacks.indexOf(cb);
-    if (i >= 0) {
-      this.touchMoveCallbacks.splice(i, 1);
-    }
-  };
-
-  this.inputMoveHandler = function(event, point) {
-    for (var i in this.onTouchCallbacks) {
-      this.onTouchCallbacks[i](event.id, point);
-    }
-    var existingTouch = this.activeTouches[event.id];
-    if (existingTouch) {
-      existingTouch.x = point.x
-      existingTouch.y = point.y;
-    }
-  };
-
-  this.onTouchOnce = function(cb) {
-    return this.singleTouchCallbacks.push(cb) - 1;
-  };
-
-  this.removeOnTouchOnce = function(index) {
-    this.singleTouchCallbacks.splice(index, 1);
-  };
-
-  this.offTouch = function(cb) {
-    return this.offTouchCallbacks.push(cb) - 1;
-  };
-
-  this.removeOffTouch = function(cb) {
-    var i = this.offTouchCallbacks.indexOf(cb);
-    if (i >= 0) {
-      this.offTouchCallbacks.splice(i, 1);
-    }
-  };
-
-  this.inputStopHandler = function(event, point) {
-    for (var i in this.offTouchCallbacks) {
-      this.offTouchCallbacks[i](event.id, point);
-    }
-    this.activeTouches[event.id] = null;
-  };
-
-  this.getTouch = function(index) {
-    index = index || -1; // Default is mouse
-    return this.activeTouches[index];
+  /** @method Screen#reset */
+  this.reset = function() {
+    this.touchManager.reset();
   };
 
 });
