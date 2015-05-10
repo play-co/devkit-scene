@@ -1,11 +1,13 @@
 import device;
 import animate;
 import animate.transitions as transitions;
+
 import ui.View as View;
 import ui.TextView as TextView;
 import ui.ImageView as ImageView;
 import ui.SpriteView as SpriteView;
 import ui.ScoreView as ScoreView;
+import .BaseView;
 
 import accelerometer;
 
@@ -107,14 +109,21 @@ scene = function (newGameFunc) {
         * This is the devkit {@link View} which all actors should be added to.
         * @var {View} scene.stage
         */
-      this.stage = new View({
+      this.stage = new BaseView({
         parent: scene.view,
         infinite: true
       });
-
       scene.stage = this.stage;
+      /**
+        * @method scene.addImage
+        * @see BaseView#addImage
+        */
+      scene.addImage = scene.stage.addImage;
 
-      scene.ui = new UIView({ superview: scene.view, infinite: true });
+      scene.ui = new UIView({
+        superview: scene.view,
+        infinite: true
+      });
 
       /**
        * The root group for all objects created on the scene instead of
@@ -835,53 +844,6 @@ scene.configureBackground = function(config) {
 
 scene.reset = function() {
   GC.app.reset();
-};
-
-/**
- * @method scene.addImage
- * @param  {String|Object} resource - resource key to be resolved by community art, or opts
- * @param  {Number} x
- * @param  {Number} y
- * @param  {Object} [opts]
- * @return {View} imageView
- */
-/**
- * @method scene.addImage(2)
- * @param  {String|Object} resource
- * @param  {Number} x
- * @param  {Number} y
- * @param  {Number} width
- * @param  {Number} height
- * @param  {Object} [opts]
- * @return {View} imageView
- */
-scene.addImage = function(resource, x, y, width, height, opts) {
-  var resourceOpts = communityart.getResource(resource, 'ImageView');
-  if (!resourceOpts.image) {
-    resourceOpts.image = resourceOpts.url;
-  }
-
-  // Check for signature (1)
-  if (typeof width === 'object') {
-    opts = width;
-  } else {
-    opts = opts || {};
-    opts.width = width;
-    opts.height = height;
-  }
-
-  opts.superview = opts.superview || scene.stage;
-  opts.autoSize = opts.autoSize !== undefined ? opts.autoSize : true;
-  opts.x = x;
-  opts.y = y;
-
-  // Set up the view
-  var viewOpts = merge(opts, resourceOpts);
-
-  var viewClass = (viewOpts.scaleMethod === undefined) ? SceneImageView : SceneImageScaleView;
-  var result = new viewClass(viewOpts);
-
-  return result;
 };
 
 /**

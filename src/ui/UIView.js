@@ -1,21 +1,9 @@
-import ui.View as View;
-import .SceneImageView;
-import .SceneImageScaleView;
+import ..BaseView;
+
 import .SceneScoreView;
 import .ProgressBar;
 
-exports = Class(View, function(supr) {
-
-  this.addImage = function(resource, x, y, width, height) {
-    var viewOpts = typeof resource === 'object' ? resource : { image: resource };
-    var viewClass = (viewOpts.scaleMethod === undefined) ? SceneImageView : SceneImageScaleView;
-    viewOpts.x = x;
-    viewOpts.y = y;
-    if (width !== undefined) { viewOpts.width = width; }
-    if (height !== undefined) { viewOpts.height = height; }
-    viewOpts.superview = this;
-    return new viewClass(viewOpts);
-  };
+exports = Class(BaseView, function(supr) {
 
   this.addProgressBar = function(resource, x, y) {
     var opts = merge({ superview: this, x: x, y: y }, resource);
