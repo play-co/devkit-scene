@@ -8,7 +8,6 @@ import ui.SpriteView as SpriteView;
 import ui.ScoreView as ScoreView;
 
 import accelerometer;
-import entities.Entity as Entity;
 
 import .spawner.HorizontalSpawner as HorizontalSpawner;
 import .spawner.VerticalSpawner as VerticalSpawner;
@@ -26,6 +25,8 @@ import .timer.TimerManager as TimerManager;
 import .timer.Timer as Timer;
 
 import .Actor;
+import .SATActor;
+
 import .Group;
 import .Screen;
 import .Camera;
@@ -647,6 +648,11 @@ scene.addBackground = function(art, opts) {
   return scene.background.addLayer(art, opts);
 };
 
+// Change the default class for actors
+scene.setActorCtor = function(actorCtor) {
+  scene._actorCtor = actorCtor;
+};
+
 /**
   * Create a new actor that will be automatically updated each tick
   * @func scene.addActor
@@ -743,6 +749,13 @@ scene.onCollision = function(a, b, callback, allCollisions) {
 
   return this.collisions.registerCollision(check);
 };
+
+// More shortcuts
+scene.actor = {
+  Actor: Actor,
+  SAT: SATActor
+}
+scene._actorCtor = scene.actor.Actor;
 
 /** Easy access to spawner classes
   * @var {Object} scene.spawner

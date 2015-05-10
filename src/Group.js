@@ -15,7 +15,7 @@ exports = Class(EntityPool, function(supr) {
     */
   this.init = function(opts) {
     opts = opts || {};
-    opts.ctor = opts.ctor || Actor;
+    opts.ctor = opts.ctor || scene._actorCtor;
     supr(this, "init", [opts]);
 
     /** @var {SpawnerManager} Group#_spawnerManager */
