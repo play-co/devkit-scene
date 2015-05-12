@@ -863,9 +863,9 @@ scene.audio = new SceneAudioManager();
 scene.addSound = bind(scene.audio, "addSound");
 scene.addSoundGroup = bind(scene.audio, "addSoundGroup");
 scene.addMusic = bind(scene.audio, "addMusic");
-scene.playSound = bind(scene.audio,"playSound");
-scene.playMusic = bind(scene.audio,"playMusic");
-scene.stopMusic = bind(scene.audio,"stopMusic");
+scene.playSound = bind(scene.audio, "playSound");
+scene.playMusic = bind(scene.audio, "playMusic");
+scene.stopMusic = bind(scene.audio, "stopMusic");
 
 scene.reset = function() {
   GC.app.reset();

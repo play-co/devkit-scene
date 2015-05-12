@@ -39,6 +39,10 @@ exports = Class(function() {
   };
 
   this.playSound = function(name) {
+    if (scene.weebyData && scene.weebyData.sound.effects === false) {
+      return;
+    }
+
     var soundNames = this._soundGroups[name];
     if (soundNames) {
       name = soundNames[ Math.floor(Math.random() * soundNames.length) ];
@@ -47,6 +51,10 @@ exports = Class(function() {
   };
 
   this.playMusic = function(name) {
+    if (scene.weebyData && scene.weebyData.music.effects === false) {
+      return;
+    }
+
     this._currentlyPlayingMusic = name;
     this._audioManager.play(name);
   };
