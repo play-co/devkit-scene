@@ -78,7 +78,7 @@ scene = function (newGameFunc) {
 
   scene.mode('default', newGameFunc);
 
-  return Class(GC.Application, function() {
+  scene._app = Class(GC.Application, function() {
     /**
      * initUI
      */
@@ -263,6 +263,8 @@ scene = function (newGameFunc) {
       }
     }
   });
+
+  return scene._app;
 
 };
 
@@ -894,7 +896,7 @@ scene.useWeeby = function() {
     scene.mode('weeby');
   });
 
-  Object.defineProperty(exports.prototype, 'rootView', { get: getGameView });
+  Object.defineProperty(scene._app.prototype, 'rootView', { get: getGameView });
 
   scene._useWeeby = true;
 };
