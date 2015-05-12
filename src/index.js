@@ -610,20 +610,24 @@ scene.gameOver = function(opts) {
   _game_running = false;
 
   setTimeout(function () {
-    if (!opts.noGameoverScreen) {
-      var bgHeight = scene.screen.height;
+    if (scene._useWeeby) {
+      weeby.finishGame({ score: scene.getScore() });
+    } else {
+      if (!opts.noGameoverScreen) {
+        var bgHeight = scene.screen.height;
 
-      // TODO: This should be a scene splash ... not random text. Allows the player to set their own game over splash.
-      if (_using_score) {
-        scene.addText('Game Over!', { y: bgHeight / 2 - DEFAULT_TEXT_HEIGHT });
-        scene.addText('Score: ' + _score, { y: bgHeight / 2 + 10 });
-      } else {
-        scene.addText('Game Over!');
+        // TODO: This should be a scene splash ... not random text. Allows the player to set their own game over splash.
+        if (_using_score) {
+          scene.addText('Game Over!', { y: bgHeight / 2 - DEFAULT_TEXT_HEIGHT });
+          scene.addText('Score: ' + _score, { y: bgHeight / 2 + 10 });
+        } else {
+          scene.addText('Game Over!');
+        }
+
+        scene.screen.onDown(function () {
+          setTimeout(function () { GC.app.reset() });
+        }, true);
       }
-
-      scene.screen.onDown(function () {
-        setTimeout(function () { GC.app.reset() });
-      }, true);
     }
   }, opts.delay);
 
@@ -867,5 +871,32 @@ scene.addScoreText = function(resource, x, y, opts) {
   return new SceneScoreView(viewOpts);
 };
 
+// TODO: This is a bit of a hack, make it better
+scene._useWeeby = false;
+scene.useWeeby = function() {
+  import device;
+  import weeby;
+  import ui.View;
+
+  var _gameView;
+  function getGameView() {
+    return _gameView || (_gameView = weeby.createGameView(GC.app));
+  }
+
+  scene.mode('weeby', function () {
+    weeby.launchUI();
+    weeby.onStartGame = function (data) {
+      scene.mode('default');
+    };
+  });
+
+  GC.on('app', function () {
+    scene.mode('weeby');
+  });
+
+  Object.defineProperty(exports.prototype, 'rootView', { get: getGameView });
+
+  scene._useWeeby = true;
+};
 
 exports = scene;
