@@ -145,7 +145,7 @@ scene = function (newGameFunc) {
       });
 
       // An overlay to catch inputs.  Bind things to this
-      this.overlay = new View({ parent: this.rootView, infinite: true });
+      this.overlay = new View({ parent: this.rootView, infinite: true, zIndex: 999999 });
       var touchManager = scene.screen.touchManager;
       this.overlay.onInputStart = bind(touchManager, touchManager.downHandler);
       this.overlay.onInputSelect = bind(touchManager, touchManager.upHandler);
@@ -329,21 +329,6 @@ scene.totalDt = 0;
 /** The total number of milliseconds that have elapsed since the start of the app.
   * @var {number} scene.totalAppDt */
 scene.totalAppDt = 0;
-
-
-/**
-  * Called when a touch occurs
-  * @callback onTouchCallback
-  * @arg {number} x
-  * @arg {number} y
-  */
-/**
-  * Register a new touch callback
-  * @func scene.onTouch
-  * @arg {onTouchCallback} callback
-  */
-scene.onTouch = function(callback) {};
-
 
 /**
   * Called every tick with accellerometer data

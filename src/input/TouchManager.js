@@ -8,6 +8,8 @@ exports = Class(function() {
   /** @var {Number} TouchManager.MAX_TOUCH_COUNT */
   this.MAX_TOUCH_COUNT = 10;
 
+  this.TOUCH_TYPES = ['down', 'move', 'up'];
+
   this.init = function() {
     // Populate instances
     this.touchInstances = [];
@@ -16,6 +18,10 @@ exports = Class(function() {
       this.touchInstances[i] = touchInstance;
       touchInstance.reset();
     }
+
+    // because safari doesnt give logical IDs
+    // dont reset this, touch events can span resets
+    this._realIdMap = {};
   };
 
   this.reset = function() {
@@ -25,25 +31,44 @@ exports = Class(function() {
     }
   };
 
-  this.getTouch = function(index) {
-    // On desktop -1 is the mouse
-    if (index === -1) {
-      index = 0;
+  this.getTouch = function(realId) {
+    if (this._realIdMap[realId]) {
+      return this._realIdMap[realId];
     }
-    return this.touchInstances[index];
+
+    // none found
+    return null;
   };
+
+  this._firstInactiveInstance = function() {
+    for (var i = 0; i < this.touchInstances.length; i++) {
+      var instance = this.touchInstances[i];
+      if (!instance.isDown) {
+        return instance;
+      }
+    }
+
+    return null;
+  }
 
   // ---- Handlers - internal to scene ---- //
 
   this.downHandler = function(event, point) {
-    var touchInstance = this.getTouch(event.id);
-    if (touchInstance) {
-      touchInstance.downHandler(event, point);
+    // Get the first available touch instance, set its realId
+    var touchInstance = this._firstInactiveInstance();
+    if (!touchInstance) {
+      console.warn('Max touches reached, no more free!', event.type, event.id);
+      return;
     }
+
+    this._realIdMap[event.id] = touchInstance;
+    touchInstance.downHandler(event, point);
   };
 
   this.upHandler = function(event, point) {
     var touchInstance = this.getTouch(event.id);
+    this._realIdMap[event.id] = undefined;
+
     if (touchInstance) {
       touchInstance.upHandler(event, point);
     }
@@ -51,6 +76,7 @@ exports = Class(function() {
 
   this.moveHandler = function(event, point) {
     var touchInstance = this.getTouch(event.id);
+
     if (touchInstance) {
       touchInstance.moveHandler(event, point);
     }
