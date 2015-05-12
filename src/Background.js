@@ -117,33 +117,31 @@ exports = Class(View, function (supr) {
     * @returns {Layer|View}
     */
   this.addLayer = function(resource, opts) {
-    var isParallaxConfig = false;
-    var resourceOpts = communityart.getResource(resource, 'Parallax');
+    if (Array.isArray(resource)) {
+      resource = {
+        type: 'ParallaxConfig',
+        config: resource
+      };
+    }
 
-    // Static image
-    if (!opts) {
+    if (resource.type === 'ParallaxConfig') {
+      for (var l in resource.config) {
+        var layerConfig = resource.config[l];
+        var layer = new Layer(layerConfig, this);
+        layer._setScroll(layerConfig.xMultiplier, layerConfig.yMultiplier);
+        this.config.push(layerConfig);
+      }
+    } else if(!opts) {
+      // Static image
       var view = new ImageView({
         superview: this,
-        image: resourceOpts.url,
+        image: resource.url,
         x: 0,
         y: 0,
         width: this.style.width,
         height: this.style.height
       });
       return view;
-    }
-
-    opts = opts || {};
-    isParallaxConfig = resourceOpts.type === "parallax";
-
-    if (isParallaxConfig) {
-      var config_opts = resourceOpts.config;
-      for (var l in config_opts) {
-        var layerConfig = config_opts[l];
-        var layer = new Layer(layerConfig, this);
-        layer._setScroll(layerConfig.xMultiplier, layerConfig.yMultiplier);
-        this.config.push(layerConfig);
-      }
     } else {
       // Automatic repeating
       if (!opts.repeatX && opts.scrollX) { opts.repeatX = true; }
@@ -155,7 +153,7 @@ exports = Class(View, function (supr) {
       else if (opts.align === 'right' && opts.x === undefined) { opts.x = 0; }
 
       // Build pieceOptions
-      var pieceOptions = { image: resourceOpts.url };
+      var pieceOptions = { image: resource.url };
       if (opts.align === 'left' || opts.align === 'right') {
         pieceOptions.xAlign = opts.align;
       } else if (opts.align === 'top' || opts.align === 'bottom') {

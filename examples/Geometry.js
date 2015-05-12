@@ -9,7 +9,7 @@ var SHIELD_COUNT = 6;
 
 exports = scene(function() {
   // Add the background and the player
-  var background = scene.addBackground('geom/bg');
+  var background = scene.addBackground(communityart('geom/bg'));
 
   var playerArt = communityart('geom/player');
   var player = scene.addPlayer(playerArt, {

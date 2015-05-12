@@ -25,7 +25,7 @@ exports = Class(View, function(supr) {
     * @return {View} imageView
     */
   this.addImage = function(resource, x, y, width, height, opts) {
-    var resourceOpts = communityart.getResource(resource, 'ImageView');
+    var resourceOpts = communityart.getConfig(resource, 'ImageView');
     if (!resourceOpts.image && resourceOpts.url) {
       resourceOpts.image = resourceOpts.url;
     }

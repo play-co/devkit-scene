@@ -30,7 +30,7 @@ exports = Class(EntityPool, function(supr) {
     * @see scene.addActor
     */
   this.addActor = function(resource, opts) {
-    var resourceOpts = communityart.getResource(resource, 'Actor');
+    var resourceOpts = communityart.getConfig(resource, 'Actor');
 
     opts = opts || {};
     opts = merge(opts, resourceOpts);

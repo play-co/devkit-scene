@@ -258,7 +258,9 @@ scene = function (newGameFunc) {
       scene.camera.update(dt);
       this.stage.style.x = -scene.camera.x;
       this.stage.style.y = -scene.camera.y;
-      scene.background.scrollTo(-scene.camera.x, -scene.camera.y);
+      if (scene.camera.following) {
+        scene.background.scrollTo(-scene.camera.x, -scene.camera.y);
+      }
     }
   });
 
@@ -840,11 +842,6 @@ scene.playSound = bind(scene.audio,"playSound");
 scene.playMusic = bind(scene.audio,"playMusic");
 scene.stopMusic = bind(scene.audio,"stopMusic");
 
-scene.configureBackground = function(config) {
-  if (config.config) { config = config.config };
-  scene.background.reloadConfig(config);
-};
-
 scene.reset = function() {
   GC.app.reset();
 };
@@ -858,7 +855,7 @@ scene.reset = function() {
   * @returns {SceneScoreView}
   */
 scene.addScoreText = function(resource, x, y, opts) {
-  var resourceOpts = communityart.getResource(resource, 'ScoreView');
+  var resourceOpts = communityart.getConfig(resource, 'ScoreView');
   opts = opts || {};
 
   opts.superview = opts.superview || scene.stage;
