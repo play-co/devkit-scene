@@ -901,6 +901,9 @@ scene.useWeeby = function() {
   scene.mode('weeby', function () {
     weeby.launchUI();
     weeby.onStartGame = function (data) {
+      // TODO: This is temporary until the state manager / reset funcitonality get refactored
+      //         to include an opts object.  The reset logic currently is very dirty
+      scene.weebyData = data;
       scene.mode('default');
     };
   });
