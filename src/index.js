@@ -495,31 +495,65 @@ scene.setTextFont = function(font) {
   * @arg {String} [opts.color]
   * @arg {String} [opts.font]
   */
-scene.showScore = function(x, y, opts) {
-  if (scene._scoreView) {
-    scene._scoreView.style.x = x;
-    scene._scoreView.style.y = y;
-    opts && scene._scoreView.updateOpts(opts);
-    return;
+/**
+  * @method scene.showScore(2)
+  * @param  {String|Object} resource - resource key to be resolved by community art, or opts
+  * @param {Number} x
+  * @param {Number} y
+  * @param {Object} [opts]
+  * @returns {SceneScoreView}
+  */
+scene.showScore = function(resource, x, y, opts) {
+  var scoreView;
+
+  // function type (1)
+  if (typeof resource === 'number') {
+    opts = y;
+    y = x;
+    x = resource;
+
+    // Update the old view
+    if (scene._scoreView) {
+      scene._scoreView.style.x = x;
+      scene._scoreView.style.y = y;
+      opts && scene._scoreView.updateOpts(opts);
+      return scene._scoreView;
+    }
+
+    // Make a new TextView
+    opts = opts || {};
+    opts.font = opts.font || _text_font;
+    opts.color = opts.color || _text_color;
+    opts.superview = opts.superview || scene.textContainer;
+
+    scoreView = new TextView(combine({
+      x: x,
+      y: y,
+      width: 200,
+      height: 75,
+      fontFamily: opts.font,
+      text: scene.getScore(),
+      horizontalAlign: 'left',
+    }, opts));
+  }
+  // function type (2)
+  else {
+    // Make a new ScoreView
+    var resourceOpts = communityart.getConfig(resource, 'ScoreView');
+    opts = opts || {};
+
+    opts.superview = opts.superview || scene.textContainer;
+    opts.x = x;
+    opts.y = y;
+    opts.format = opts.format || SceneScoreView.FORMAT_SCORE;
+
+    var viewOpts = merge(opts, resourceOpts);
+    scoreView = new SceneScoreView(viewOpts);
   }
 
-  opts = opts || {};
-  opts.font = opts.font || _text_font;
-  opts.color = opts.color || _text_color;
-
-  scene._scoreView = new TextView(combine({
-    parent: scene.textContainer,
-    x: x,
-    y: y,
-    width: 200,
-    height: 75,
-    color: opts.color,
-    fontFamily: opts.font,
-    text: scene.getScore(),
-    horizontalAlign: 'left',
-  }, opts || {}));
-
-  scene.extraViews.push(scene._scoreView);
+  scene.extraViews.push(scoreView);
+  scene._scoreView = scoreView;
+  return scoreView;
 };
 
 /**
@@ -850,27 +884,6 @@ scene.stopMusic = bind(scene.audio,"stopMusic");
 
 scene.reset = function() {
   GC.app.reset();
-};
-
-/**
-  * @method scene.addScoreText
-  * @param  {String|Object} resource - resource key to be resolved by community art, or opts
-  * @param {Number} x
-  * @param {Number} y
-  * @param {Object} opts
-  * @returns {SceneScoreView}
-  */
-scene.addScoreText = function(resource, x, y, opts) {
-  var resourceOpts = communityart.getConfig(resource, 'ScoreView');
-  opts = opts || {};
-
-  opts.superview = opts.superview || scene.stage;
-  opts.x = x;
-  opts.y = y;
-  opts.format = opts.format || SceneScoreView.FORMAT_SCORE;
-
-  var viewOpts = merge(opts, resourceOpts);
-  return new SceneScoreView(viewOpts);
 };
 
 // TODO: This is a bit of a hack, make it better
