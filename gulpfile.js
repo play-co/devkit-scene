@@ -1,66 +1,116 @@
+var path = require('path');
+var fs = require('fs');
 var gulp = require('gulp');
-var webserver = require('gulp-webserver');
-var jsdoc = require("gulp-jsdoc");
+var cliArgs = require("command-line-args");
 
-var targetDir = ['src/**/*.js', 'docReadme.md'];
+var UglifyJS = require("uglify-js");
 
-gulp.task('jsdoc', [], function(cb) {
-  var preprocessSource = function() {
-    // you're going to receive Vinyl files as chunks
-    function transform(file, cb) {
-      // read and modify file contents
-      var fileContents = String(file.contents);
-      fileContents = fileContents.replace(/(import .*?;)\n/g,
-        function(str, group1) {
-          return 'jsio("' + group1 + '");';
-        });
-      file.contents = new Buffer(fileContents);
+var modulesDir = path.join(__dirname, 'node_modules');
 
-      // if there was some error, just pass as the first parameter here
-      cb(null, file);
+var cli = cliArgs([
+  { name: "min", type: Boolean, description: "Compress output" }
+]);
+var argv = cli.parse();
+
+var paths = {
+  'js': 'src',
+  'dest': 'dist/',
+
+  'jsio': path.join(modulesDir, 'jsio', 'packages'),
+  'squill': path.join(modulesDir, 'squill')
+};
+
+var buildPathCache = function(modules) {
+  var pathCache = {};
+  for (var i = 0; i < modules.length; i++) {
+    var module = modules[i];
+
+    var moduleDir = path.join(modulesDir, module);
+    var modulePackageConfig = require(path.join(moduleDir, 'package.json'));
+    var clientPaths = modulePackageConfig.devkit.clientPaths;
+
+    for (var clientPathName in clientPaths) {
+      var clientPath = path.join(moduleDir, clientPaths[clientPathName])
+      if (clientPathName === '*') {
+        var files = fs.readdirSync(clientPath);
+        for (var j = 0; j < files.length; j++) {
+          var file = files[j];
+          var importName = file.replace(/\.[^/.]+$/, '');
+
+          pathCache[importName] = path.join(clientPath, importName);
+        }
+      } else {
+        pathCache[clientPathName] = clientPath;
+      }
     }
-
-    // returning the map will cause your transform function to be called
-    // for each one of the chunks (files) you receive. And when this stream
-    // receives a 'end' signal, it will end as well.
-    //
-    // Additionally, you want to require the `event-stream` somewhere else.
-    return require('event-stream').map(transform);
-  };
-
-  try {
-    gulp.src(targetDir)
-      .pipe(preprocessSource())
-      .pipe(jsdoc.parser())
-      .pipe(jsdoc.generator('./out', {
-        path: 'ink-docstrap',
-        theme: 'superhero',
-        linenums: true,
-        collapseSymbols: false,
-        inverseNav: true,
-        syntaxTheme: 'dark' // this apparently does nothing
-      }));
   }
-  catch (e) {
-    console.error('Error while executing jsdoc');
-  }
+
+  return pathCache;
+};
+
+gulp.task('compile', [], function(cb) {
+  var jsio = require('jsio');
+  var compilerPath = path.join(jsio.__env.getPath(), '..', 'compilers');
+  jsio.path.add(compilerPath);
+
+
+  var pathCache = buildPathCache([
+    'devkit-core',
+    'timestep',
+    'devkit-effects',
+    'devkit-parallax',
+    'devkit-entities',
+    'devkit-accelerometer',
+    'community-art'
+  ]);
+  pathCache['squill'] = paths.squill;
+  pathCache['src'] = paths.js;
+
+
+  console.log('jsio:', jsio.path.cache);
+  var compiler = jsio('import jsio_compile.compiler');
+  compiler.start(['jsio_compile', paths.js, 'import .src.index'], {
+    cwd: __dirname,
+    path: [paths.jsio],
+    pathCache: pathCache,
+
+    environment: 'browser',
+    includeJsio: true,
+    appendImport: true,
+    compressSources: argv.min,
+    compressResult: argv.min,
+    interface: {
+      setCompiler: function (compiler) { this.compiler = compiler; },
+      run: function (args, opts) { this.compiler.run(args, opts); },
+      onError: function (err) {
+        cb && cb(err);
+      },
+      onFinish: function (opts, code) {
+        if (!fs.existsSync(paths.dest)) {
+          fs.mkdirSync(paths.dest);
+        }
+
+        var filename = path.join(paths.dest, argv.min ? 'scene.min.js' : 'scene.js');
+        fs.writeFile(filename, code, cb);
+      },
+      compress: function (filename, src, opts, cb) {
+        var result = UglifyJS.minify(src, {
+          fromString: true,
+          compress: {
+            global_defs: {
+              DEBUG: false
+            }
+          }
+        });
+
+        // console.log(filename, '-->', result.code)
+        cb(result.code);
+      }
+    }
+  });
+});
+
+gulp.task('help', [], function(cb) {
+  console.log(cli.getUsage());
   cb();
-});
-
-gulp.task('watch', ['jsdoc'], function() {
-  gulp.watch(targetDir, ['jsdoc']);
-});
-
-gulp.task('webserver', function() {
-  gulp.src('')
-    .pipe(webserver({
-      host: '0.0.0.0',
-      livereload: true,
-      directoryListing: true,
-      open: false,
-      defaultFile: 'index.html'
-    }));
-});
-
-gulp.task('default', ['watch', 'webserver'], function() {
 });

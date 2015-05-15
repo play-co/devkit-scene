@@ -8,13 +8,17 @@
     "devkit-entities": "git://github.com/gameclosure/devkit-entities.git#master",
     "devkit-parallax": "git://github.com/gameclosure/devkit-parallax.git#v0.1.5",
     "community-art": "git://github.com/weebygames/community-art.git#master",
-    "accelerometer": "git://github.com/gameclosure/accelerometer.git#v3.0.1",
+    "devkit-accelerometer": "git://github.com/gameclosure/accelerometer.git#v3.0.1",
     "devkit-effects": "git://github.com/gameclosure/devkit-effects.git#master"
   },
-  "_devDependencies": {
+  "devDependencies": {
+    "command-line-args": "^0.5.9",
+    "devkit-core": "git://github.com/gameclosure/devkit-core.git#refactor-simulator-connection",
     "gulp": "^3.8.11",
-    "gulp-jsdoc": "^0.1.4",
-    "gulp-webserver": "^0.9.0"
+    "jsio": "2.0.0-beta.1",
+    "squill": "git+https://github.com/gameclosure/squill#bindings",
+    "timestep": "git://github.com/gameclosure/timestep.git#master",
+    "uglify-js": "^2.4.21"
   },
   "scripts": {},
   "devkit": {
