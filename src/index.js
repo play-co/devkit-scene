@@ -197,11 +197,18 @@ scene = function (newGameFunc) {
       }
     }
 
+    var _isResetting = false;
+
     /**
      * reset
      */
     this.reset = function(mode) {
+
+      if (_isResetting) { return; }
+      _isResetting = true;
+
       if (mode === undefined) mode = 'default';
+
 
       scene.ui.reset();
 
@@ -251,6 +258,7 @@ scene = function (newGameFunc) {
 
       // The curtain rises, and Act 1 begins!
       _game_running = true;
+      _isResetting = false;
     }
 
     /**
