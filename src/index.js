@@ -989,6 +989,9 @@ scene.animate = function(subject, groupId) {
   if (groupId !== "scene" && scene.animationGroups.indexOf(groupId) === -1) {
     scene.animationGroups.push(groupId);
   }
+  if (subject._addAnimationGroup) {
+    subject._addAnimationGroup(groupId);
+  }
   return anim;
 };
 

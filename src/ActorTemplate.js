@@ -1,4 +1,5 @@
 import effects;
+import animate;
 
 /**
   * This is the basic entity for all things in a scene game.  If it moves, it's and actor.
@@ -24,6 +25,7 @@ exports = function(inherits) {
 
     this.init = function(opts) {
       suprPrototype.init.call(this, opts);
+      this._animationGroups = [];
     }
 
     this.reset = function(config) {
@@ -229,6 +231,7 @@ exports = function(inherits) {
      * This function destroys the Actor, as in, removes it from the scene
      */
     this.destroy = function(runDestroyHandlers) {
+      this.clearSceneAnimations();
       runDestroyHandlers = runDestroyHandlers !== undefined ? runDestroyHandlers : true;
       scene.collisions.removeCollisionsContaining(this);
       if (runDestroyHandlers) {
@@ -239,6 +242,13 @@ exports = function(inherits) {
       suprPrototype.destroy.call(this);
       effects.commit(this);
     }
+
+    this.clearSceneAnimations = function() {
+      for (var i = 0; i < this._animationGroups.length; i++) {
+        animate(this, this._animationGroups[i]).clear();
+      }
+      this._animationGroups = [];
+    };
 
     /**
      * This function stops all input to the actor
@@ -339,5 +349,12 @@ exports = function(inherits) {
     this.showHitBounds = function() {
       this.view.showHitBounds();
     };
+
+    this._addAnimationGroup = function(id) {
+      if (this._animationGroups.indexOf(id) === -1) {
+        this._animationGroups.push(id);
+      }
+    };
+
   });
 };
