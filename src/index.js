@@ -286,9 +286,8 @@ scene = function (newGameFunc) {
       scene.camera.update(dt);
       this.stage.style.x = -scene.camera.x;
       this.stage.style.y = -scene.camera.y;
-      if (scene.camera.following) {
-        scene.background.scrollTo(-scene.camera.x, -scene.camera.y);
-      }
+
+      scene.background.scrollTo(-scene.camera.x, -scene.camera.y);
     }
   });
 

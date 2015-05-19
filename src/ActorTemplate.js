@@ -57,6 +57,7 @@ exports = function(inherits) {
       this.rotation = config.rotation || 0;
       this.flipX = config.flipX || false;
       this.flipY = config.flipY || false;
+      this.zIndex = config.zIndex || 0;
     }
 
     this.applyScaledBounds = function(sourceBounds, targetBounds, scale) {
@@ -344,6 +345,11 @@ exports = function(inherits) {
     Object.defineProperty(this, "rotation", {
       get: function() { return this.view.style.r },
       set: function(value) { this.view.style.r = value; }
+    });
+
+    Object.defineProperty(this, "zIndex", {
+      get: function() { return this.view.style.zIndex },
+      set: function(value) { this.view.style.zIndex = value; }
     });
 
     this.showHitBounds = function() {
