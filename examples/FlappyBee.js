@@ -5,7 +5,7 @@ var PARALLAX_THEME = 'flappybee/parallax/forest';
 scene.setTextColor("#FFFFFF");
 
 scene.splash(function() {
-  scene.addImage(communityart('flappybee/instructions'), scene.screen.center.x, scene.screen.center.y);
+  scene.addImage(communityart('flappybee/instructions'), scene.screen.centerX, scene.screen.centerY);
   scene.addBackground(communityart(PARALLAX_THEME));
 });
 
@@ -17,7 +17,7 @@ exports = scene(function() {
   scene.addBackground(communityart(PARALLAX_THEME));
 
   // Show the score
-  scene.showScore(communityart('flappybee/scoreText'), scene.screen.center.x, 50);
+  scene.showScore(communityart('flappybee/scoreText'), scene.screen.centerX, 50);
 
   // Add the player
   var player = scene.addPlayer(communityart('flappybee/bee/yellow'), {
