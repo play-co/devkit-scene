@@ -45,26 +45,39 @@ import communityart;
 import effects;
 
 // Default values
+/** @type {Number} scene.DEFAULT_TEXT_WIDTH
+ * @private
+ * @default 350 */
 var DEFAULT_TEXT_WIDTH  = 350;
+/** @type {Number} scene.DEFAULT_TEXT_HEIGHT
+ * @private
+ * @default 75 */
 var DEFAULT_TEXT_HEIGHT = 75;
-var DEFAULT_TEXT_COLOR  = '#FFF';
-var DEFAULT_TEXT_FONT   = 'Arial';
-
-// To make speeds 'feel' nicer
-var SCALE_DT = 0.001;
 
 // Variables that are private to this file
 var _modes = {}
 
 /** Use the get and set method
-  * @var {number} scene._score
-  * @see scene.getScore
-  * @see scene.setScore */
+ * @var {number} scene._score
+ * @private
+ * @see scene.getScore
+ * @see scene.setScore */
 var _score = 0;
-
 var _using_score = false;
-var _text_color = DEFAULT_TEXT_COLOR;
-var _text_font = DEFAULT_TEXT_FONT;
+
+/** @type {String} scene._text_color
+ * @private
+ * @default '#FFF'
+ * @see scene.setTextColor
+ */
+var _text_color = '#FFF';
+/** @type {String} scene._text_font
+ * @private
+ * @default 'Arial'
+ * @see scene.setTextFont
+ */
+var _text_font = 'Arial';
+
 var _game_running = false;
 var _on_tick = null;
 
@@ -94,11 +107,9 @@ scene = function (newGameFunc) {
       scene.updateScreenDimensions();
 
       /**
-        * This is the devkit {@link View} which all backgrounds should be added to.
+        * The devkit {@link View} which all backgrounds should be added to.
         * @var {Background} scene.background
         */
-      console.log("DIMENSIONS:", scene.screen.width, scene.screen.height);
-
       scene.background = new Background({
         parent: this.rootView,
         width: scene.screen.width,
@@ -106,7 +117,7 @@ scene = function (newGameFunc) {
       });
 
       /**
-        * This is the devkit {@link View} which all actors should be added to.
+        * The devkit {@link View} which all actors should be added to.
         * @var {View} scene.stage
         */
       this.stage = new BaseView({
@@ -114,26 +125,30 @@ scene = function (newGameFunc) {
         infinite: true
       });
       scene.stage = this.stage;
+
       /**
         * @method scene.addImage
         * @see BaseView#addImage
         */
       scene.addImage = bind(scene.stage, scene.stage.addImage);
 
+      /**
+       * The devkit {@link View} which all UI should be added to.
+       * @var {UIView} scene.ui
+       */
       scene.ui = new UIView({
         superview: scene.view,
         infinite: true
       });
 
       /**
-       * The root group for all objects created on the scene instead of
-       * on their own group.
+       * The default group for actors (if no other group is used).
        * @var {Group} scene.group
        */
       scene.group = new Group({superview: this.stage});
 
       /**
-       * The superview for all text views.
+       * The devkit {@link View} which all text should be added to.
        * @var {View} scene.textContainer
        */
       scene.textContainer = new View({
@@ -144,13 +159,20 @@ scene = function (newGameFunc) {
         zIndex: 100000
       });
 
-      // An overlay to catch inputs.  Bind things to this
-      this.overlay = new View({ parent: this.rootView, infinite: true, zIndex: 999999 });
+      /**
+       * An empty devkit {@link View} which is overtop of the entire game, used to catch input.
+       * @var {View} scene._inputOverlay
+       */
+      scene._inputOverlay = new View({ parent: this.rootView, infinite: true, zIndex: 999999 });
       var touchManager = scene.screen.touchManager;
-      this.overlay.onInputStart = bind(touchManager, touchManager.downHandler);
-      this.overlay.onInputSelect = bind(touchManager, touchManager.upHandler);
-      this.overlay.onInputMove = bind(touchManager, touchManager.moveHandler);
+      scene._inputOverlay.onInputStart = bind(touchManager, touchManager.downHandler);
+      scene._inputOverlay.onInputSelect = bind(touchManager, touchManager.upHandler);
+      scene._inputOverlay.onInputMove = bind(touchManager, touchManager.moveHandler);
 
+      /**
+       * The default manager for scene timers. Add timers to this if you want them automatically managed.
+       * @var {TimerManager} scene.timerManager
+       */
       scene.timerManager = new TimerManager();
     }
 
@@ -167,10 +189,9 @@ scene = function (newGameFunc) {
         this.reset('splash');
 
         // start the game when you click
-        self = this
         scene.screen.onDown(function() {
-          self.reset('default');
-        }, true);
+          this.reset('default');
+        }.bind(this), true);
       } else {
         this.reset();
       }
@@ -200,8 +221,8 @@ scene = function (newGameFunc) {
       scene.totalDt = 0;
       scene.timerManager.reset();
 
-      for (var i in this.groups) {
-        this.groups[i].destroy(false);
+      for (var i in scene.groups) {
+        scene.groups[i].destroy(false);
       }
 
       for (var k in scene.extraViews) {
@@ -217,7 +238,7 @@ scene = function (newGameFunc) {
 
       // Clear the tallies
       scene.extraViews = [];
-      this.groups = [];
+      scene.groups = [];
       _score = 0;
       _on_tick = null;
 
@@ -247,13 +268,13 @@ scene = function (newGameFunc) {
       scene.timerManager.update(dt);
 
       // Convert dt into seconds
-      dt *= SCALE_DT;
+      dt /= 1000;
 
       scene.collisions.update();
       scene.background.update(dt);
       scene.group.update(dt);
-      for (var i = 0; i < this.groups.length; i++) {
-        this.groups[i].update(dt);
+      for (var i = 0; i < scene.groups.length; i++) {
+        scene.groups[i].update(dt);
       }
       scene.camera.update(dt);
       this.stage.style.x = -scene.camera.x;
@@ -268,16 +289,36 @@ scene = function (newGameFunc) {
 
 };
 
+/**
+ * Easy access to {@link ScaleManager.SCALE_MODE}
+ * @var {Object} scene.SCALE_MODE
+ */
 scene.SCALE_MODE = ScaleManager.SCALE_MODE;
+/**
+ * The scene scale manager is responsible for automatically fitting your game to any resolution in a reasonable way.
+ * The default width and height are 576 and 1024 respectively.
+ * The defualt scale mode is {@link ScaleManager.SCALE_MODE.LOCK_HEIGHT}
+ * @type {ScaleManager} scene.scaleManager
+ */
 scene.scaleManager = new ScaleManager(576, 1024, scene.SCALE_MODE.LOCK_HEIGHT);
 
+/**
+ * Update the scaleManager as well as the scene screen dimensions.
+ * @method scene.setScaleOptions
+ * @param  {Number} width
+ * @param  {Number} height
+ * @param  {String} scaleMode
+ * @see ScaleManager#resize
+ * @see scene.updateScreenDimensions
+ */
 scene.setScaleOptions = function(width, height, scaleMode) {
   scene.scaleManager.resize(width, height, scaleMode);
   scene.updateScreenDimensions();
 };
 
 /**
- * updateScreenDimensions
+ * This automatically updates the internal scene variables relying on the scaleManager sizes
+ * @method scene.updateScreenDimensions
  */
 scene.updateScreenDimensions = function() {
 
@@ -297,81 +338,100 @@ scene.updateScreenDimensions = function() {
 };
 
 /**
-  * @var {Screen} scene.screen
-  */
+ * The screen object is the rectangle where all UI lives.  Its dimensions match that of the device screen.
+ * Default size is 576 x 1024
+ * @var {Screen} scene.screen
+ */
 scene.screen = new Screen(576, 1024);
 
 /**
-  * @var {Camera} scene.cam
-  */
+ * The scene camera is useful for following around an Actor. The camera can be
+ * thought of as the rectangular region of world space that is currently visible to the user.
+ * Default size is 576 x 1024
+ * @var {Camera} scene.cam
+ */
 scene.camera = new Camera(scene.screen.width, scene.screen.height);
 
 /**
-  * @var {CollisionManager} scene.collisions
-  */
+ * The collision manager is responsible for tracking all scene collisions.
+ * @var {CollisionManager} scene.collisions
+ * @see scene.onCollision
+ */
 scene.collisions = new CollisionManager();
 
 /**
-  * @var {StateManager} scene.state
-  */
+ * The state manager is what handles changing game states.
+ * @var {StateManager} scene.state
+ */
 scene.state = new StateManager();
 
 /**
-  * There can be only one player. {@link scene.gameOver} is automatically called when the player is destroyed.
-  * @var {Actor} scene.player
-  */
+ * There can be only one player. {@link scene.gameOver} is automatically called when the player is destroyed.
+ * @var {Actor} scene.player
+ * @see scene.addPlayer
+ */
 scene.player = null;
 
-/** The total number of milliseconds that have elapsed since the start of the game.
-  * @var {number} scene.totalDt */
+/**
+ * The total number of milliseconds that have elapsed since the start of the game.
+ * @var {number} scene.totalDt
+ */
 scene.totalDt = 0;
 
-/** The total number of milliseconds that have elapsed since the start of the app.
-  * @var {number} scene.totalAppDt */
+/**
+ * The total number of milliseconds that have elapsed since the start of the app.
+ * @var {number} scene.totalAppDt
+ */
 scene.totalAppDt = 0;
 
 /**
-  * Called every tick with accellerometer data
-  * @callback onTickCallback
-  * @arg {number} [dt] - Used to normalise game speed based on real time
-  */
+ * Called every tick with the dt in milliseconds since the last tick.
+ * @callback onTickCallback
+ * @arg {number} [dt] - Used to normalise game speed based on real time
+ */
 /**
-  * Register a new tick handler
-  * @func scene.onTick
-  * @arg {onTickCallback} callback
-  */
+ * Register a new tick handler
+ * @func scene.onTick
+ * @arg {onTickCallback} callback
+ */
 scene.onTick = function(cb) {
   _on_tick = cb;
 };
 
+// ---- ---- Accelerometer ---- ---- //
+
 /**
- * startAccelerometer(fun)
- *
- * Wraps to the accelerometer module, doesn't do much but provide some niceish
- * calculations by default. If you don't care about those, or are nit-picky with
- * speed, just use the accelerometer module by yourself.
+ * @var {Boolean} scene._accelerometerStarted
  */
-scene.accelerometer = {
-  _started: false,
-  _onAccelerometer: [],
-};
+scene._accelerometerStarted = false;
+/**
+ * @var {Boolean} scene._accelerometerHandlers
+ */
+scene._accelerometerHandlers = [];
 
 /**
-  * Called every tick with accellerometer data
-  * @callback onAccelerometerCallback
-  * @arg {AccellerometerEvent} e
-  */
+ * @typedef {Object} AccellerometerData
+ * @property {Number} x
+ * @property {Number} y
+ * @property {Number} z
+ * @property {Number} forwardTilt
+ * @property {Number} tilt
+ * @property {Number} twist
+ */
 /**
-  * Register a new accelerometer callback
-  * @func scene.onAccelerometer
-  * @arg {onAccelerometerCallback} callback
-  */
+ * Called every tick with accellerometer data
+ * @callback onAccelerometerCallback
+ * @arg {AccellerometerData} e
+ */
+/**
+ * Register a new accelerometer callback
+ * @func scene.onAccelerometer
+ * @arg {onAccelerometerCallback} callback
+ */
 scene.onAccelerometer = function(cb) {
-  var accelCallbacks = scene.accelerometer._onAccelerometer;
-  accelCallbacks.push(cb);
-
-  if (!scene.accelerometer._started) {
-    scene.accelerometer._started = true;
+  if (!scene._accelerometerStarted) {
+    scene._accelerometerStarted = true;
+    scene._accelerometerHandlers = [];
 
     accelerometer.on('devicemotion', function (evt) {
 
@@ -388,35 +448,45 @@ scene.onAccelerometer = function(cb) {
         twist: Math.atan2(x, z),
       };
 
+      // Update all the handlers!
+      var accelCallbacks = scene._accelerometerHandlers;
       for (var i = 0; i < accelCallbacks.length; ++i) {
         accelCallbacks[i](accelObj);
       }
     });
   }
+
+  scene._accelerometerHandlers.push(cb);
 };
 
-scene.stopAccelerometer = function(cb) {
-  if (_accelerometer_started) {
+/**
+ * Stop and clear accelerometer handlers.
+ * @method scene.stopAccelerometer
+ */
+scene.stopAccelerometer = function() {
+  if (scene._accelerometerStarted) {
     accelerometer.stop();
-    _accelerometer_started = false;
+    scene._accelerometerStarted = false;
   }
 };
 
+// ---- ---- //
+
 /**
-  * Displays text
-  * @func scene.addText
-  * @arg {string} text
-  * @arg {Object} [opts] - contains options to be applied to {@link TextView}
-  * @returns {TextView}
-  */
+ * Displays text
+ * @func scene.addText
+ * @arg {string} text
+ * @arg {Object} [opts] - contains options to be applied to {@link TextView}
+ * @returns {TextView}
+ */
 /**
-  * @func scene.addText(2)
-  * @arg {string} text
-  * @arg {number} x
-  * @arg {number} y
-  * @arg {Object} [opts] - contains options to be applied to {@link TextView}
-  * @returns {TextView}
-  */
+ * @func scene.addText(2)
+ * @arg {string} text
+ * @arg {number} x
+ * @arg {number} y
+ * @arg {Object} [opts] - contains options to be applied to {@link SceneText}
+ * @returns {SceneText}
+ */
 scene.addText = function(text, x, y, opts) {
   opts = opts || {};
 
@@ -448,6 +518,11 @@ scene.addText = function(text, x, y, opts) {
   return result;
 };
 
+/**
+ * Remove a text view from the scene.
+ * @method scene.removeText
+ * @param  {SceneText} sceneText - The instance to be removed
+ */
 scene.removeText = function(sceneText) {
   var extraViews = scene.extraViews;
   var index = extraViews.indexOf(sceneText);
@@ -460,34 +535,46 @@ scene.removeText = function(sceneText) {
   }
 };
 
+/**
+ * Set the default text color to be applied to any new text view created using {@link scene.addText}
+ * @method scene.setTextColor
+ * @param  {String} color
+ */
 scene.setTextColor = function(color) {
   // TODO validate?
   _text_color = color;
 };
 
+/**
+ * Set the default text font to be applied to any new text view created using {@link scene.addText}
+ * @method scene.setTextFont
+ * @param  {String} font
+ */
 scene.setTextFont = function(font) {
   // TODO validate?
   _text_font = font;
 };
 
 /**
-  * Set the x and y coordinates in screen space for the score text. The score text remains invisible
-  * until this function is called.
-  * @func scene.showScore
-  * @arg {number} x
-  * @arg {number} y
-  * @arg {Object} [opts] contains options to be applied to the underlying {@link View}
-  * @arg {String} [opts.color]
-  * @arg {String} [opts.font]
-  */
+ * Set the x and y coordinates in screen space for the score text. The score text remains invisible
+ * until this function is called.
+ * @method  scene.showScore
+ * @param   {Number} x
+ * @param   {Number} y
+ * @param   {Object} [opts] contains options to be applied to the underlying {@link View}
+ * @param   {String} [opts.color]
+ * @param   {String} [opts.font]
+ * @returns {TextView}
+ */
 /**
-  * @method scene.showScore(2)
-  * @param  {String|Object} resource - resource key to be resolved by community art, or opts
-  * @param {Number} x
-  * @param {Number} y
-  * @param {Object} [opts]
-  * @returns {SceneScoreView}
-  */
+ * If a resource is specified, a {@link ScoreView} will be used (because they look great).
+ * @method scene.showScore(2)
+ * @param   {String|Object} resource - resource key to be resolved by community art, or opts
+ * @param   {Number}        x
+ * @param   {Number}        y
+ * @param   {Object}        [opts]
+ * @returns {SceneScoreView}
+ */
 scene.showScore = function(resource, x, y, opts) {
   var scoreView;
 
@@ -542,10 +629,10 @@ scene.showScore = function(resource, x, y, opts) {
 };
 
 /**
-  * Calling this function will set {@link scene._score} and update the score view.
-  * @func scene.setScore
-  * @arg {number} newScore
-  */
+ * Calling this function will set {@link scene._score} and update the score view.
+ * @func scene.setScore
+ * @arg {number} newScore
+ */
 scene.setScore = function(score) {
   if (_game_running) {
     _score = score;
@@ -557,70 +644,73 @@ scene.setScore = function(score) {
 };
 
 /**
-  * @func scene.addScore
-  * @see scene.setScore
-  * @arg {number} amount
-  */
+ * @func scene.addScore
+ * @arg {number} amount
+ * @see scene.setScore
+ */
 scene.addScore = function(add) {
   scene.setScore(scene.getScore() + add);
 };
 
-/** @func scene.getScore
-  * @returns {number} */
+/**
+ * @func scene.getScore
+ * @returns {number}
+ */
 scene.getScore = function() {
   _using_score = true;
   return _score;
 };
 
 /**
-  * Execute a callback every specified amount of milliseconds. Game dt will be used
-  * to determine how long has passed, not system time. Replacement for `setInterval`.
-  * @func scene.addInterval
-  * @arg {function} callback
-  * @arg {number} ms - milliseconds between callback executions
-  * @returns {Timer} intervalInstance
-  */
+ * Execute a callback every specified amount of milliseconds. Game dt will be used
+ * to determine how long has passed, not system time. Replacement for `setInterval`.
+ * @func scene.addInterval
+ * @arg {function} callback
+ * @arg {number} ms - milliseconds between callback executions
+ * @returns {Timer} intervalInstance
+ */
 scene.addInterval = function(callback, ms) {
   return this.timerManager.addTimer(new Timer(callback, ms, false));
 };
 
 /**
-  * Remove an interval before it has executed. Replacement for `clearInterval`.
-  * @func scene.removeInterval
-  * @arg {Timer} intervalInstance
-  */
+ * Remove an interval before it has executed. Replacement for `clearInterval`.
+ * @func scene.removeInterval
+ * @arg {Timer} intervalInstance
+ */
 scene.removeInterval = function(intervalInstance) {
   return this.timerManager.removeTimer(intervalInstance);
 };
 
 /**
-  * Execute a callback after a specified amount of milliseconds. Callback will only execute once.
-  * Game dt will be used to determine how long has passed, not system time. Replacement for `setTimeout`.
-  * @func scene.addTimeout
-  * @arg {function} callback
-  * @arg {number} ms - milliseconds until callback is executed
-  * @returns {Timer} timeoutInstance
-  */
+ * Execute a callback after a specified amount of milliseconds. Callback will only execute once.
+ * Game dt will be used to determine how long has passed, not system time. Replacement for `setTimeout`.
+ * @func scene.addTimeout
+ * @arg {function} callback
+ * @arg {number}   ms - milliseconds until callback is executed
+ * @returns {Timer} timeoutInstance
+ */
 scene.addTimeout = function(callback, ms) {
   return this.timerManager.addTimer(new Timer(callback, ms, true));
 };
 
 /**
-  * Remove a timeout before it has executed. Replacement for `clearTimeout`.
-  * @func scene.removeTimeout
-  * @arg {Timer} timeoutInstance
-  */
+ * Remove a timeout before it has executed. Replacement for `clearTimeout`.
+ * @func scene.removeTimeout
+ * @arg {Timer} timeoutInstance
+ */
 scene.removeTimeout = function(timeoutInstance) {
   return this.timerManager.removeTimer(timeoutInstance);
 };
 
 /**
-  * When called, this function will restart the game.
-  * @func scene.gameOver
-  * @arg {Object} [opts]
-  * @arg {number} [opts.delay] - A delay between when this function is called and when the endgame logic is run.
-  * @arg {boolean} [opts.noGameoverScreen] - Optionally skip the "Game Over" text.
-  */
+ * When called, this function will restart the game.
+ * If scene has been set to use Weeby, calling this will return the user to the Weeby UI.
+ * @func scene.gameOver
+ * @arg {Object}  [opts]
+ * @arg {number}  [opts.delay] - A delay between when this function is called and when the endgame logic is run.
+ * @arg {boolean} [opts.noGameoverScreen] - Optionally skip the "Game Over" text.
+ */
 scene.gameOver = function(opts) {
 
   if (_game_running === false ) { return; }
@@ -655,13 +745,16 @@ scene.gameOver = function(opts) {
 };
 
 /**
- * mode(name, resetFun, opts = {}) - Set a mode to the given function
- * ~ name    the name of the mode to set
- * ~ fun     the function to call from reset, whenever the mode resets or begins
- * ~ opts    options to pass to the mode function
- *
- * mode(name) - Switches to the given mode
- * ~ name    the name of the mode to switch to
+ * Set a mode to the given function
+ * @method scene.mode
+ * @param {String} name - The name of the mode to set
+ * @param {function} resetFunction - The function to call from reset, whenever the mode resets or begins
+ * @param {Object} [opts] - Options to pass to the mode function
+ */
+/**
+ * Switches to the given mode
+ * @method scene.mode(2)
+ * @param {String} name - The name of the mode to switch to
  */
 scene.mode = function(name, fun, opts) {
   if (fun !== undefined) {
@@ -677,54 +770,64 @@ scene.mode = function(name, fun, opts) {
   }
 };
 
-
 /**
-  * Construct a splash screen to show at the beginning of the game, click once anywhere to hide the screen.
-  * @func scene.splash
-  * @arg {function} func
-  */
+ * Construct a splash screen to show at the beginning of the game, click once anywhere to hide the screen.
+ * @func scene.splash
+ * @arg {function} func
+ */
 scene.splash = function(fun, opts) {
+  // TODO: Check for an existing splash screen?
+  // TODO: How does it know that clicking once goes to the game? Should be more configurable here and not hardcoded
   scene.mode('splash', fun, opts);
 };
 
+/**
+ * Add a background layer to your game.
+ * @method scene.addBackground
+ * @param  {Object} resource
+ * @param  {Object} [opts]
+ */
 scene.addBackground = function(art, opts) {
   return scene.background.addLayer(art, opts);
 };
 
-// Change the default class for actors
+/**
+ * Change the default class for actors
+ * @method scene.setActorCtor
+ * @param  {Class} actorCtor
+ */
 scene.setActorCtor = function(actorCtor) {
   scene._actorCtor = actorCtor;
 };
 
 /**
-  * Create a new actor that will be automatically updated each tick
-  * @func scene.addActor
-  * @param  {String|Object} resource - resource key to be resolved by community art, or opts
-  * @param {Object} [opts] - contains options to be applied to the underlying {@link Actor}
-  * @returns {Actor}
-  */
+ * Create a new actor that will be automatically updated each tick
+ * @method  scene.addActor
+ * @param   {String|Object} resource - resource key to be resolved by community art, or opts
+ * @param   {Object}        [opts]   - contains options to be applied to the underlying {@link Actor}
+ * @returns {Actor}
+ */
 /**
-  * @func scene.addActor(2)
-  * @arg {View} view
-  * @arg {Object} [opts] - contains options to be applied to the underlying {@link Actor}
-  * @returns {Actor}
-  */
+ * @method  scene.addActor(2)
+ * @param   {View}   view
+ * @param   {Object} [opts] - contains options to be applied to the underlying {@link Actor}
+ * @returns {Actor}
+ */
 scene.addActor = function(resource, opts) {
   return scene.group.addActor(resource, opts);
 };
 
 /**
-  * Sets the scene player, makes sure not to override an existing player.
-  * @func scene.addPlayer
-  *
-  * @see scene.addActor
-  * @param  {String|Object} resource - resource key to be resolved by community art, or opts
-  * @param {Object} [opts] - contains options to be applied to the underlying {@link Actor}
-  * @returns {View} - The newly set player
-  */
+ * Sets the scene player, makes sure not to override an existing player.
+ * @method  scene.addPlayer
+ * @param   {String|Object} resource - resource key to be resolved by community art, or opts
+ * @param   {Object}        [opts]   - contains options to be applied to the underlying {@link Actor}
+ * @returns {View}                   - The newly set player
+ * @see scene.addActor
+ */
 scene.addPlayer = function(resource, opts) {
   if (scene.player) {
-    throw new Error("You can only add one player!");
+    throw new Error('You can only add one player!');
   }
 
   scene.player = scene.addActor(resource, opts);
@@ -735,48 +838,49 @@ scene.addPlayer = function(resource, opts) {
 };
 
 /**
-  * Add a new group
-  * @func scene.addGroup
-  * @arg {Object} [opts]
-  * @returns {@link Group}
-  */
+ * Add a new actor group to scene tracking
+ * @func    scene.addGroup
+ * @arg     {Object} [opts]
+ * @returns {Group}
+ */
 scene.addGroup = function(opts) {
   opts = opts || {};
   opts.superview = GC.app.stage;
   var result = new Group(opts);
-  GC.app.groups.push(result);
+  scene.groups.push(result);
   return result;
 };
 
 /**
-  * Will add a new spawner to the scene's default group.
-  * @arg {Spawner} spawner
-  * @returns {Spawner} spawner
-  * @see {Group#addSpawner}
-  */
+ * Will add a new spawner to the scene default group.
+ * @arg     {Spawner} spawner
+ * @returns {Spawner}
+ * @see     {Group#addSpawner}
+ */
 scene.addSpawner = function(spawner) {
   return scene.group.addSpawner(spawner);
 };
 
 /**
-  * Will remove a spawner from the scene's default group.
-  * @arg {Spawner} spawner
-  * @see {Group#removeSpawner}
-  */
+ * Will remove a spawner from the scene default group.
+ * @arg     {Spawner} spawner
+ * @returns {Spawner}
+ * @see     {Group#removeSpawner}
+ */
 scene.removeSpawner = function(spawner) {
   return scene.group.removeSpawner(spawner);
 };
 
 /**
-  * This collision check will be run each tick. {@link callback} will be called only once per tick
-  * @func scene.onCollision
-  * @arg {Actor|Actor[]|Group|Collidable} a
-  * @arg {Actor|Actor[]|Group|Collidable} b
-  * @arg {onCollisionCallback} callback
-  * @arg {boolean} [allCollisions] - {@link callback} may be called more than once per tick
-  * @see CollisionChecker
-  * @returns {number} collisionCheckID
-  */
+ * This collision check will be run each tick. The callback will be called only once per tick by default.
+ * @func scene.onCollision
+ * @arg {Actor|Actor[]|Group|Collidable} a
+ * @arg {Actor|Actor[]|Group|Collidable} b
+ * @arg {onCollisionCallback}            callback
+ * @arg {boolean}                        [allCollisions] - {@link callback} may be called more than once per tick
+ * @returns {number} collisionCheckID
+ * @see CollisionChecker
+ */
 scene.onCollision = function(a, b, callback, allCollisions) {
   // create a new collision checker
   var check = new CollisionChecker({
@@ -789,40 +893,64 @@ scene.onCollision = function(a, b, callback, allCollisions) {
   return this.collisions.registerCollision(check);
 };
 
-// More shortcuts
+// --- ---- Shortcuts ---- ---- //
+
+/**
+ * Easy access to actor classes
+ * @var      {Object}   scene.actor
+ * @property {Actor}    scene.actor.Actor
+ * @property {SATActor} scene.actor.SAT
+ */
 scene.actor = {
   Actor: Actor,
   SAT: SATActor
 }
 scene._actorCtor = scene.actor.Actor;
 
-/** Easy access to spawner classes
-  * @var {Object} scene.spawner
-  * @prop {Timed} scene.spawner.Spawner
-  * @prop {Horizontal} scene.spawner.Horizontal
-  * @prop {Vertical} scene.spawner.Vertical */
+/**
+ * Easy access to spawner classes
+ * @var  {Object}     scene.spawner
+ * @prop {Timed}      scene.spawner.Spawner
+ * @prop {Horizontal} scene.spawner.Horizontal
+ * @prop {Vertical}   scene.spawner.Vertical
+ */
 scene.spawner = {
   Horizontal: HorizontalSpawner,
   Vertical: VerticalSpawner,
   Timed: Spawner
 };
 
-/** Easy access to shape classes
-  * @var {Object} scene.shape
-  * @prop {Rect} scene.shape.Rect
-  * @prop {Line} scene.shape.Line */
+/**
+ * Easy access to shape classes
+ * @var  {Object} scene.shape
+ * @prop {Rect}   scene.shape.Rect
+ * @prop {Line}   scene.shape.Line
+ */
 scene.shape = {
   Rect: Rect,
   Line: Line
 };
 
+/**
+ * Easy access to collision classes
+ * @var  {Object}             scene.collision
+ * @prop {CollisionChecker}   scene.collision.CollisionChecker
+ */
 scene.collision = {
   CollisionChecker: CollisionChecker
 };
 
+/**
+ * @var {String[]} scene.animationGroups - Animation groups to be tracked and auto cleaned up by scene
+ * @default ['scene']
+ */
 // TODO: seems like this calls for ... another manager!
 scene.animationGroups = null;
 
+/**
+ * Clear all the tracked animation groups
+ * @method scene.clearAnimations
+ */
 scene.clearAnimations = function() {
   if (scene.animationGroups) {
     // Clear old animaion groups
@@ -843,11 +971,11 @@ scene.clearAnimations = function() {
 };
 
 /**
-  * @func scene.animate
-  * @arg {View}    subject
-  * @arg {string}  [name]
-  * @returns {Animator} anim
-  */
+ * @func scene.animate
+ * @arg {View}         subject
+ * @arg {string}       [groupName]
+ * @returns {Animator} anim
+ */
 scene.animate = function(subject, groupId) {
   groupId = groupId === undefined ? "scene" : "scene_" + groupId;
   var anim = animate(subject, groupId);
@@ -857,22 +985,75 @@ scene.animate = function(subject, groupId) {
   return anim;
 };
 
+/**
+ * Easy access to {@link animate.transitions}
+ * @todo Document animate
+ */
 scene.transitions = transitions;
 
-scene.audio = new SceneAudioManager();
-scene.addSound = bind(scene.audio, "addSound");
-scene.addSoundGroup = bind(scene.audio, "addSoundGroup");
-scene.addMusic = bind(scene.audio, "addMusic");
-scene.playSound = bind(scene.audio, "playSound");
-scene.playMusic = bind(scene.audio, "playMusic");
-scene.stopMusic = bind(scene.audio, "stopMusic");
+// ---- ---- Audio --- ---- //
 
+/**
+ * The default scene audio manager. Used to register your games sounds and music.
+ * @var {SceneAudioManager} scene.audio
+ */
+scene.audio = new SceneAudioManager();
+/**
+ * Add a new sound effect to your game.
+ * @method scene.addSound
+ * @see SceneAudioManager#addSound
+ */
+scene.addSound = bind(scene.audio, 'addSound');
+/**
+ * @todo Idk what a sound group is
+ * @method scene.addSoundGroup
+ * @see SceneAudioManager#addSoundGroup
+ */
+scene.addSoundGroup = bind(scene.audio, 'addSoundGroup');
+/**
+ * Add a new background music track to your game.
+ * @method scene.addMusic
+ * @see SceneAudioManager#addMusic
+ */
+scene.addMusic = bind(scene.audio, 'addMusic');
+/**
+ * Play a registered sound.
+ * @method scene.playSound
+ * @see SceneAudioManager#playSound
+ */
+scene.playSound = bind(scene.audio, 'playSound');
+/**
+ * Play a registered music track.
+ * @method scene.playMusic
+ * @see SceneAudioManager#playMusic
+ */
+scene.playMusic = bind(scene.audio, 'playMusic');
+/**
+ * Stop a playing music track.
+ * @method scene.stopMusic
+ * @see SceneAudioManager#stopMusic
+ */
+scene.stopMusic = bind(scene.audio, 'stopMusic');
+
+/**
+ * Reset and restart the entire game.
+ * @method scene.reset
+ */
 scene.reset = function() {
   GC.app.reset();
 };
 
+/**
+ * Whether or not the game will be using an included Weeby loop
+ * @var {Boolean} scene._useWeeby
+ */
 // TODO: This is a bit of a hack, make it better
 scene._useWeeby = false;
+/**
+ * Use a Weeby loop!
+ * Warning: Requires access to a Weeby bundle.
+ * @method scene.useWeeby
+ */
 scene.useWeeby = function() {
   import device;
   import weeby;
