@@ -48,9 +48,6 @@ exports = function(inherits) {
       // Health
       this.health = config.health || 1;
 
-      this.destroyed = false;
-      config.autoSize = true;
-
       this.unscaledHitBounds = this.model.hitBounds;
       this.scale = config.scale !== undefined ? config.scale : 1;
       this.view.setFramerate(config.frameRate !== undefined ? config.frameRate : 30);
@@ -86,8 +83,8 @@ exports = function(inherits) {
     this.updateEntity = suprPrototype.update;
 
     this.update = function(dt) {
-      if (this.destroyed) {
-        console.warn('Will not update destroyed Actor.');
+      if (!this.active) {
+        console.warn('Will not update inactive Actor.');
         return;
       }
 
@@ -239,8 +236,6 @@ exports = function(inherits) {
           this.destroyHandlers[i](this);
         }
       }
-      if (this.view.hasAnimations) { this.view.stopAnimation(); }
-      this.destroyed = true;
       suprPrototype.destroy.call(this);
     }
 
@@ -309,7 +304,7 @@ exports = function(inherits) {
     };
 
     Object.defineProperty(this, "currentAnimation", {
-      get: function() { return this.view.hasAnimations ? this.view._currentAnimationName : ""; }
+      get: function() { return this.view.isSprite ? this.view._currentAnimationName : ""; }
     });
 
     Object.defineProperty(this, "opacity", {
@@ -342,9 +337,6 @@ exports = function(inherits) {
 
     this.showHitBounds = function() {
       this.view.showHitBounds();
-      // this.view.hitBoundsView.style.offsetX = -this.view.style.offsetX * this.view.style.scale;
-      // this.view.hitBoundsView.style.offsetY = -this.view.style.offsetY * this.view.style.scale;
-      // this.view.hitBoundsView.style.scale = 1 / this.view.style.scale;
     };
   });
 };

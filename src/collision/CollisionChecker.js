@@ -111,7 +111,7 @@ var CC = Class(function() {
   };
 
   this.run = function() {
-    if (this._a.destroyed || this._b.destroyed) { return false; }
+    if (this._a.active === false || this._b.active === false) { return false; }
 
     this.lastCollisionState = this.collisionState;
     this.collisionState = this.test(this._a, this._b, this._callback, this._allCollisions);

@@ -155,7 +155,7 @@ exports = Class(Rect, function(supr) {
   this.update = function(dt) {
     if (!this.following) { return; }
 
-    if (this.following.destroyed) {
+    if (!this.following.active) {
       this.stopFollowing();
       return;
     }
