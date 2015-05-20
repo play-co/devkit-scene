@@ -206,7 +206,6 @@ scene = function (newGameFunc) {
       scene.ui.reset();
 
       effects.commit();
-      effects.stop();
       scene.clearAnimations();
       scene.updateScreenDimensions();
       scene.screen.reset();
