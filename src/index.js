@@ -1,6 +1,6 @@
 import device;
-import animate;
 import animate.transitions as transitions;
+import .AnimationHelper;
 
 import ui.View as View;
 import ui.TextView as TextView;
@@ -213,7 +213,7 @@ scene = function (newGameFunc) {
       scene.ui.reset();
 
       effects.commit();
-      scene.clearAnimations();
+      scene.animate.clearAnimations();
       scene.updateScreenDimensions();
       scene.screen.reset();
       scene.background.reset();
@@ -947,52 +947,12 @@ scene.collision = {
 };
 
 /**
- * @var {String[]} scene.animationGroups - Animation groups to be tracked and auto cleaned up by scene
- * @default ['scene']
- */
-// TODO: seems like this calls for ... another manager!
-scene.animationGroups = null;
-
-/**
- * Clear all the tracked animation groups
- * @method scene.clearAnimations
- */
-scene.clearAnimations = function() {
-  if (scene.animationGroups) {
-    // Clear old animaion groups
-    for (var i = 0; i < scene.animationGroups.length; i++) {
-      var group = animate.getGroup(scene.animationGroups[i]);
-      if (!group) { continue; }
-      var animations = group._anims;
-      for (var key in animations) {
-        animations[key].commit();
-        animations[key].clear();
-        delete animations[key];
-      }
-    }
-  }
-
-  // Reset array
-  scene.animationGroups = ['scene'];
-};
-
-/**
  * @func scene.animate
  * @arg {View}         subject
  * @arg {string}       [groupName]
  * @returns {Animator} anim
  */
-scene.animate = function(subject, groupId) {
-  groupId = groupId === undefined ? "scene" : "scene_" + groupId;
-  var anim = animate(subject, groupId);
-  if (groupId !== "scene" && scene.animationGroups.indexOf(groupId) === -1) {
-    scene.animationGroups.push(groupId);
-  }
-  if (subject._addAnimationGroup) {
-    subject._addAnimationGroup(groupId);
-  }
-  return anim;
-};
+scene.animate = AnimationHelper;
 
 /**
  * Easy access to {@link animate.transitions}
