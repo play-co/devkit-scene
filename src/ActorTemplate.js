@@ -29,10 +29,10 @@ exports = function(inherits) {
     this.reset = function(config) {
       suprPrototype.reset.call(this, config);
 
+      effects.clear(this);
       this.lastFollowTarget = null;
       this.destroyHandlers = [];
       this.tickHandlers = [];
-      effects.commit(this);
 
       this.dtExisted = 0;
 
@@ -237,6 +237,7 @@ exports = function(inherits) {
         }
       }
       suprPrototype.destroy.call(this);
+      effects.commit(this);
     }
 
     /**
