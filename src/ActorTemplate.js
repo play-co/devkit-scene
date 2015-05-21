@@ -306,6 +306,21 @@ exports = function(inherits) {
       return Math.sqrt(this.vx * this.vx + this.vy * this.vy);
     };
 
+    this._addStyleProperty = function(styleName, newName) {
+      newName = newName || styleName;
+      Object.defineProperty(this, newName, {
+        get: function() { return this.view.style[styleName]; },
+        set: function(value) { this.view.style[styleName] = value; }
+      });
+    };
+
+    this._addStyleProperty("opacity");
+    this._addStyleProperty("scale");
+    this._addStyleProperty("flipX");
+    this._addStyleProperty("flipY");
+    this._addStyleProperty("r", "rotation");
+    this._addStyleProperty("zIndex");
+
     /**
       * Register a new destroy handler, will be called after {@link Actor#destroy} has been called.
       * @func Actor#onDestroy
@@ -319,37 +334,9 @@ exports = function(inherits) {
       get: function() { return this.view.isSprite ? this.view._currentAnimationName : ""; }
     });
 
-    Object.defineProperty(this, "opacity", {
-      get: function() { return this.view.style.opacity; },
-      set: function(value) { this.view.style.opacity = value; }
-    });
-
-    Object.defineProperty(this, "scale", {
-      get: function() { return this.view.style.scale },
-      set: function(value) {
-        this.view.style.scale = value;
-        this.applyScaledBounds(this.unscaledHitBounds, this.model.hitBounds, value);
-      }
-    });
-
-    Object.defineProperty(this, "flipX", {
-      get: function() { return this.view.style.flipX },
-      set: function(value) { this.view.style.flipX = value; }
-    });
-
-    Object.defineProperty(this, "flipY", {
-      get: function() { return this.view.style.flipY },
-      set: function(value) { this.view.style.flipY = value; }
-    });
-
-    Object.defineProperty(this, "rotation", {
-      get: function() { return this.view.style.r },
-      set: function(value) { this.view.style.r = value; }
-    });
-
-    Object.defineProperty(this, "zIndex", {
-      get: function() { return this.view.style.zIndex },
-      set: function(value) { this.view.style.zIndex = value; }
+    Object.defineProperty(this, "clipRect", {
+      get: function() { return this.view.clipRect; },
+      set: function(value) { this.view.clipRect = value; }
     });
 
     this.showHitBounds = function() {

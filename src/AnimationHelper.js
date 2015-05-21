@@ -52,6 +52,7 @@ exports.clearAnimations = function() {
  * @arg {number}  [opts.duration] - The duration of the animation
  * @arg {number}  [opts.rotation] - The amount to rotate
  * @arg {Function} [opts.transition] - The transition to use for easing
+ * @arg {Function} [opts.rotateActor] - The transition to use for easing
  */
 exports.rotateAround = function(opts) {
   var target = opts.target;
@@ -61,6 +62,7 @@ exports.rotateAround = function(opts) {
   var rotation = opts.rotation || 0;
   var transition = opts.transition || transitions.linear;
   var rotateActor = opts.rotateActor || false;
+  var actorRotation = target.rotation;
   var dx = target.x - x;
   var dy = target.y - y;
   var distance = Math.sqrt(dx * dx + dy * dy);
@@ -70,11 +72,13 @@ exports.rotateAround = function(opts) {
     var endAngle = startAngle + rotation;
     target.x = x + Math.cos(endAngle) * distance;
     target.y = y + Math.sin(endAngle) * distance;
+    target.rotation += rotation;
   } else {
     scene.animate(target, 'rotateAround').now({}, duration, transition, function(tt) {
       var targetAngle = startAngle + rotation * tt;
       target.x = x + Math.cos(targetAngle) * distance;
       target.y = y + Math.sin(targetAngle) * distance;
+      if (rotateActor) { target.rotation = actorRotation + rotation * tt; }
     });
   }
 
