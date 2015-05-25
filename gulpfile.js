@@ -4,6 +4,9 @@ var gulp = require('gulp');
 var cliArgs = require("command-line-args");
 
 var UglifyJS = require("uglify-js");
+var plugins = require('gulp-load-plugins')();
+var nib = require('nib');
+var mergeStream = require('merge-stream');
 
 var modulesDir = path.join(__dirname, 'node_modules');
 
@@ -19,6 +22,53 @@ var paths = {
   'jsio': path.join(modulesDir, 'jsio', 'packages'),
   'squill': path.join(modulesDir, 'squill')
 };
+
+var websitePaths = {
+  'stylus': 'website/stylus/**/*.styl',
+  'css': 'website/stylus/**/*.css',
+  'html': 'website/html/**/*.html',
+  'js': 'website/js/**/*.js',
+  'resources': 'website/resources/**/*.*',
+
+  'output': 'dist/www'
+};
+
+gulp.task('website-css', [], function() {
+  var stream = mergeStream(
+    gulp.src(websitePaths.stylus)
+      .pipe(plugins.stylus({ use: nib(),  import: ['nib'] })),
+    gulp.src(websitePaths.css)
+  );
+
+  return stream
+    .pipe(plugins.concat('all.css'))
+    .pipe(gulp.dest(websitePaths.output));
+});
+
+gulp.task('website-js', [], function() {
+  return gulp.src(websitePaths.js)
+    .pipe(plugins.concat('all.js'))
+    .pipe(gulp.dest(websitePaths.output));
+});
+
+gulp.task('website-html', [], function() {
+  return gulp.src(websitePaths.html)
+    .pipe(gulp.dest(websitePaths.output));
+});
+
+gulp.task('website-resources', [], function() {
+  return gulp.src(websitePaths.resources)
+    .pipe(gulp.dest(path.join(websitePaths.output, 'resources')));
+});
+
+gulp.task('website', ['website-css', 'website-html', 'website-resources', 'website-js'], function() {
+});
+
+gulp.task('website-watch', ['website'], function() {
+  gulp.watch([websitePaths.stylus, websitePaths.css], ['website-css']);
+  gulp.watch([websitePaths.js], ['website-js']);
+  gulp.watch([websitePaths.html], ['website-html']);
+});
 
 var buildPathCache = function(modules) {
   var pathCache = {};

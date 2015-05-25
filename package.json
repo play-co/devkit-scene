@@ -15,7 +15,12 @@
     "command-line-args": "^0.5.9",
     "devkit-core": "git://github.com/gameclosure/devkit-core.git#refactor-simulator-connection",
     "gulp": "^3.8.11",
+    "gulp-concat": "^2.5.2",
+    "gulp-load-plugins": "^0.10.0",
+    "gulp-stylus": "^2.0.2",
     "jsio": "2.0.0-beta.1",
+    "merge-stream": "^0.1.7",
+    "nib": "^1.1.0",
     "squill": "git+https://github.com/gameclosure/squill#bindings",
     "timestep": "git://github.com/gameclosure/timestep.git#master",
     "uglify-js": "^2.4.21"
