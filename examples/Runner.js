@@ -59,11 +59,11 @@ exports = scene(function() {
   scene.onCollision(player, platforms, function (player, platform) {
     if (player.vy < 0) { return; }
     // If last frame's player collision bottom was above the platform, hop
-    var lastCollisionBottom = player.shape.bounds.maxY - (player.y - player.previousY);
-    if (lastCollisionBottom <= platform.shape.bounds.minY) {
+    var lastCollisionBottom = player.shape.maxY - (player.y - player.previousY);
+    if (lastCollisionBottom <= platform.shape.minY) {
       player.vy = 0;
       // Move the player out of the platform
-      var dy = player.shape.bounds.maxY - platform.shape.bounds.minY;
+      var dy = player.shape.maxY - platform.shape.minY;
       player.y -= dy;
       player.onGround = scene.totalDt;
     }

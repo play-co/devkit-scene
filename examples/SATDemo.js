@@ -21,7 +21,7 @@ exports = scene(function() {
 
   // If you want to see what the debug drawing would look like, check this out
   //   NOTE: This will not work on native devkit
-  target.view.debugDraw = true;
+  target.showHitBounds();
 
   // Now lets try rotating this triangle
   target.onTick(function(dt) {
