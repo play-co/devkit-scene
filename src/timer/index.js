@@ -1,3 +1,4 @@
+import .TimerManager;
 
 exports = {
   /**
@@ -40,5 +41,11 @@ exports = {
    */
   removeTimeout: function(timeoutInstance) {
     return scene.timerManager.removeTimer(timeoutInstance);
-  }
+  },
+
+  /**
+   * The default manager for scene timers. Add timers to this if you want them automatically managed.
+   * @var {TimerManager} scene.timerManager
+   */
+  timerManager: new TimerManager()
 };

@@ -1,9 +1,16 @@
 import device;
 
+import ui.View as View;
+import ui.ImageView as ImageView;
+import ui.SpriteView as SpriteView;
+import ui.ScoreView as ScoreView;
 import ui.TextView as TextView;
 
 import communityart;
 
+import scene.ui.BaseView as BaseView;
+import scene.ui.Background as Background;
+import scene.ui.UIView as UIView;
 import scene.ui.Screen as Screen;
 import scene.ui.SceneScoreView as SceneScoreView;
 import scene.ui.SceneText as SceneText;
@@ -239,8 +246,8 @@ exports = {
    * @see scene.updateScreenDimensions
    */
   setScaleOptions: function(width, height, scaleMode) {
-    scene.scaleManager.resize(width, height, scaleMode);
-    scene.updateScreenDimensions();
+    this.scaleManager.resize(width, height, scaleMode);
+    this.updateScreenDimensions();
   },
 
   /**
@@ -248,16 +255,17 @@ exports = {
    * @method scene.updateScreenDimensions
    */
   updateScreenDimensions: function() {
+    var scaleManager = this.scaleManager;
 
-    scene.camera.resize(scene.scaleManager.width, scene.scaleManager.height);
-    scene.screen.width = scene.scaleManager.width;
-    scene.screen.height = scene.scaleManager.height;
+    scene.internal.fire('updateScreenDimensions');
+    this.screen.width = scaleManager.width;
+    this.screen.height = scaleManager.height;
 
-    if (!scene.view) { return; }
+    if (!this.view) { return; }
 
-    scene.scaleManager.scaleView(scene.view);
+    scaleManager.scaleView(this.view);
 
-    var vs = scene.view.style;
+    var vs = this.view.style;
     vs.x = (device.width - vs.width) / 2;
     vs.y = (device.height - vs.height) / 2;
     vs.anchorX = vs.width / 2;
@@ -269,5 +277,104 @@ exports = {
    * Default size is 576 x 1024
    * @var {Screen} scene.screen
    */
-  screen: new Screen(576, 1024)
+  screen: new Screen(576, 1024),
+
+  /**
+    * The devkit {@link View} which contains the entire scene.
+    * @var {View} scene.view
+    */
+  view: null,
+
+  /**
+  * The devkit {@link View} which all backgrounds should be added to.
+  * @var {Background} scene.background
+  */
+  background: null,
+
+  /**
+    * The devkit {@link View} which all actors should be added to.
+    * @var {View} scene.stage
+    */
+  stage: null,
+
+  /**
+    * @method scene.addImage
+    * @see BaseView#addImage
+    */
+  addImage: null,
+
+  /**
+   * The devkit {@link View} which all UI should be added to.
+   * @var {UIView} scene.ui
+   */
+  ui: null,
+
+  /**
+   * The devkit {@link View} which all text should be added to.
+   * @var {View} scene.textContainer
+   */
+  textContainer: null,
+
+  /**
+   * An empty devkit {@link View} which is overtop of the entire game, used to catch input.
+   * @var {View} scene.inputOverlay
+   */
+  inputOverlay: null,
+
+  __listeners__: {
+    init: [
+      {
+        priority: -1000,
+        cb: function (app) {
+          this.view = app;
+        }
+      },
+      {
+        priority: -10,
+        cb: function (app) {
+          this.updateScreenDimensions();
+        }
+      },
+      {
+        priority: 10,
+        cb: function (app) {
+          this.background = new Background({
+            parent: this.view,
+            width: this.screen.width,
+            height: this.screen.height
+          });
+
+          this.stage = new BaseView({
+            parent: this.view,
+            infinite: true
+          });
+
+          this.addImage = bind(this.stage, this.stage.addImage);
+
+          this.ui = new UIView({
+            superview: this.view,
+            infinite: true
+          });
+
+          this.textContainer = new View({
+            parent: this.view,
+            width:  this.screen.width,
+            height: this.screen.height,
+            blockEvents: true,
+            zIndex: 100000
+          });
+        }
+      },
+      {
+        priority: 1000,
+        cb: function (app) {
+          this.inputOverlay = new View({ parent: this.view, infinite: true, zIndex: 999999 });
+          var touchManager = this.screen.touchManager;
+          this.inputOverlay.onInputStart = bind(touchManager, touchManager.downHandler);
+          this.inputOverlay.onInputSelect = bind(touchManager, touchManager.upHandler);
+          this.inputOverlay.onInputMove = bind(touchManager, touchManager.moveHandler);
+        }
+      }
+    ]
+  }
 };
