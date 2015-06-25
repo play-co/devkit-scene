@@ -1,8 +1,8 @@
 import communityart;
 import entities.EntityPool as EntityPool;
-import .Actor;
 
-import .spawner.SpawnerManager as SpawnerManager;
+import scene.actor.Actor as Actor;
+import scene.spawner.SpawnerManager as SpawnerManager;
 
 exports = Class(EntityPool, function(supr) {
 

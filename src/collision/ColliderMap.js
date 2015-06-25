@@ -1,4 +1,4 @@
-import ..Map as Map;
+import scene.utils.Map as Map;
 
 exports = Class(function() {
 

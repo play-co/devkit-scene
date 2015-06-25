@@ -1,7 +1,7 @@
 import ui.View as View;
 
-import .ui.SceneImageView as SceneImageView;
-import .ui.SceneImageScaleView as SceneImageScaleView;
+import scene.ui.SceneImageView as SceneImageView;
+import scene.ui.SceneImageScaleView as SceneImageScaleView;
 
 import communityart;
 

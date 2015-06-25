@@ -1,6 +1,7 @@
-import communityart;
 import ui.View as View;
 import ui.ImageView as ImageView;
+
+import communityart;
 
 import parallax.Parallax as Parallax;
 

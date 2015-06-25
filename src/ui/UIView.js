@@ -1,4 +1,4 @@
-import ..BaseView;
+import scene.ui.BaseView as BaseView;
 
 import .SceneScoreView;
 import .ProgressBar;

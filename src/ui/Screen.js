@@ -1,7 +1,6 @@
-import .Actor;
 import entities.shapes.Rect as Rect;
 
-import .input.TouchManager as TouchManager;
+import scene.input.TouchManager as TouchManager;
 
 exports = Class(Rect, function(supr) {
 

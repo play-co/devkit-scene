@@ -1,6 +1,6 @@
 import math.geom.Point as Point;
 
-import ..Group as Group;
+import scene.group.Group as Group;
 
 exports = Class(function() {
   /**
