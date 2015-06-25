@@ -1,7 +1,5 @@
 import .Camera;
 
-var camera = new Camera(scene.screen.width, scene.screen.height);
-
 exports = {
   /**
    * The scene camera is useful for following around an Actor. The camera can be
@@ -9,5 +7,5 @@ exports = {
    * Default size is 576 x 1024
    * @var {Camera} scene.cam
    */
-  camera: camera
+  camera: null
 }

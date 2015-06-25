@@ -1,10 +1,13 @@
+import device;
+
 import ui.TextView as TextView;
 
 import communityart;
 
+import scene.ui.Screen as Screen;
 import scene.ui.SceneScoreView as SceneScoreView;
 import scene.ui.SceneText as SceneText;
-
+import scene.ui.ScaleManager as ScaleManager;
 
 exports = {
   text: {
@@ -210,5 +213,61 @@ exports = {
     scene.extraViews.push(scoreView);
     scene._scoreView = scoreView;
     return scoreView;
-  }
+  },
+
+  /**
+   * Easy access to {@link ScaleManager.SCALE_MODE}
+   * @var {Object} scene.SCALE_MODE
+   */
+  SCALE_MODE: ScaleManager.SCALE_MODE,
+
+  /**
+   * The scene scale manager is responsible for automatically fitting your game to any resolution in a reasonable way.
+   * The default width and height are 576 and 1024 respectively.
+   * The defualt scale mode is {@link ScaleManager.SCALE_MODE.LOCK_HEIGHT}
+   * @type {ScaleManager} scene.scaleManager
+   */
+  scaleManager: new ScaleManager(576, 1024, ScaleManager.SCALE_MODE.LOCK_HEIGHT),
+
+  /**
+   * Update the scaleManager as well as the scene screen dimensions.
+   * @method scene.setScaleOptions
+   * @param  {Number} width
+   * @param  {Number} height
+   * @param  {String} scaleMode
+   * @see ScaleManager#resize
+   * @see scene.updateScreenDimensions
+   */
+  setScaleOptions: function(width, height, scaleMode) {
+    scene.scaleManager.resize(width, height, scaleMode);
+    scene.updateScreenDimensions();
+  },
+
+  /**
+   * This automatically updates the internal scene variables relying on the scaleManager sizes
+   * @method scene.updateScreenDimensions
+   */
+  updateScreenDimensions: function() {
+
+    scene.camera.resize(scene.scaleManager.width, scene.scaleManager.height);
+    scene.screen.width = scene.scaleManager.width;
+    scene.screen.height = scene.scaleManager.height;
+
+    if (!scene.view) { return; }
+
+    scene.scaleManager.scaleView(scene.view);
+
+    var vs = scene.view.style;
+    vs.x = (device.width - vs.width) / 2;
+    vs.y = (device.height - vs.height) / 2;
+    vs.anchorX = vs.width / 2;
+    vs.anchorY = vs.height / 2;
+  },
+
+  /**
+   * The screen object is the rectangle where all UI lives.  Its dimensions match that of the device screen.
+   * Default size is 576 x 1024
+   * @var {Screen} scene.screen
+   */
+  screen: new Screen(576, 1024)
 };

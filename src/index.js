@@ -1,5 +1,3 @@
-import device;
-
 import ui.View as View;
 import ui.ImageView as ImageView;
 import ui.SpriteView as SpriteView;
@@ -17,13 +15,10 @@ import .timer.TimerManager as TimerManager;
 import .timer.Timer as Timer;
 
 import .group.Group as Group;
-import .ui.Screen as Screen;
 import .camera.Camera as Camera;
 import .ui.Background as Background;
 import .utils;
-import .ui.ScaleManager as ScaleManager;
 import .ui.UIView as UIView;
-import .ui.SceneImageView as SceneImageView;
 
 import communityart;
 import effects;
@@ -66,6 +61,7 @@ scene = function (newGameFunc) {
         * @var {View} scene.view
         */
       scene.view = this.rootView;
+      scene.camera = new Camera(scene.screen.width, scene.screen.height);
 
       scene.updateScreenDimensions();
 
@@ -250,61 +246,6 @@ scene = function (newGameFunc) {
   return scene._app;
 
 };
-
-/**
- * Easy access to {@link ScaleManager.SCALE_MODE}
- * @var {Object} scene.SCALE_MODE
- */
-scene.SCALE_MODE = ScaleManager.SCALE_MODE;
-/**
- * The scene scale manager is responsible for automatically fitting your game to any resolution in a reasonable way.
- * The default width and height are 576 and 1024 respectively.
- * The defualt scale mode is {@link ScaleManager.SCALE_MODE.LOCK_HEIGHT}
- * @type {ScaleManager} scene.scaleManager
- */
-scene.scaleManager = new ScaleManager(576, 1024, scene.SCALE_MODE.LOCK_HEIGHT);
-
-/**
- * Update the scaleManager as well as the scene screen dimensions.
- * @method scene.setScaleOptions
- * @param  {Number} width
- * @param  {Number} height
- * @param  {String} scaleMode
- * @see ScaleManager#resize
- * @see scene.updateScreenDimensions
- */
-scene.setScaleOptions = function(width, height, scaleMode) {
-  scene.scaleManager.resize(width, height, scaleMode);
-  scene.updateScreenDimensions();
-};
-
-/**
- * This automatically updates the internal scene variables relying on the scaleManager sizes
- * @method scene.updateScreenDimensions
- */
-scene.updateScreenDimensions = function() {
-
-  scene.camera.resize(scene.scaleManager.width, scene.scaleManager.height);
-  scene.screen.width = scene.scaleManager.width;
-  scene.screen.height = scene.scaleManager.height;
-
-  if (!scene.view) { return; }
-
-  scene.scaleManager.scaleView(scene.view);
-
-  var vs = scene.view.style;
-  vs.x = (device.width - vs.width) / 2;
-  vs.y = (device.height - vs.height) / 2;
-  vs.anchorX = vs.width / 2;
-  vs.anchorY = vs.height / 2;
-};
-
-/**
- * The screen object is the rectangle where all UI lives.  Its dimensions match that of the device screen.
- * Default size is 576 x 1024
- * @var {Screen} scene.screen
- */
-scene.screen = new Screen(576, 1024);
 
 /**
  * The state manager is what handles changing game states.
@@ -566,10 +507,10 @@ scene.reset = function() {
 var SCENE_MODULES = [
   jsio('import .animation'),
   jsio('import .collision'),
+  jsio('import .ui'),
   jsio('import .actor'),
   jsio('import .group'),
   jsio('import .camera'),
-  jsio('import .ui'),
   jsio('import .spawner'),
   jsio('import .audio'),
   jsio('import .weeby'),
