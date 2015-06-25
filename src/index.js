@@ -1,6 +1,6 @@
 import device;
-import animate;
 import animate.transitions as transitions;
+import .AnimationHelper;
 
 import ui.View as View;
 import ui.TextView as TextView;
@@ -197,16 +197,23 @@ scene = function (newGameFunc) {
       }
     }
 
+    var _isResetting = false;
+
     /**
      * reset
      */
     this.reset = function(mode) {
+
+      if (_isResetting) { return; }
+      _isResetting = true;
+
       if (mode === undefined) mode = 'default';
+
 
       scene.ui.reset();
 
       effects.commit();
-      scene.clearAnimations();
+      scene.animate.clearAnimations();
       scene.updateScreenDimensions();
       scene.screen.reset();
       scene.background.reset();
@@ -251,6 +258,7 @@ scene = function (newGameFunc) {
 
       // The curtain rises, and Act 1 begins!
       _game_running = true;
+      _isResetting = false;
     }
 
     /**
@@ -278,9 +286,8 @@ scene = function (newGameFunc) {
       scene.camera.update(dt);
       this.stage.style.x = -scene.camera.x;
       this.stage.style.y = -scene.camera.y;
-      if (scene.camera.following) {
-        scene.background.scrollTo(-scene.camera.x, -scene.camera.y);
-      }
+
+      scene.background.scrollTo(-scene.camera.x, -scene.camera.y);
     }
   });
 
@@ -940,49 +947,12 @@ scene.collision = {
 };
 
 /**
- * @var {String[]} scene.animationGroups - Animation groups to be tracked and auto cleaned up by scene
- * @default ['scene']
- */
-// TODO: seems like this calls for ... another manager!
-scene.animationGroups = null;
-
-/**
- * Clear all the tracked animation groups
- * @method scene.clearAnimations
- */
-scene.clearAnimations = function() {
-  if (scene.animationGroups) {
-    // Clear old animaion groups
-    for (var i = 0; i < scene.animationGroups.length; i++) {
-      var group = animate.getGroup(scene.animationGroups[i]);
-      if (!group) { continue; }
-      var animations = group._anims;
-      for (var key in animations) {
-        animations[key].commit();
-        animations[key].clear();
-        delete animations[key];
-      }
-    }
-  }
-
-  // Reset array
-  scene.animationGroups = ['scene'];
-};
-
-/**
  * @func scene.animate
  * @arg {View}         subject
  * @arg {string}       [groupName]
  * @returns {Animator} anim
  */
-scene.animate = function(subject, groupId) {
-  groupId = groupId === undefined ? "scene" : "scene_" + groupId;
-  var anim = animate(subject, groupId);
-  if (groupId !== "scene" && scene.animationGroups.indexOf(groupId) === -1) {
-    scene.animationGroups.push(groupId);
-  }
-  return anim;
-};
+scene.animate = AnimationHelper;
 
 /**
  * Easy access to {@link animate.transitions}

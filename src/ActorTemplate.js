@@ -1,4 +1,5 @@
 import effects;
+import animate;
 
 /**
   * This is the basic entity for all things in a scene game.  If it moves, it's and actor.
@@ -24,6 +25,7 @@ exports = function(inherits) {
 
     this.init = function(opts) {
       suprPrototype.init.call(this, opts);
+      this._animationGroups = [];
     }
 
     this.reset = function(config) {
@@ -55,6 +57,7 @@ exports = function(inherits) {
       this.rotation = config.rotation || 0;
       this.flipX = config.flipX || false;
       this.flipY = config.flipY || false;
+      this.zIndex = config.zIndex || 0;
     }
 
     this.applyScaledBounds = function(sourceBounds, targetBounds, scale) {
@@ -229,6 +232,7 @@ exports = function(inherits) {
      * This function destroys the Actor, as in, removes it from the scene
      */
     this.destroy = function(runDestroyHandlers) {
+      this.clearSceneAnimations();
       runDestroyHandlers = runDestroyHandlers !== undefined ? runDestroyHandlers : true;
       scene.collisions.removeCollisionsContaining(this);
       if (runDestroyHandlers) {
@@ -239,6 +243,13 @@ exports = function(inherits) {
       suprPrototype.destroy.call(this);
       effects.commit(this);
     }
+
+    this.clearSceneAnimations = function() {
+      for (var i = 0; i < this._animationGroups.length; i++) {
+        animate(this, this._animationGroups[i]).clear();
+      }
+      this._animationGroups = [];
+    };
 
     /**
      * This function stops all input to the actor
@@ -295,6 +306,21 @@ exports = function(inherits) {
       return Math.sqrt(this.vx * this.vx + this.vy * this.vy);
     };
 
+    this._addStyleProperty = function(styleName, newName) {
+      newName = newName || styleName;
+      Object.defineProperty(this, newName, {
+        get: function() { return this.view.style[styleName]; },
+        set: function(value) { this.view.style[styleName] = value; }
+      });
+    };
+
+    this._addStyleProperty("opacity");
+    this._addStyleProperty("scale");
+    this._addStyleProperty("flipX");
+    this._addStyleProperty("flipY");
+    this._addStyleProperty("r", "rotation");
+    this._addStyleProperty("zIndex");
+
     /**
       * Register a new destroy handler, will be called after {@link Actor#destroy} has been called.
       * @func Actor#onDestroy
@@ -308,36 +334,20 @@ exports = function(inherits) {
       get: function() { return this.view.isSprite ? this.view._currentAnimationName : ""; }
     });
 
-    Object.defineProperty(this, "opacity", {
-      get: function() { return this.view.style.opacity; },
-      set: function(value) { this.view.style.opacity = value; }
-    });
-
-    Object.defineProperty(this, "scale", {
-      get: function() { return this.view.style.scale },
-      set: function(value) {
-        this.view.style.scale = value;
-        this.applyScaledBounds(this.unscaledHitBounds, this.model.hitBounds, value);
-      }
-    });
-
-    Object.defineProperty(this, "flipX", {
-      get: function() { return this.view.style.flipX },
-      set: function(value) { this.view.style.flipX = value; }
-    });
-
-    Object.defineProperty(this, "flipY", {
-      get: function() { return this.view.style.flipY },
-      set: function(value) { this.view.style.flipY = value; }
-    });
-
-    Object.defineProperty(this, "rotation", {
-      get: function() { return this.view.style.r },
-      set: function(value) { this.view.style.r = value; }
+    Object.defineProperty(this, "clipRect", {
+      get: function() { return this.view.clipRect; },
+      set: function(value) { this.view.clipRect = value; }
     });
 
     this.showHitBounds = function() {
       this.view.showHitBounds();
     };
+
+    this._addAnimationGroup = function(id) {
+      if (this._animationGroups.indexOf(id) === -1) {
+        this._animationGroups.push(id);
+      }
+    };
+
   });
 };
