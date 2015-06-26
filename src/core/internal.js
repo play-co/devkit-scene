@@ -64,8 +64,7 @@ var fire = function(name) {
 
   var scene = window.scene;
   for (var i = 0, len = listeners.length; i < len; i++) {
-    var listener = listeners[i];
-    listener.cb.apply(scene, args);
+    listeners[i].cb.apply(scene, args);
   }
 };
 

@@ -116,7 +116,7 @@ scene.registerModule = function(module, parentObj, parentChain) {
         // Try to merge the objects
         scene.registerModule(module[key], parentObj[key], chain);
       } else {
-        scene.warn('[scene] Module export collision: ', typeof module[key], chain.join('.'), module[key]);
+        scene.warn('Module export collision: ', typeof module[key], chain.join('.'), module[key]);
       }
       continue;
     }

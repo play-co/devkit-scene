@@ -129,8 +129,8 @@ exports = Class(View, function (supr) {
       for (var l in resource.config) {
         var layerConfig = resource.config[l];
         var layer = new Layer(layerConfig, this);
-        layer._setScroll(layerConfig.xMultiplier, layerConfig.yMultiplier);
         this.config.push(layerConfig);
+        layer.setScroll(layerConfig.xMultiplier, layerConfig.yMultiplier);
       }
     } else if(!opts) {
       // Static image

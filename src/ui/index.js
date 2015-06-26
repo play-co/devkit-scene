@@ -60,7 +60,7 @@ exports = {
    * @param  {Object} [opts]
    */
   addBackground: function(art, opts) {
-    return scene.background.addLayer(art, opts);
+    return this.background.addLayer(art, opts);
   },
 
   /**
@@ -362,6 +362,7 @@ exports = {
 
         this.inputOverlay = new View({ parent: this.view, infinite: true, zIndex: 999999 });
         var touchManager = this.screen.touchManager;
+        // forward input events
         this.inputOverlay.onInputStart = bind(touchManager, touchManager.downHandler);
         this.inputOverlay.onInputSelect = bind(touchManager, touchManager.upHandler);
         this.inputOverlay.onInputMove = bind(touchManager, touchManager.moveHandler);
