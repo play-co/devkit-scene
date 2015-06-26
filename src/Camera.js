@@ -95,8 +95,7 @@ exports = Class(Rect, function(supr) {
     */
   this.follow = function(target, movementBounds) {
     this.following = target;
-    this.movementBounds = movementBounds
-      || new Rect({ x: this._x + this.width / 2, y: this._y + this.height / 2 });
+    this.movementBounds = movementBounds || new Rect(target);
   };
 
   /**
