@@ -51,5 +51,14 @@ exports = {
       scene.animationGroups.push(groupId);
     }
     return anim;
-  }
+  },
+
+  __listeners__: [
+    {
+      event: 'restartUI',
+      cb: function() {
+        this.clearAnimations();
+      }
+    }
+  ]
 };

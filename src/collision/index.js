@@ -38,5 +38,22 @@ exports = {
    */
   collision: {
     CollisionChecker: CollisionChecker
-  }
+  },
+
+  __listeners__: [
+    // Restart
+    {
+      event: 'restartGame',
+      cb: function() {
+        this.collisions.reset();
+      }
+    },
+    // Tick
+    {
+      event: 'tickSec',
+      cb: function(dt) {
+        this.collisions.update();
+      }
+    }
+  ]
 };

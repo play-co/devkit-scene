@@ -321,60 +321,87 @@ exports = {
    */
   inputOverlay: null,
 
-  __listeners__: {
-    init: [
-      {
-        priority: -1000,
-        cb: function (app) {
-          this.view = app;
-        }
-      },
-      {
-        priority: -10,
-        cb: function (app) {
-          this.updateScreenDimensions();
-        }
-      },
-      {
-        priority: 10,
-        cb: function (app) {
-          this.background = new Background({
-            parent: this.view,
-            width: this.screen.width,
-            height: this.screen.height
-          });
-
-          this.stage = new BaseView({
-            parent: this.view,
-            infinite: true
-          });
-
-          this.addImage = bind(this.stage, this.stage.addImage);
-
-          this.ui = new UIView({
-            superview: this.view,
-            infinite: true
-          });
-
-          this.textContainer = new View({
-            parent: this.view,
-            width:  this.screen.width,
-            height: this.screen.height,
-            blockEvents: true,
-            zIndex: 100000
-          });
-        }
-      },
-      {
-        priority: 1000,
-        cb: function (app) {
-          this.inputOverlay = new View({ parent: this.view, infinite: true, zIndex: 999999 });
-          var touchManager = this.screen.touchManager;
-          this.inputOverlay.onInputStart = bind(touchManager, touchManager.downHandler);
-          this.inputOverlay.onInputSelect = bind(touchManager, touchManager.upHandler);
-          this.inputOverlay.onInputMove = bind(touchManager, touchManager.moveHandler);
-        }
+  __listeners__: [
+    {
+      event: 'initView',
+      cb: function (app) {
+        this.view = app;
       }
-    ]
-  }
+    },
+    {
+      event: 'initUI',
+      priority: 10,
+      cb: function (app) {
+        this.updateScreenDimensions();
+
+        this.background = new Background({
+          parent: this.view,
+          width: this.screen.width,
+          height: this.screen.height
+        });
+
+        this.stage = new BaseView({
+          parent: this.view,
+          infinite: true
+        });
+
+        this.addImage = bind(this.stage, this.stage.addImage);
+
+        this.ui = new UIView({
+          superview: this.view,
+          infinite: true
+        });
+
+        this.textContainer = new View({
+          parent: this.view,
+          width:  this.screen.width,
+          height: this.screen.height,
+          blockEvents: true,
+          zIndex: 100000
+        });
+
+        this.inputOverlay = new View({ parent: this.view, infinite: true, zIndex: 999999 });
+        var touchManager = this.screen.touchManager;
+        this.inputOverlay.onInputStart = bind(touchManager, touchManager.downHandler);
+        this.inputOverlay.onInputSelect = bind(touchManager, touchManager.upHandler);
+        this.inputOverlay.onInputMove = bind(touchManager, touchManager.moveHandler);
+      }
+    },
+    // Restart
+    {
+      event: 'restartUI',
+      cb: function(mode) {
+        this.ui.reset();
+
+        // TODO: Why is there an updatescreendimensions called at reset and init?
+        this.updateScreenDimensions();
+        this.screen.reset();
+        this.background.reset();
+
+        for (var k in this.extraViews) {
+          this.extraViews[k].removeFromSuperview();
+        }
+
+        this.extraViews = [];
+
+        delete this._scoreView;
+        this.background.destroy();
+
+        this.stage.removeAllSubviews();
+      }
+    },
+    {
+      event: 'restartGame',
+      cb: function() {
+        this.background.reloadConfig();
+      }
+    },
+    // Tick
+    {
+      event: 'tickSec',
+      cb: function(dt) {
+        this.background.update(dt);
+      }
+    }
+  ]
 };

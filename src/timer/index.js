@@ -47,5 +47,21 @@ exports = {
    * The default manager for scene timers. Add timers to this if you want them automatically managed.
    * @var {TimerManager} scene.timerManager
    */
-  timerManager: new TimerManager()
+  timerManager: new TimerManager(),
+
+  __listeners__: [
+    {
+      event: 'restartGame',
+      cb: function() {
+        this.timerManager.reset();
+      }
+    },
+    // Tick
+    {
+      event: 'tickMSec',
+      cb: function(dt) {
+        this.timerManager.update(dt);
+      }
+    }
+  ]
 };

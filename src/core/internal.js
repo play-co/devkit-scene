@@ -51,23 +51,19 @@ var registerListener = function(opts) {
 };
 
 var listenerComparator = function(a, b) {
-  if(a.priority < b.priority) return -1;
-  if(a.priority > b.priority) return 1;
-  return 0;
+  return a.priority - b.priority;
 };
 
 var fire = function(name) {
   // console.log('Firing:', name);
 
   var listeners = _listeners[name];
-  if (!listeners) {
-    return;
-  }
+  if (!listeners) { return; }
 
   var args = [].slice.call(arguments, 1);
 
   var scene = window.scene;
-  for (var i = 0; i < listeners.length; i++) {
+  for (var i = 0, len = listeners.length; i < len; i++) {
     var listener = listeners[i];
     listener.cb.apply(scene, args);
   }

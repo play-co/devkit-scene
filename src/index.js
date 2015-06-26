@@ -1,20 +1,22 @@
-import communityart;
-import effects;
-
-
 /**
  * Construct the main scene for the game, this is where all of the gameplay is defined.
  * @namespace scene
- * @version 0.0.3
+ * @version 0.0.4
  * @arg {function} - The function which will initialize a new game scene
  */
 scene = function (newGameFunc) {
-
   scene.mode('default', newGameFunc);
+  return scene.theGame();
+};
 
-  scene._app = Class(GC.Application, function() {
+scene._makeApp = function() {
+  return Class(GC.Application, function() {
+    var fire = scene.internal.fire;
+
     this.initUI = function() {
-      scene.internal.fire('init', this);
+      fire('initView', this);
+      fire('initUI');
+      fire('initGame');
     }
 
     this.launchUI  =
@@ -32,122 +34,30 @@ scene = function (newGameFunc) {
       }
     }
 
-    /**
-     * reset
-     */
     this.reset = function(mode) {
       if (mode === undefined) mode = 'default';
-
-      // UI
-      scene.ui.reset();
-
-      // Core
-      effects.commit();
-
-      // Animation
-      scene.clearAnimations();
-
-      // UI
-      // TODO: Why is there an updatescreendimensions called at reset and init?
-      scene.updateScreenDimensions();
-      scene.screen.reset();
-      scene.background.reset();
-
-      // Group
-      scene.group.destroy(false);
-
-      // Core
-      scene.player = null;
-
-      // Camera
-      scene.camera.stopFollowing();
-      scene.camera.x = 0;
-      scene.camera.y = 0;
-
-      // Core
-      scene.totalDt = 0;
-
-      // Timer
-      scene.timerManager.reset();
-
-      // Core
-      for (var i in scene.groups) {
-        scene.groups[i].destroy(false);
-      }
-
-      // UI
-      for (var k in scene.extraViews) {
-        scene.extraViews[k].removeFromSuperview();
-      }
-
-      delete scene._scoreView;
-      scene.background.destroy();
-
-      // Collision
-      scene.collisions.reset();
-
-      // UI
-      scene.stage.removeAllSubviews();
-
-      // Clear the tallies
-      scene.extraViews = []; // UI
-      scene.groups = []; // Core
-      scene.core._score = 0; // Core
-      scene.core._on_tick = null; // Core
-
-      // State
-      scene.state.reset();
-
-      // Let's reboot the fun!
-      var currentMode = scene.core._modes[mode]
-      currentMode.fun(scene.state._gameObject, currentMode.opts);
-
-      // UI
-      scene.background.reloadConfig();
-
-      // The curtain rises, and Act 1 begins!
-      scene.core._game_running = true;
+      fire('restartUI', mode);
+      fire('restartGame', mode);
+      fire('restartState', mode);
     }
 
-    /**
-     * tick tock
-     */
     this.tick = function(dt) {
-      if (scene.core._on_tick) {
-        scene.core._on_tick(dt);
-      }
-
-      scene.totalDt += dt;
-      scene.totaApplDt += dt;
-
-      scene.timerManager.update(dt);
-
+      fire('tickMSec', dt);
       // Convert dt into seconds
       dt /= 1000;
-
-      scene.collisions.update();
-      scene.background.update(dt);
-      scene.group.update(dt);
-      for (var i = 0; i < scene.groups.length; i++) {
-        scene.groups[i].update(dt);
-      }
-      scene.camera.update(dt);
-      scene.stage.style.x = -scene.camera.x;
-      scene.stage.style.y = -scene.camera.y;
-      if (scene.camera.following) {
-        scene.background.scrollTo(-scene.camera.x, -scene.camera.y);
-      }
+      fire('tickSec', dt);
+      fire('tickUI', dt);
     }
   });
-
-  return scene._app;
-
 };
 
+scene.theGame = function() {
+  if (!scene._app) {
+    scene._app = scene._makeApp();
+  }
 
-/////////////////////////////////////////////////
-/////////////////////////////////////////////////
-
+  return scene._app;
+};
 
 // // Internal Module Importing // //
 

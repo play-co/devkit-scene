@@ -1,3 +1,5 @@
+import communityart;
+import effects;
 
 import entities.shapes.Line as Line;
 import entities.shapes.Rect as Rect;
@@ -200,5 +202,51 @@ exports = {
    */
   reset: function() {
     GC.app.reset();
-  }
+  },
+
+  __listeners__: [
+    {
+      event: 'restartUI',
+      cb: function() {
+        effects.commit();
+      }
+    },
+    {
+      event: 'restartGame',
+      cb: function() {
+        this.player = null;
+        this.totalDt = 0;
+
+        // State
+        this.state.reset();
+
+        this.core._score = 0;
+        this.core._on_tick = null;
+      }
+    },
+    // FIXME: why is state management happening with this _modes thing?
+    {
+      event: 'restartState',
+      cb: function(mode) {
+        // Let's reboot the fun!
+        var currentMode = this.core._modes[mode]
+        currentMode.fun(this.state._gameObject, currentMode.opts);
+
+        this.core._game_running = true;
+      }
+    },
+    // Tick
+    {
+      event: 'tickMSec',
+      cb: function(dt) {
+        //  TODO: fix ontick so that it isnt bad
+        if (this.core._on_tick) {
+          this.core._on_tick(dt);
+        }
+
+        this.totalDt += dt;
+        this.totaApplDt += dt;
+      }
+    }
+  ]
 };

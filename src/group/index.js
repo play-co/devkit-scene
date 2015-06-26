@@ -9,9 +9,9 @@ exports = {
    */
   addGroup: function(opts) {
     opts = opts || {};
-    opts.superview = GC.app.stage;
+    opts.superview = this.stage;
     var result = new Group(opts);
-    scene.groups.push(result);
+    this.groups.push(result);
     return result;
   },
 
@@ -21,12 +21,36 @@ exports = {
    */
   group: null,
 
+  groups: null,
+
   __listeners__: [
     {
-      event: 'init',
-      priority: 100,
-      cb: function (app) {
+      event: 'initGame',
+      cb: function () {
         this.group = new Group({superview: this.stage});
+      }
+    },
+    // Restart
+    {
+      event: 'restartGame',
+      cb: function() {
+        this.group.destroy(false);
+
+        for (var i in this.groups) {
+          this.groups[i].destroy(false);
+        }
+
+        this.groups = [];
+      }
+    },
+    // Tick
+    {
+      event: 'tickSec',
+      cb: function(dt) {
+        this.group.update(dt);
+        for (var i = 0; i < this.groups.length; i++) {
+          this.groups[i].update(dt);
+        }
       }
     }
   ]
