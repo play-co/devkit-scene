@@ -324,8 +324,8 @@ exports = {
   __listeners__: [
     {
       event: 'initView',
-      cb: function (app) {
-        this.view = app;
+      cb: function () {
+        this.view = scene.app;
       }
     },
     {

@@ -4,13 +4,9 @@ import effects;
 import entities.shapes.Line as Line;
 import entities.shapes.Rect as Rect;
 
-import scene.state.StateManager as StateManager;
-
 exports = {
   core: {
     _game_running: false,
-    // TODO: remove this and use the state management...
-    _modes: {},
     // TODO: remove this
     _on_tick: null,
 
@@ -22,12 +18,6 @@ exports = {
     _score: 0,
     _using_score: false
   },
-
-  /**
-   * The state manager is what handles changing game states.
-   * @var {StateManager} scene.state
-   */
-  state: new StateManager(),
 
   /**
    * There can be only one player. {@link scene.gameOver} is automatically called when the player is destroyed.
@@ -113,54 +103,27 @@ exports = {
 
     this.core._game_running = false;
 
-    var scene = this;
     setTimeout(function () {
-      if (scene._useWeeby) {
-        weeby.finishGame({ score: scene.getScore() });
+      if (this._useWeeby) {
+        weeby.finishGame({ score: this.getScore() });
       } else {
         if (!opts.noGameoverScreen) {
-          var bgHeight = scene.screen.height;
+          var bgHeight = this.screen.height;
 
           // TODO: This should be a scene splash ... not random text. Allows the player to set their own game over splash.
-          if (scene.core._using_score) {
-            scene.addText('Game Over!', { y: bgHeight / 2 - scene.text.DEFAULT_TEXT_HEIGHT });
-            scene.addText('Score: ' + scene.core._score, { y: bgHeight / 2 + 10 });
+          if (this.core._using_score) {
+            this.addText('Game Over!', { y: bgHeight / 2 - this.text.DEFAULT_TEXT_HEIGHT });
+            this.addText('Score: ' + this.core._score, { y: bgHeight / 2 + 10 });
           } else {
-            scene.addText('Game Over!');
+            this.addText('Game Over!');
           }
 
-          scene.screen.onDown(function () {
-            setTimeout(function () { GC.app.reset() });
+          this.screen.onDown(function () {
+            setTimeout(function () { scene.internal.game.start(); });
           }, true);
         }
       }
-    }, opts.delay);
-  },
-
-  /**
-   * Set a mode to the given function
-   * @method scene.mode
-   * @param {String} name - The name of the mode to set
-   * @param {function} resetFunction - The function to call from reset, whenever the mode resets or begins
-   * @param {Object} [opts] - Options to pass to the mode function
-   */
-  /**
-   * Switches to the given mode
-   * @method scene.mode(2)
-   * @param {String} name - The name of the mode to switch to
-   */
-  mode: function(name, fun, opts) {
-    if (fun !== undefined) {
-      // Set a mode to a function
-      opts = opts || {};
-      this.core._modes[name] = {
-        fun: fun,
-        opts: opts
-      };
-    } else {
-      // Change to the given mode
-      this.reset(name);
-    }
+    }.bind(this), opts.delay);
   },
 
   /**
@@ -217,22 +180,8 @@ exports = {
         this.player = null;
         this.totalDt = 0;
 
-        // State
-        this.state.reset();
-
         this.core._score = 0;
         this.core._on_tick = null;
-      }
-    },
-    // FIXME: why is state management happening with this _modes thing?
-    {
-      event: 'restartState',
-      cb: function(mode) {
-        // Let's reboot the fun!
-        var currentMode = this.core._modes[mode]
-        currentMode.fun(this.state._gameObject, currentMode.opts);
-
-        this.core._game_running = true;
       }
     },
     // Tick

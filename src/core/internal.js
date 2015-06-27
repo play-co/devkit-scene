@@ -68,11 +68,53 @@ var fire = function(name) {
   }
 };
 
+var initGame = function() {
+  fire('initView');
+  fire('initUI');
+  fire('initGame');
+};
+
+var startGame = function() {
+  // show the splash screen
+  if (scene.state.has('splash')) {
+    scene.internal.game.reset('splash');
+
+    // start the game when you click
+    scene.screen.onDown(function() {
+      scene.internal.game.reset('game');
+    }.bind(this), true);
+  } else {
+    scene.internal.game.reset();
+  }
+};
+
+var resetGame = function(mode) {
+  if (mode === undefined) mode = 'game';
+  fire('restartUI', mode);
+  fire('restartGame', mode);
+  fire('restartState', mode);
+};
+
+var tickGame = function(dt) {
+  fire('tickMSec', dt);
+  // Convert dt into seconds
+  dt /= 1000;
+  fire('tickSec', dt);
+  fire('tickUI', dt);
+};
+
 
 exports = {
   internal: {
     registerListeners: registerListeners,
     registerListener: registerListener,
-    fire: fire
+    fire: fire,
+
+    game: {
+      init: initGame,
+      start: startGame,
+      reset: resetGame,
+      tick: tickGame
+    }
   }
 };

@@ -1,3 +1,6 @@
+import scene.utils.Logger as Logger;
+var log = new Logger('TouchManager', false);
+
 import .TouchInstance;
 
 /**
@@ -57,10 +60,11 @@ exports = Class(function() {
     // Get the first available touch instance, set its realId
     var touchInstance = this._firstInactiveInstance();
     if (!touchInstance) {
-      console.warn('Max touches reached, no more free!', event.type, event.id);
+      log.warn('Max touches reached, no more free!', event.type, event.id);
       return;
     }
 
+    log.log('downHandler: ' + touchInstance.id);
     this._realIdMap[event.id] = touchInstance;
     touchInstance.downHandler(event, point);
   };
@@ -69,6 +73,7 @@ exports = Class(function() {
     var touchInstance = this.getTouch(event.id);
     this._realIdMap[event.id] = undefined;
 
+    log.log('upHandler: ' + touchInstance.id);
     if (touchInstance) {
       touchInstance.upHandler(event, point);
     }
