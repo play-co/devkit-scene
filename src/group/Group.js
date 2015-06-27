@@ -1,6 +1,8 @@
 import communityart;
 import entities.EntityPool as EntityPool;
 
+import scene.utils.performance as performance;
+
 import scene.actor.Actor as Actor;
 import scene.spawner.SpawnerManager as SpawnerManager;
 
@@ -30,6 +32,7 @@ exports = Class(EntityPool, function(supr) {
     * @see scene.addActor
     */
   this.addActor = function(resource, opts) {
+    performance.start('Group:addActor');
     var resourceOpts = communityart.getConfig(resource, 'Actor');
 
     opts = opts || {};
@@ -45,6 +48,7 @@ exports = Class(EntityPool, function(supr) {
     // add the actor to the group
     scene.stage.addSubview(result.view);
     result.group = this;
+    performance.stop('Group:addActor');
     return result;
   };
 
@@ -99,7 +103,9 @@ exports = Class(EntityPool, function(supr) {
       this._spawnerManager.update(dt);
     }
 
+    performance.start('Group:update');
     this.updatePool(dt);
+    performance.stop('Group:update');
   };
 
   this.getClosest = function(x, y, ignore) {

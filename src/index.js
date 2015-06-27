@@ -1,3 +1,4 @@
+import scene.utils.performance as performance;
 import scene.utils.Logger as Logger;
 
 /**
@@ -47,9 +48,9 @@ var SCENE_MODULES = [
 
 // // Logging // //
 
-var VERBOSE = true;
 scene.log = new Logger('scene', true);
 scene.log.log('Logging now ready');
+scene.performance = performance;
 
 // // Module Registration // //
 

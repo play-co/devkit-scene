@@ -1,3 +1,4 @@
+import scene.utils.performance as performance;
 
 var _listeners = {};
 
@@ -69,12 +70,18 @@ var fire = function(name) {
 };
 
 var initGame = function() {
+  performance.start('init');
+
   fire('initView');
   fire('initUI');
   fire('initGame');
+
+  performance.stop('init');
 };
 
 var startGame = function() {
+  scene.performance.dump();
+
   // show the splash screen
   if (scene.state.has('splash')) {
     scene.internal.game.reset('splash');
@@ -89,18 +96,26 @@ var startGame = function() {
 };
 
 var resetGame = function(mode) {
+  performance.start('reset');
+
   if (mode === undefined) mode = 'game';
   fire('restartUI', mode);
   fire('restartGame', mode);
   fire('restartState', mode);
+
+  performance.stop('reset');
 };
 
 var tickGame = function(dt) {
+  performance.start('tick');
+
   fire('tickMSec', dt);
   // Convert dt into seconds
   dt /= 1000;
   fire('tickSec', dt);
   fire('tickUI', dt);
+
+  performance.stop('tick');
 };
 
 

@@ -5,6 +5,8 @@ import communityart;
 
 import parallax.Parallax as Parallax;
 
+import scene.utils.performance as performance;
+
 // The background serves as a generator for this class
 // Those instances are exposed to the user
 var Layer = Class(function () {
@@ -80,7 +82,13 @@ exports = Class(View, function (supr) {
   this.scroll = function(x, y) {
     this.offsetX += x;
     this.offsetY += y;
+    this._updateParallax();
+  };
+
+  this._updateParallax = function() {
+    performance.start('Background:updateParallax');
     this.parallax.update(this.offsetX, this.offsetY);
+    performance.stop('Background:updateParallax');
   };
 
   /**
@@ -105,7 +113,7 @@ exports = Class(View, function (supr) {
   this.scrollTo = function(x, y) {
     this.offsetX = x;
     this.offsetY = y;
-    this.parallax.update(this.offsetX, this.offsetY);
+    this._updateParallax();
   };
 
   /**
@@ -118,6 +126,7 @@ exports = Class(View, function (supr) {
     * @returns {Layer|View}
     */
   this.addLayer = function(resource, opts) {
+    performance.start('Background:addLayer');
     if (Array.isArray(resource)) {
       resource = {
         type: 'ParallaxConfig',
@@ -178,6 +187,7 @@ exports = Class(View, function (supr) {
     }
 
     this.zIndex = Math.max(this.zIndex - 1, 0);
+    performance.stop('Background:addLayer');
     return layer;
   }
 });
