@@ -34,7 +34,7 @@ var TrackerInstance = Class(function() {
     return sum / len;
   };
 
-})
+});
 
 var PerformanceTracker = Class(function() {
 

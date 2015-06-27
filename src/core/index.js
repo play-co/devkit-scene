@@ -4,20 +4,19 @@ import effects;
 import entities.shapes.Line as Line;
 import entities.shapes.Rect as Rect;
 
-exports = {
-  core: {
-    _game_running: false,
-    // TODO: remove this
-    _on_tick: null,
+var _onTickHandlers = [];
 
-    /** Use the get and set method
-     * @var {number} scene._score
-     * @private
-     * @see scene.getScore
-     * @see scene.setScore */
-    _score: 0,
-    _using_score: false
-  },
+/** Use the get and set method
+ * @var {number} _score
+ * @private
+ * @see scene.getScore
+ * @see scene.setScore */
+var _score = 0;
+
+var _using_score = false;
+var _game_running = false;
+
+exports = {
 
   /**
    * There can be only one player. {@link scene.gameOver} is automatically called when the player is destroyed.
@@ -48,9 +47,8 @@ exports = {
    * @func scene.onTick
    * @arg {onTickCallback} callback
    */
-  // FIXME: this is really bad
   onTick: function(cb) {
-    this.core._on_tick = cb;
+    _onTickHandlers.push(cb);
   },
 
   /**
@@ -59,9 +57,9 @@ exports = {
    * @arg {number} newScore
    */
   setScore: function(score) {
-    if (this.core._game_running) {
-      this.core._score = score;
-      this.core._using_score = true;
+    if (_game_running) {
+      _score = score;
+      _using_score = true;
       if (this._scoreView) {
         this._scoreView.setText('' + score);
       }
@@ -82,8 +80,8 @@ exports = {
    * @returns {number}
    */
   getScore: function() {
-    this.core._using_score = true;
-    return this.core._score;
+    _using_score = true;
+    return _score;
   },
 
   /**
@@ -96,12 +94,12 @@ exports = {
    */
   gameOver: function(opts) {
 
-    if (this.core._game_running === false ) { return; }
+    if (_game_running === false ) { return; }
 
     opts = opts || {};
     opts.delay = opts.delay !== undefined ? opts.delay : 1000;
 
-    this.core._game_running = false;
+    _game_running = false;
 
     setTimeout(function () {
       if (this._useWeeby) {
@@ -111,9 +109,9 @@ exports = {
           var bgHeight = this.screen.height;
 
           // TODO: This should be a scene splash ... not random text. Allows the player to set their own game over splash.
-          if (this.core._using_score) {
+          if (_using_score) {
             this.addText('Game Over!', { y: bgHeight / 2 - this.text.DEFAULT_TEXT_HEIGHT });
-            this.addText('Score: ' + this.core._score, { y: bgHeight / 2 + 10 });
+            this.addText('Score: ' + _score, { y: bgHeight / 2 + 10 });
           } else {
             this.addText('Game Over!');
           }
@@ -177,11 +175,18 @@ exports = {
     {
       event: 'restartGame',
       cb: function() {
+        _onTickHandlers = [];
+
         this.player = null;
         this.totalDt = 0;
 
-        this.core._score = 0;
-        this.core._on_tick = null;
+        _score = 0;
+      }
+    },
+    {
+      event: 'restartState',
+      cb: function(mode) {
+        _game_running = true;
       }
     },
     // Tick
@@ -189,9 +194,9 @@ exports = {
       event: 'tickMSec',
       cb: function(dt) {
         //  TODO: fix ontick so that it isnt bad
-        if (this.core._on_tick) {
-          this.core._on_tick(dt);
-        }
+        _onTickHandlers.forEach(function(handler) {
+          handler(dt);
+        });
 
         this.totalDt += dt;
         this.totaApplDt += dt;

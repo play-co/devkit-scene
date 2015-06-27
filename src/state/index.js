@@ -39,10 +39,7 @@ exports = {
     {
       event: 'restartState',
       cb: function(mode) {
-        // Let's reboot the fun!
         this.state.enter(mode, true);
-
-        this.core._game_running = true;
       }
     }
   ]
