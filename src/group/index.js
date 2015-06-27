@@ -1,6 +1,20 @@
 import .Group;
+import scene.actor.Actor as Actor;
 
 exports = {
+  groupConfig: {
+    _actorCtor: Actor
+  },
+
+  /**
+   * Change the default class for actors
+   * @method scene.setActorCtor
+   * @param  {Class} actorCtor
+   */
+  setActorCtor: function(actorCtor) {
+    this.groupConfig._actorCtor = actorCtor;
+  },
+
   /**
    * Add a new actor group to scene tracking
    * @func    scene.addGroup

@@ -10,7 +10,7 @@ exports = {
    * @see     {Group#addSpawner}
    */
   addSpawner: function(spawner) {
-    return scene.group.addSpawner(spawner);
+    return this.group.addSpawner(spawner);
   },
 
   /**
@@ -20,7 +20,7 @@ exports = {
    * @see     {Group#removeSpawner}
    */
   removeSpawner: function(spawner) {
-    return scene.group.removeSpawner(spawner);
+    return this.group.removeSpawner(spawner);
   },
 
   /**

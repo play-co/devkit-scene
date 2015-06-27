@@ -13,7 +13,7 @@ var useWeeby = function() {
     return _gameView || (_gameView = weeby.createGameView(GC.app));
   }
 
-  scene.mode('weeby', function () {
+  this.mode('weeby', function () {
     weeby.launchUI();
     weeby.onStartGame = function (data) {
       // TODO: This is temporary until the state manager / reset funcitonality get refactored
@@ -29,7 +29,7 @@ var useWeeby = function() {
 
   Object.defineProperty(scene._appClass.prototype, 'rootView', { get: getGameView });
 
-  scene._useWeeby = true;
+  this._useWeeby = true;
 };
 
 exports = {

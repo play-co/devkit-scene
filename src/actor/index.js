@@ -2,14 +2,6 @@ import .Actor;
 import .SATActor;
 
 exports = {
-  /**
-   * Change the default class for actors
-   * @method scene.setActorCtor
-   * @param  {Class} actorCtor
-   */
-  setActorCtor: function(actorCtor) {
-    scene._actorCtor = actorCtor;
-  },
 
   /**
    * Create a new actor that will be automatically updated each tick
@@ -37,6 +29,5 @@ exports = {
   actor: {
     Actor: Actor,
     SAT: SATActor
-  },
-  _actorCtor: Actor
+  }
 };

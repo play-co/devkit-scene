@@ -10,7 +10,7 @@ exports = {
    * @returns {Timer} intervalInstance
    */
   addInterval: function(callback, ms) {
-    return scene.timerManager.addTimer(new Timer(callback, ms, false));
+    return this.timerManager.addTimer(new Timer(callback, ms, false));
   },
 
   /**
@@ -19,7 +19,7 @@ exports = {
    * @arg {Timer} intervalInstance
    */
   removeInterval: function(intervalInstance) {
-    return scene.timerManager.removeTimer(intervalInstance);
+    return this.timerManager.removeTimer(intervalInstance);
   },
 
   /**
@@ -31,7 +31,7 @@ exports = {
    * @returns {Timer} timeoutInstance
    */
   addTimeout: function(callback, ms) {
-    return scene.timerManager.addTimer(new Timer(callback, ms, true));
+    return this.timerManager.addTimer(new Timer(callback, ms, true));
   },
 
   /**
@@ -40,7 +40,7 @@ exports = {
    * @arg {Timer} timeoutInstance
    */
   removeTimeout: function(timeoutInstance) {
-    return scene.timerManager.removeTimer(timeoutInstance);
+    return this.timerManager.removeTimer(timeoutInstance);
   },
 
   /**

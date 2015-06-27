@@ -55,7 +55,7 @@ exports = {
   splash: function(fun, opts) {
     // TODO: Check for an existing splash screen?
     // TODO: How does it know that clicking once goes to the game? Should be more configurable here and not hardcoded
-    scene.mode('splash', fun, opts);
+    this.mode('splash', fun, opts);
   },
 
   /**
@@ -95,16 +95,16 @@ exports = {
       opts.y = opts.y !== undefined ? opts.y : y;
     }
 
-    var textWidth = scene.text.DEFAULT_TEXT_WIDTH;
-    var textHeight = scene.text.DEFAULT_TEXT_HEIGHT;
+    var textWidth = this.text.DEFAULT_TEXT_WIDTH;
+    var textHeight = this.text.DEFAULT_TEXT_HEIGHT;
 
     opts = merge(opts, {
-      superview: scene.textContainer,
+      superview: this.textContainer,
       text: text,
-      x: (scene.textContainer.style.width - textWidth) / 2,
-      y: (scene.textContainer.style.height - textHeight) / 2,
-      color: scene.text.color,
-      fontFamily: scene.text.font,
+      x: (this.textContainer.style.width - textWidth) / 2,
+      y: (this.textContainer.style.height - textHeight) / 2,
+      color: this.text.color,
+      fontFamily: this.text.font,
       // FIXME: opts.center, because width and height might be different
       anchorX: textWidth / 2,
       anchorY: textHeight / 2,
@@ -113,7 +113,7 @@ exports = {
     });
 
     var result = new SceneText(opts);
-    scene.extraViews.push(result);
+    this.extraViews.push(result);
     return result;
   },
 
@@ -123,7 +123,7 @@ exports = {
    * @param  {SceneText} sceneText - The instance to be removed
    */
   removeText: function(sceneText) {
-    var extraViews = scene.extraViews;
+    var extraViews = this.extraViews;
     var index = extraViews.indexOf(sceneText);
     if (index !== -1) {
       sceneText.removeFromSuperview();
@@ -141,7 +141,7 @@ exports = {
    */
   setTextColor: function(color) {
     // TODO validate?
-    scene.text.color = color;
+    this.text.color = color;
   },
 
   /**
@@ -151,7 +151,7 @@ exports = {
    */
   setTextFont: function(font) {
     // TODO validate?
-    scene.text.font = font;
+    this.text.font = font;
   },
 
   /**
@@ -184,18 +184,18 @@ exports = {
       x = resource;
 
       // Update the old view
-      if (scene._scoreView) {
-        scene._scoreView.style.x = x;
-        scene._scoreView.style.y = y;
-        opts && scene._scoreView.updateOpts(opts);
-        return scene._scoreView;
+      if (this._scoreView) {
+        this._scoreView.style.x = x;
+        this._scoreView.style.y = y;
+        opts && this._scoreView.updateOpts(opts);
+        return this._scoreView;
       }
 
       // Make a new TextView
       opts = opts || {};
-      opts.font = opts.font || scene.text.font;
-      opts.color = opts.color || scene.text.color;
-      opts.superview = opts.superview || scene.textContainer;
+      opts.font = opts.font || this.text.font;
+      opts.color = opts.color || this.text.color;
+      opts.superview = opts.superview || this.textContainer;
 
       scoreView = new TextView(combine({
         x: x,
@@ -203,7 +203,7 @@ exports = {
         width: 200,
         height: 75,
         fontFamily: opts.font,
-        text: scene.getScore(),
+        text: this.getScore(),
         horizontalAlign: 'left',
       }, opts));
     }
@@ -213,7 +213,7 @@ exports = {
       var resourceOpts = communityart.getConfig(resource, 'ScoreView');
       opts = opts || {};
 
-      opts.superview = opts.superview || scene.textContainer;
+      opts.superview = opts.superview || this.textContainer;
       opts.x = x;
       opts.y = y;
       opts.format = opts.format || SceneScoreView.FORMAT_SCORE;
@@ -222,8 +222,8 @@ exports = {
       scoreView = new SceneScoreView(viewOpts);
     }
 
-    scene.extraViews.push(scoreView);
-    scene._scoreView = scoreView;
+    this.extraViews.push(scoreView);
+    this._scoreView = scoreView;
     return scoreView;
   },
 
@@ -262,7 +262,7 @@ exports = {
   updateScreenDimensions: function() {
     var scaleManager = this.scaleManager;
 
-    scene.internal.fire('updateScreenDimensions');
+    this.internal.fire('updateScreenDimensions');
     this.screen.width = scaleManager.width;
     this.screen.height = scaleManager.height;
 

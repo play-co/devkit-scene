@@ -6,6 +6,7 @@ import scene.utils.performance as performance;
 import scene.actor.Actor as Actor;
 import scene.spawner.SpawnerManager as SpawnerManager;
 
+
 exports = Class(EntityPool, function(supr) {
 
   // Cache a reference to make faster direct calls
@@ -17,7 +18,7 @@ exports = Class(EntityPool, function(supr) {
     */
   this.init = function(opts) {
     opts = opts || {};
-    opts.ctor = opts.ctor || scene._actorCtor;
+    opts.ctor = opts.ctor || scene.groupConfig._actorCtor;
     supr(this, "init", [opts]);
 
     /** @var {SpawnerManager} Group#_spawnerManager */
