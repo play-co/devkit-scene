@@ -1,3 +1,5 @@
+import scene.config;
+
 import scene.utils.performance as performance;
 import scene.utils.Logger as Logger;
 
@@ -7,7 +9,7 @@ import scene.utils.Logger as Logger;
  * @version 0.0.4
  * @arg {function} - The function which will initialize a new game scene
  */
-scene = function (newGameFunc) {
+var scene = window.scene = function (newGameFunc) {
   scene.mode('game', newGameFunc);
   return scene._appClass;
 };
@@ -48,7 +50,7 @@ var SCENE_MODULES = [
 
 // // Logging // //
 
-scene.log = new Logger('scene', true);
+scene.log = new Logger('scene', SCENE_CONFIG.logging.scene);
 scene.log.log('Logging now ready');
 scene.performance = performance;
 

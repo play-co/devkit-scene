@@ -1,5 +1,5 @@
 import scene.utils.Logger as Logger;
-var log = new Logger('TouchManager', false);
+var log = new Logger('TouchManager', SCENE_CONFIG.logging.touchManager);
 
 import .TouchInstance;
 

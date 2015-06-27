@@ -2,7 +2,7 @@
 exports = Class(function() {
 
   // Set to true to see ALL logger outputs
-  this.VERBOSE = false;
+  this.VERBOSE = SCENE_CONFIG.logging.OVERRIDE;
 
   this.init = function(name, verbose) {
     this.name = name;
