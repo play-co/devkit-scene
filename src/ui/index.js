@@ -16,6 +16,11 @@ import scene.ui.SceneScoreView as SceneScoreView;
 import scene.ui.SceneText as SceneText;
 import scene.ui.ScaleManager as ScaleManager;
 
+
+var DEFAULT_SCREEN_WIDTH = 576;
+var DEFAULT_SCREEN_HEIGHT = 1024;
+
+
 exports = {
   text: {
     /** @type {Number} scene.text.DEFAULT_TEXT_WIDTH
@@ -234,7 +239,7 @@ exports = {
    * The defualt scale mode is {@link ScaleManager.SCALE_MODE.LOCK_HEIGHT}
    * @type {ScaleManager} scene.scaleManager
    */
-  scaleManager: new ScaleManager(576, 1024, ScaleManager.SCALE_MODE.LOCK_HEIGHT),
+  scaleManager: new ScaleManager(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT, ScaleManager.SCALE_MODE.LOCK_HEIGHT),
 
   /**
    * Update the scaleManager as well as the scene screen dimensions.
@@ -277,7 +282,7 @@ exports = {
    * Default size is 576 x 1024
    * @var {Screen} scene.screen
    */
-  screen: new Screen(576, 1024),
+  screen: new Screen(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT),
 
   /**
     * The devkit {@link View} which contains the entire scene.
