@@ -102,7 +102,7 @@ exports = {
     _game_running = false;
 
     setTimeout(function () {
-      if (this._useWeeby) {
+      if (this.weebyData) {
         weeby.finishGame({ score: this.getScore() });
       } else {
         if (!opts.noGameoverScreen) {
