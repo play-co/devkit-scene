@@ -136,8 +136,6 @@ exports = Class(View, function (supr) {
       var view = new ImageView({
         superview: this,
         image: resource.url,
-        x: 0,
-        y: 0,
         width: this.style.width,
         height: this.style.height
       });

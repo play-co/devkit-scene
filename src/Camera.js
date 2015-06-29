@@ -94,9 +94,26 @@ exports = Class(Rect, function(supr) {
     * @arg {Rect} [movementBounds] - The camera will keep the actor within these screen bounds
     */
   this.follow = function(target, movementBounds) {
+    // define default movementBounds based on background scrolling
+    if (!movementBounds) {
+      var bgConfig = scene.background.config;
+      var scrollX = false;
+      var scrollY = false;
+      for (var i = 0; i < bgConfig.length; i++) {
+        scrollX = bgConfig[i].xCanSpawn || scrollX;
+        scrollY = bgConfig[i].yCanSpawn || scrollY;
+      }
+
+      movementBounds = new Rect({
+        x: scrollX ? this._x + this.width / 2 : 0,
+        y: scrollY ? this._y + this.height / 2 : 0,
+        width: scrollX ? 0 : this.width,
+        height: scrollY ? 0 : this.height
+      });
+    }
+
     this.following = target;
-    this.movementBounds = movementBounds
-      || new Rect({ x: this._x + this.width / 2, y: this._y + this.height / 2 });
+    this.movementBounds = movementBounds;
   };
 
   /**
