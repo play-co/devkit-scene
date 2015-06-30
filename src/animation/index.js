@@ -8,10 +8,15 @@ import animate.transitions as transitions;
 var subjectAnimations = {}
 
 var addSubjectAnimation = function(subject, groupId) {
-  if (!subjectAnimations[subject]) {
-    subjectAnimations[subject] = [groupId];
+  var subjectKey = subject.__anim_id;
+  if (subjectKey === undefined) {
+    throw new Error('Cannot add subject animation, no __anim_id present on the subject.');
+  }
+
+  if (!subjectAnimations[subjectKey]) {
+    subjectAnimations[subjectKey] = [groupId];
   } else {
-    var animationGroups = subjectAnimations[subject];
+    var animationGroups = subjectAnimations[subjectKey];
     if (animationGroups.indexOf(groupId) === -1) {
       animationGroups.push(groupId);
     }
@@ -19,12 +24,17 @@ var addSubjectAnimation = function(subject, groupId) {
 };
 
 var clearSubjectAnimations = function(subject) {
-  var animationGroups = subjectAnimations[subject];
+  var subjectKey = subject.__anim_id;
+  if (subjectKey === undefined) {
+    return;
+  }
+
+  var animationGroups = subjectAnimations[subjectKey];
   for (var i = 0, len = animationGroups.length; i < len; i++) {
     animate(subject, animationGroups[i]).clear();
   }
 
-  delete subjectAnimations[subject];
+  delete subjectAnimations[subjectKey];
 };
 
 var rotateAround = function(opts) {

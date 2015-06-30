@@ -231,13 +231,17 @@ exports = function(inherits) {
      */
     this.destroy = function(runDestroyHandlers) {
       runDestroyHandlers = runDestroyHandlers !== undefined ? runDestroyHandlers : true;
-      scene.collisions.removeCollisionsContaining(this);
+
       if (runDestroyHandlers) {
         for (var i = 0; i < this.destroyHandlers.length; i++) {
           this.destroyHandlers[i](this);
         }
       }
       suprPrototype.destroy.call(this);
+
+      // Run various cleanups
+      scene.collisions.removeCollisionsContaining(this);
+      scene.clearSubjectAnimations(this);
       effects.commit(this);
     }
 
@@ -332,7 +336,7 @@ exports = function(inherits) {
     });
 
     Object.defineProperty(this, 'clipRect', {
-      get: function() { return this.view.style.scale },
+      get: function() { return this.view.clipRect; },
       set: function(value) { this.view.clipRect = value; }
     });
 
