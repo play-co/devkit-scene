@@ -241,7 +241,7 @@ exports = function(inherits) {
 
       // Run various cleanups
       scene.collisions.removeCollisionsContaining(this);
-      scene.clearSubjectAnimations(this);
+      scene.clearAnimations(this);
       effects.commit(this);
     }
 

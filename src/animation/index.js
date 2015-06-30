@@ -24,17 +24,14 @@ var addSubjectAnimation = function(subject, groupId) {
 };
 
 var clearSubjectAnimations = function(subject) {
-  var subjectKey = subject.__anim_id;
-  if (subjectKey === undefined) {
-    return;
-  }
-
+  var subjectKey = subject.__anim_id || "";
   var animationGroups = subjectAnimations[subjectKey];
-  for (var i = 0, len = animationGroups.length; i < len; i++) {
-    animate(subject, animationGroups[i]).clear();
+  if (animationGroups) {
+    for (var i = 0, len = animationGroups.length; i < len; i++) {
+      animate(subject, animationGroups[i]).clear();
+    }
+    delete subjectAnimations[subjectKey];
   }
-
-  delete subjectAnimations[subjectKey];
 };
 
 var rotateAround = function(opts) {
