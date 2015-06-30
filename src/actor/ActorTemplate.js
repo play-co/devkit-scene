@@ -55,6 +55,7 @@ exports = function(inherits) {
       this.rotation = config.rotation || 0;
       this.flipX = config.flipX || false;
       this.flipY = config.flipY || false;
+      this.zIndex = config.zIndex || 0;
     }
 
     this.applyScaledBounds = function(sourceBounds, targetBounds, scale) {
@@ -230,13 +231,17 @@ exports = function(inherits) {
      */
     this.destroy = function(runDestroyHandlers) {
       runDestroyHandlers = runDestroyHandlers !== undefined ? runDestroyHandlers : true;
-      scene.collisions.removeCollisionsContaining(this);
+
       if (runDestroyHandlers) {
         for (var i = 0; i < this.destroyHandlers.length; i++) {
           this.destroyHandlers[i](this);
         }
       }
       suprPrototype.destroy.call(this);
+
+      // Run various cleanups
+      scene.collisions.removeCollisionsContaining(this);
+      scene.clearSubjectAnimations(this);
       effects.commit(this);
     }
 
@@ -304,13 +309,22 @@ exports = function(inherits) {
       this.destroyHandlers.push(callback);
     };
 
+    this._addStyleProperty = function(styleName, newName) {
+      newName = newName || styleName;
+      Object.defineProperty(this, newName, {
+        get: function() { return this.view.style[styleName]; },
+        set: function(value) { this.view.style[styleName] = value; }
+      });
+    };
+
+    this._addStyleProperty('opacity');
+    this._addStyleProperty('flipX');
+    this._addStyleProperty('flipY');
+    this._addStyleProperty('r', 'rotation');
+    this._addStyleProperty('zIndex');
+
     Object.defineProperty(this, "currentAnimation", {
       get: function() { return this.view.isSprite ? this.view._currentAnimationName : ""; }
-    });
-
-    Object.defineProperty(this, "opacity", {
-      get: function() { return this.view.style.opacity; },
-      set: function(value) { this.view.style.opacity = value; }
     });
 
     Object.defineProperty(this, "scale", {
@@ -321,19 +335,9 @@ exports = function(inherits) {
       }
     });
 
-    Object.defineProperty(this, "flipX", {
-      get: function() { return this.view.style.flipX },
-      set: function(value) { this.view.style.flipX = value; }
-    });
-
-    Object.defineProperty(this, "flipY", {
-      get: function() { return this.view.style.flipY },
-      set: function(value) { this.view.style.flipY = value; }
-    });
-
-    Object.defineProperty(this, "rotation", {
-      get: function() { return this.view.style.r },
-      set: function(value) { this.view.style.r = value; }
+    Object.defineProperty(this, 'clipRect', {
+      get: function() { return this.view.clipRect; },
+      set: function(value) { this.view.clipRect = value; }
     });
 
     this.showHitBounds = function() {

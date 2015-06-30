@@ -1,5 +1,9 @@
+
 exports = Class(function() {
 
+  /**
+   * @class StateManager
+   */
   this.init = function() {
     this._state = "";
     this._states = {};
@@ -16,6 +20,16 @@ exports = Class(function() {
     this._states[name] = initializer;
   };
 
+  /**
+   * Check if a state has been registered for name
+   * @method StateManager#has
+   * @param  {string} name
+   * @return {Boolean}
+   */
+  this.has = function(name) {
+    return !!this._states[name];
+  }
+
   this.reset = function() {
     if (this._state !== "") { this.enter(""); }
     this._gameObject = {};
@@ -26,8 +40,6 @@ exports = Class(function() {
     * All onExitStates are cleared on a state change
     * @arg {teardownFn} teardownFn
     */
-
-
   /**
     * NOTE: Cannot set states during a state change !!!!
     * @arg {string} stateName

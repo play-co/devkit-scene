@@ -1,4 +1,3 @@
-import .Actor;
 import entities.shapes.Rect as Rect;
 
 exports = Class(Rect, function(supr) {

@@ -1,7 +1,7 @@
-import ..Actor as Actor;
-import ..Group as Group;
-import entities.shapes.Shape as Shape;
+import scene.actor.Actor as Actor;
+import scene.group.Group as Group;
 
+import entities.shapes.Shape as Shape;
 import entities.physics as EntityPhysics;
 
 var CC = Class(function() {
