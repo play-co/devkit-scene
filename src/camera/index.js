@@ -44,9 +44,7 @@ exports = {
         stageStyle.x = -cam.x;
         stageStyle.y = -cam.y;
 
-        if (cam.following) {
-          this.background.scrollTo(-cam.x, -cam.y);
-        }
+        this.background.scrollTo(-cam.x, -cam.y);
       }
     }
   ]

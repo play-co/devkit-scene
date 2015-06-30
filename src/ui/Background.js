@@ -111,6 +111,7 @@ exports = Class(View, function (supr) {
    * scrollTo(x, y)
    */
   this.scrollTo = function(x, y) {
+    if (this.offsetX === x && this.offsetY === y) { return; }
     this.offsetX = x;
     this.offsetY = y;
     this._updateParallax();
