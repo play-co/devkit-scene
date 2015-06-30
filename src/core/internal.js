@@ -1,6 +1,7 @@
 import scene.utils.performance as performance;
 
 var _listeners = {};
+var _isResetting = false;
 
 var registerListeners = function(listeners) {
   if (Array.isArray(listeners)) {
@@ -96,6 +97,13 @@ var startGame = function() {
 };
 
 var resetGame = function(mode) {
+  // Avoid state loops
+  if (_isResetting) {
+    console.error('Already resetting (call to scene.game.reset while in a reset)');
+    return;
+  }
+  _isResetting = true;
+
   performance.start('reset');
 
   if (mode === undefined) mode = 'game';
@@ -104,6 +112,7 @@ var resetGame = function(mode) {
   fire('restartState', mode);
 
   performance.stop('reset');
+  _isResetting = false;
 };
 
 var tickGame = function(dt) {
