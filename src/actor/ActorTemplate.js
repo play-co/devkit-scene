@@ -243,7 +243,7 @@ exports = function(inherits) {
       scene.collisions.removeCollisionsContaining(this);
       scene.clearAnimations(this);
       effects.commit(this);
-    }
+    };
 
     /**
      * This function stops all input to the actor
@@ -253,7 +253,7 @@ exports = function(inherits) {
     this.stopInput = function() {
       scene.screen.removeOnDown(this._inputCb);
       return this;
-    }
+    };
 
     /**
      * onTouch
@@ -266,7 +266,7 @@ exports = function(inherits) {
         }
       }.bind(this));
       return this;
-    }
+    };
 
     /**
      * play(animation)
@@ -284,7 +284,7 @@ exports = function(inherits) {
       this.view.resume();
 
       return this;
-    }
+    };
 
     /**
      * loop(animation)
