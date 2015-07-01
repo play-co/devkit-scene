@@ -23,7 +23,7 @@ exports = Class(function(supr) {
     this._collisionChecks = [];
     this._collisionChecksToAdd = [];
     this._collisionChecksToRemove = [];
-    this._collidersToRemove = [];
+    this._checksToRemove = [];
     this.collisionCheckID = -1;
     this._processing = false;
   };
@@ -34,7 +34,6 @@ exports = Class(function(supr) {
     * @returns {number} collisionCheckID
     */
   this.registerCollision = function(collisionChecker) {
-
     this.collisionCheckID++;
 
     // create a new collision checker
@@ -50,8 +49,7 @@ exports = Class(function(supr) {
   };
 
   this.update = function(dt) {
-
-    this._removeColliders();
+    this._removeOldChecks();
     this._addDeferredCollisionChecks();
 
     this._processing = true;
@@ -65,7 +63,6 @@ exports = Class(function(supr) {
     }
 
     this._processing = false;
-
   };
 
   /**
@@ -100,8 +97,11 @@ exports = Class(function(supr) {
   this.start = function(collisionCheckID) {};
 
   this.removeCollisionsContaining = function(collider) {
-    if (this._collidersToRemove.indexOf(collider) === -1 ) {
-      this._collidersToRemove.push(collider);
+    if (this._checksToRemove.indexOf(collider) === -1) {
+      var checksOnCollider = this._colliderMap.getCollisionChecksOn(collider);
+      if (checksOnCollider) {
+        this._checksToRemove.push(checksOnCollider);
+      }
     }
   };
 
@@ -111,18 +111,14 @@ exports = Class(function(supr) {
     this._colliderMap.insert(collisionChecker);
   };
 
-  this._removeColliders = function() {
-    if (this._collidersToRemove.length === 0) { return; }
-
-    for (var i = 0; i < this._collidersToRemove.length; i++) {
-      var checksOnCollider = this._colliderMap.getCollisionChecksOn(this._collidersToRemove[i]);
-      if (checksOnCollider === null) { continue; }
-      for (var j = 0; j < checksOnCollider.length; j++) {
-        this.remove(checksOnCollider[j]);
+  this._removeOldChecks = function() {
+    for (var i = 0; i < this._checksToRemove.length; i++) {
+      var checks = this._checksToRemove[i];
+      for (var j = 0; j < checks.length; j++) {
+        this.remove(checks[j]);
       }
     }
-
-    this._collidersToRemove.length = 0;
+    this._checksToRemove.length = 0;
   };
 
   this._addDeferredCollisionChecks = function() {
