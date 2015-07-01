@@ -20,7 +20,7 @@ var useWeeby = function() {
     weeby.launchUI();
     weeby.onStartGame = function (data) {
       scene.weebyData = data;
-      scene.mode('game');
+      scene.internal.game.reset();
     };
 
     scene.mode('weeby');
