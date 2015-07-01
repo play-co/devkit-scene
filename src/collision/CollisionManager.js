@@ -97,10 +97,13 @@ exports = Class(function(supr) {
   this.start = function(collisionCheckID) {};
 
   this.removeCollisionsContaining = function(collider) {
-    if (this._checksToRemove.indexOf(collider) === -1) {
-      var checksOnCollider = this._colliderMap.getCollisionChecksOn(collider);
-      if (checksOnCollider) {
-        this._checksToRemove.push(checksOnCollider);
+    var checks = this._colliderMap.getCollisionChecksOn(collider);
+    if (checks) {
+      for (var i = 0; i < checks.length; i++) {
+        var check = checks[i];
+        if (this._checksToRemove.indexOf(check) === -1) {
+          this._checksToRemove.push(check);
+        }
       }
     }
   };
@@ -113,10 +116,7 @@ exports = Class(function(supr) {
 
   this._removeOldChecks = function() {
     for (var i = 0; i < this._checksToRemove.length; i++) {
-      var checks = this._checksToRemove[i];
-      for (var j = 0; j < checks.length; j++) {
-        this.remove(checks[j]);
-      }
+      this.remove(this._checksToRemove[i]);
     }
     this._checksToRemove.length = 0;
   };
