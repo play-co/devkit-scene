@@ -1,4 +1,4 @@
-import communityart;
+//import communityart;
 import effects;
 
 import entities.shapes.Line as Line;
@@ -103,7 +103,8 @@ exports = {
 
     setTimeout(function () {
       if (this.weebyData) {
-        weeby.finishGame({ score: this.getScore() });
+        this.weeby.finishGame({ score: this.getScore() });
+        scene.mode('weeby');
       } else {
         if (!opts.noGameoverScreen) {
           var bgHeight = this.screen.height;
