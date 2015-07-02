@@ -5,6 +5,7 @@
  */
 var useWeeby = function() {
   import weeby;
+  this.weeby = weeby;
 
   var _gameView;
   function getGameView() {
@@ -12,14 +13,16 @@ var useWeeby = function() {
   }
 
   this.mode('weeby', function () {
-    weeby.launchUI();
-    weeby.onStartGame = function (data) {
-      scene.weebyData = data;
-      scene.mode('default');
-    };
+
   });
 
   GC.on('app', function () {
+    weeby.launchUI();
+    weeby.onStartGame = function (data) {
+      scene.weebyData = data;
+      scene.internal.game.reset();
+    };
+
     scene.mode('weeby');
   });
 
@@ -37,5 +40,7 @@ exports = {
    * Data from the weeby library, if it is being used, otherwise null
    * @type {Object}
    */
-  weebyData: null
+  weebyData: null,
+
+  weeby: null
 };
