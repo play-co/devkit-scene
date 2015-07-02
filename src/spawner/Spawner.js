@@ -26,10 +26,10 @@ exports = Class(function() {
       * This is where the spawning should occur. Positions will always be screen space, not world space, unless {@link Spawner#useWorldSpace} is set
       * @var {Shape|Shape[]|Point} Spawner#spawnAt
       */
-    this.spawnAt = spawnAt;
+    this.spawnAt = spawnAt || { x: 0, y: 0 };
 
     /** @var {function} Spawner#spawnFunction */
-    this.spawnFunction = spawnFunction;
+    this.spawnFunction = spawnFunction || function () {};
 
     /** @var {number} Spawner#spawnDelay */
     this.spawnDelay = spawnDelay !== undefined ? spawnDelay : 500;
