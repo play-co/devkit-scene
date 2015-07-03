@@ -7,11 +7,11 @@ exports = Class(SceneImageView, function(supr) {
 
   this.init = function(opts) {
     opts.autoSize = true;
-    opts.image = opts.backgrounds[0];
+    opts.image = opts.backgrounds ? opts.backgrounds[0] : opts.image;
     supr(this, "init", [opts]);
 
-    this._backgrounds = opts.backgrounds;
-    this._fills = opts.fills;
+    this._backgrounds = opts.backgrounds || null;
+    this._fills = opts.fills || null;
 
     this._backgroundIndex = -1;
     this._fillIndex = -1;
@@ -39,12 +39,15 @@ exports = Class(SceneImageView, function(supr) {
 
   this.setValue = function(value, animationDuration) {
     if (this._value === value) { return; }
-    animationDuration = animationDuration || 0;
     var startValue = this._value;
     var target = this;
-    scene.animate(this.animObject).now({}, animationDuration, scene.transitions.linear, function(tt, t) {
-      target._setFillValue(startValue * (1-tt) + value * tt);
-    });
+    if (animationDuration) {
+      scene.animate(this.animObject).now({}, animationDuration, scene.transitions.linear, function(tt, t) {
+        target._setFillValue(startValue * (1-tt) + value * tt);
+      });
+    } else {
+      target._setFillValue(value);
+    }
     this._value = value;
   };
 
@@ -57,16 +60,20 @@ exports = Class(SceneImageView, function(supr) {
 
     value = Math.floor(value);
 
-    var backgroundIndex = Math.min(value, this._backgrounds.length - 1);
-    if (this._backgroundIndex !== backgroundIndex) {
-      this._backgroundIndex = backgroundIndex;
-      this.setImage(this._backgrounds[backgroundIndex]);
+    if (this._backgrounds) {
+      var backgroundIndex = Math.min(value, this._backgrounds.length - 1);
+      if (this._backgroundIndex !== backgroundIndex) {
+        this._backgroundIndex = backgroundIndex;
+        this.setImage(this._backgrounds[backgroundIndex]);
+      }
     }
 
-    var fillIndex = Math.min(value, this._fills.length - 1);
-    if (this._fillIndex !== fillIndex) {
-      this._fillIndex = fillIndex;
-      this.fillImage.setImage(this._fills[fillIndex]);
+    if (this._fills) {
+      var fillIndex = Math.min(value, this._fills.length - 1);
+      if (this._fillIndex !== fillIndex) {
+        this._fillIndex = fillIndex;
+        this.fillImage.setImage(this._fills[fillIndex]);
+      }
     }
   };
 
