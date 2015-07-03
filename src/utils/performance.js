@@ -39,6 +39,7 @@ var TrackerInstance = Class(function() {
 var PerformanceTracker = Class(function() {
 
   this.DO_TRACKING = SCENE_CONFIG.performance;
+  window.performance = window.performance || {};
   this.now = window.performance.now ? window.performance.now.bind(window.performance) : Date.now;
 
   this.init = function() {
