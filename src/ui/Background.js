@@ -142,14 +142,17 @@ exports = Class(View, function (supr) {
         this.config.push(layerConfig);
         layer.setScroll(layerConfig.xMultiplier, layerConfig.yMultiplier);
       }
-    } else if(!opts) {
-      // Static image
+    } else if (!opts) {
+      // Static image - auto-fits width, centered, maintains aspect ratio
       var view = new ImageView({
         superview: this,
         image: resource.url,
         width: this.style.width,
-        height: this.style.height
+        autoSize: true,
+        fixedAspectRatio: true
       });
+      view.style.x = (this.style.width - view.style.width) / 2;
+      view.style.y = (this.style.height - view.style.height) / 2;
       return view;
     } else {
       // Automatic repeating
