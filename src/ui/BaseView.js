@@ -35,20 +35,19 @@ exports = Class(View, function(supr) {
       opts = width;
     } else {
       opts = opts || {};
-      opts.width = width;
-      opts.height = height;
+      opts.width = width || resourceOpts.width;
+      opts.height = height || resourceOpts.height;
     }
 
-    opts.superview = opts.superview || this;
-    opts.autoSize = opts.autoSize !== undefined
-        ? opts.autoSize
-        : (opts.width === undefined && opts.height === undefined);
-    opts.x = x;
-    opts.y = y;
+    var viewOpts = merge(opts, resourceOpts);
+    viewOpts.superview = viewOpts.superview || this;
+    viewOpts.autoSize = viewOpts.autoSize !== undefined
+        ? viewOpts.autoSize
+        : (viewOpts.width === undefined && viewOpts.height === undefined);
+    viewOpts.x = x || viewOpts.x;
+    viewOpts.y = y || viewOpts.y;
 
     // Set up the view
-    var viewOpts = merge(opts, resourceOpts);
-
     var viewClass = (viewOpts.scaleMethod === undefined) ? SceneImageView : SceneImageScaleView;
     var result = new viewClass(viewOpts);
 

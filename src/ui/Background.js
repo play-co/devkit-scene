@@ -146,7 +146,7 @@ exports = Class(View, function (supr) {
       // Static image - auto-fits width, centered, maintains aspect ratio
       var view = new ImageView({
         superview: this,
-        image: resource.url,
+        image: resource.url || resource.image,
         width: this.style.width,
         autoSize: true,
         fixedAspectRatio: true
@@ -165,7 +165,7 @@ exports = Class(View, function (supr) {
       else if (opts.align === 'right' && opts.x === undefined) { opts.x = 0; }
 
       // Build pieceOptions
-      var pieceOptions = { image: resource.url };
+      var pieceOptions = { image: resource.url || resource.image };
       if (opts.align === 'left' || opts.align === 'right') {
         pieceOptions.xAlign = opts.align;
       } else if (opts.align === 'top' || opts.align === 'bottom') {
