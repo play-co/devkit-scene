@@ -1,6 +1,22 @@
 import .Group;
 import scene.actor.Actor as Actor;
 
+var _conglomorateGroups = null;
+
+var conglomorate = function(ctor, opts) {
+  if (!_conglomorateGroups) { throw new Error('conglomorate groups not yet initilized'); }
+
+  var lookupName = ctor.name;
+  if (!lookupName) { console.error(ctor); throw new Error('no name available on ctor'); }
+
+  var group = _conglomorateGroups[lookupName];
+  if (!group) {
+    _conglomorateGroups[lookupName] = group = scene.addGroup({ ctor: ctor });
+  }
+
+  return group.addActor(null, opts);
+};
+
 exports = {
   groupConfig: {
     _actorCtor: Actor
@@ -39,6 +55,16 @@ exports = {
   },
 
   /**
+   * Automatically obtain a group for this class, and return an actor instance from that group.
+   * This function provides an easy way to add custom actors to scene.
+   * @func scene.conglomorate
+   * @arg     {Actor}  ctor
+   * @arg     {object} [opts]
+   * @returns {Actor}  newInstance
+   */
+  conglomorate: conglomorate,
+
+  /**
    * The default group for actors (if no other group is used).
    * @var {Group} scene.group
    */
@@ -64,6 +90,8 @@ exports = {
         }
 
         this.groups = [];
+
+        _conglomorateGroups = {};
       }
     },
     // Tick
