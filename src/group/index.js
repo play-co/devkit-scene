@@ -16,6 +16,15 @@ exports = {
   },
 
   /**
+   * Create a new actor in the defualt scene group
+   * @method  scene.addActor
+   * @see Group#addActor
+   */
+  addActor: function(resource, opts) {
+    return this.group.addActor(resource, opts);
+  },
+
+  /**
    * Add a new actor group to scene tracking
    * @func    scene.addGroup
    * @arg     {Object} [opts]
