@@ -277,8 +277,8 @@ exports = function(inherits) {
       this.view.startAnimation(animation, {
         loop: false,
         callback: function () {
-          if (onComplete) { onComplete(); }
           this.view.pause();
+          if (onComplete) { onComplete(); }
         }.bind(this)
       });
       this.view.resume();
