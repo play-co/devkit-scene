@@ -1,6 +1,5 @@
 import ui.ImageView as ImageView;
 import ui.ImageScaleView as ImageScaleView;
-import lib.PubSub as PubSub;
 
 var uid = 0;
 var uidInput = -1;
@@ -25,7 +24,6 @@ exports = Class(ImageScaleView, function(supr) {
     this.toggle = opts.toggle || false;
 
     this._btnID = uid++;
-    this._pubsub = new PubSub();
 
     // button up and down callbacks
     if (opts.onDown) {
@@ -60,7 +58,7 @@ exports = Class(ImageScaleView, function(supr) {
    */
   this.registerListener = function(evtName, listener) {
     var registerListener = function(listener) {
-      this._pubsub.addListener(evtName, listener);
+      this.addListener(evtName, listener);
     }.bind(this);
 
     if (Array.isArray(listener)) {
@@ -112,11 +110,11 @@ exports = Class(ImageScaleView, function(supr) {
 
     if (pressed) {
       this.setImage(this.pressedImage);
-      this._pubsub.emit('onDown');
+      this.emit('onDown');
       this.offsetSubviews();
     } else {
       this.setImage(this.normalImage);
-      this._pubsub.emit('onUp');
+      this.emit('onUp');
       this.onsetSubviews();
     }
   };
@@ -157,7 +155,7 @@ exports = Class(ImageScaleView, function(supr) {
     if (this.pressed) {
       this.setPressed(false);
       this.hasBeenClicked = true;
-      this._pubsub.emit('onClick', evt, srcPt);
+      this.emit('onClick', evt, srcPt);
     }
   };
 

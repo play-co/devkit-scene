@@ -31,11 +31,9 @@ exports = Class(function() {
    * @arg {Button} button
    */
   this._onDown = function(button) {
-    if (this.radio) {
-      this._buttons.forEach(function(iterButton) {
-        if (iterButton === button) return;
-        iterButton.setPressed(false);
-      });
-    }
+    this._buttons.forEach(function(iterButton) {
+      if (iterButton === button) return;
+      iterButton.setPressed(false);
+    });
   };
 });
