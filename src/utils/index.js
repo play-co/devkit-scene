@@ -104,3 +104,6 @@ pickRandomProperty = function(obj) {
   var result = choose(Object.keys(obj));
   return obj[result];
 };
+
+DEG_TO_RAD = Math.PI / 180;
+RAD_TO_DEG = 180 / Math.PI;

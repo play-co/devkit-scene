@@ -73,6 +73,11 @@ exports = Class(function() {
     var touchInstance = this.getTouch(event.id);
     this._realIdMap[event.id] = undefined;
 
+    if (!touchInstance) {
+      log.error('No touch instance for touch id: ' + event.id);
+      return;
+    }
+
     log.log('upHandler: ' + touchInstance.id);
     if (touchInstance) {
       touchInstance.upHandler(event, point);

@@ -4,18 +4,17 @@ import effects;
   * This is the basic entity for all things in a scene game.  If it moves, it's and actor.
   * @class Actor
   * @extends Entity
-  * @arg {Object} [opts]
-  *
+  * @arg {Object}         [opts]
   * @arg {boolean|Object} [opts.followTouches] - Follow touches on the screen, or follow one or both axis (if argument type is Object)
-  * @arg {boolean} [opts.followTouches.x]
-  * @arg {boolean} [opts.followTouches.y]
-  * @arg {boolean} [opts.followTouches.instant=false] - causes the actor to be at the touch position instantly, without smoothing
-  * @arg {number} [opts.followTouches.xMultipier=0.1] - When not instant, this is used for velocity smoothing
-  * @arg {number} [opts.followTouches.yMultipier=0.1] - When not instant, this is used for velocity smoothing
-  *
+  * @arg {boolean}        [opts.followTouches.x]
+  * @arg {boolean}        [opts.followTouches.y]
+  * @arg {boolean}        [opts.followTouches.instant=false] - causes the actor to be at the touch position instantly, without smoothing
+  * @arg {number}         [opts.followTouches.xMultipier=0.1] - When not instant, this is used for velocity smoothing
+  * @arg {number}         [opts.followTouches.yMultipier=0.1] - When not instant, this is used for velocity smoothing
   * @arg {cameraUpdateFunction|cameraUpdateFunction[]} [opts.cameraFunction]
-  *
-  * @arg {number} [opts.health]
+  * @arg {number}         [opts.health]
+  * @arg {boolean|object} [opts.faceForward] - Causes the actor to always face in the direction it is heading (determined by velocity)
+  * @arg {number}         [opts.faceForward.offset] - An offset for the actor to use while facing forward
   */
 exports = function(inherits) {
   return Class(inherits, function() {
@@ -47,6 +46,8 @@ exports = function(inherits) {
 
       // Health
       this.health = config.health || 1;
+
+      this.faceForward = config.faceForward || false;
 
       this.unscaledHitBounds = this.model.hitBounds;
       this.scale = config.scale !== undefined ? config.scale : 1;
@@ -93,6 +94,10 @@ exports = function(inherits) {
 
       this.followTouch(dt);
       this.updateEntity(dt);
+
+      if (this.faceForward) {
+        this.rotateAt(this.x + this.vx, this.y + this.vy, this.faceForward.offset);
+      }
 
       // onTick handlers
       for (var i = 0; i < this.tickHandlers.length; i++) {

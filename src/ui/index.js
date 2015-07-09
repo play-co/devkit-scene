@@ -352,16 +352,12 @@ exports = {
 
         this.addImage = bind(this.stage, this.stage.addImage);
 
-        this.ui = new UIView({
-          superview: this.view,
-          infinite: true
-        });
-
         this.textContainer = new View({
           parent: this.view,
           width:  this.screen.width,
           height: this.screen.height,
           blockEvents: true,
+          canHandleEvents: false,
           zIndex: 100000
         });
 
@@ -371,6 +367,11 @@ exports = {
         this.inputOverlay.onInputStart = bind(touchManager, touchManager.downHandler);
         this.inputOverlay.onInputSelect = bind(touchManager, touchManager.upHandler);
         this.inputOverlay.onInputMove = bind(touchManager, touchManager.moveHandler);
+
+        this.ui = new UIView({
+          parent: this.inputOverlay,
+          infinite: true
+        });
       }
     },
     // Restart

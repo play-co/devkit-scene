@@ -9,7 +9,7 @@ exports = Class(function() {
     this._states = {};
     this._exitFunctions = [];
     this._enteringState = false;
-    this._gameObject = {};
+    this.gameData = null;
   };
 
   /**
@@ -31,8 +31,8 @@ exports = Class(function() {
   }
 
   this.reset = function() {
+    this.gameData = {};
     if (this._state !== "") { this.enter(""); }
-    this._gameObject = {};
   };
 
   /**
@@ -68,7 +68,7 @@ exports = Class(function() {
 
     this._enteringState = true;
 
-    var args = [ this._gameObject ];
+    var args = [ this.gameData ];
     // Store extra arguments to pass to state function.
     for (var i = 3; i < arguments.length; i++) {
       args.push(arguments[i]);
