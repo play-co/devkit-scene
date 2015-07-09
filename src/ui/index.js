@@ -330,7 +330,12 @@ exports = {
     {
       event: 'initView',
       cb: function () {
-        this.view = scene.app;
+        this.view = new View({
+          parent: scene.app,
+          width: scene.app.width,
+          height: scene.app.height,
+          infinite: true
+        });
       }
     },
     {
