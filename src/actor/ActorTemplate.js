@@ -296,6 +296,14 @@ exports = function(inherits) {
       return this;
     };
 
+    /**
+     * stop(animation)
+     */
+    this.stop = function() {
+      this.view.pause();
+      return this;
+    };
+
     this.getSpeed = function() {
       return Math.sqrt(this.vx * this.vx + this.vy * this.vy);
     };

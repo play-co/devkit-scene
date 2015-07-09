@@ -16,8 +16,8 @@ var Layer = Class(function () {
   }
 
   this._setScroll = function(sx, sy) {
-    this.config.xMultiplier = sx || 1;
-    this.config.yMultiplier = sy || 1;
+    this.config.xMultiplier = sx !== undefined ? sx : 1;
+    this.config.yMultiplier = sy !== undefined ? sy : 1;
     // TODO fix it so we can set scrolling mid-game
     //this.config.xOffset = -(sx || 0) * this.background.offsetX;
     //this.config.yOffset = -(sy || 0) * this.background.offsetY;

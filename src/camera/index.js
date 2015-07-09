@@ -40,11 +40,14 @@ exports = {
         var cam = this.camera;
         cam.update(dt);
 
-        var stageStyle = this.stage.style;
-        stageStyle.x = -cam.x;
-        stageStyle.y = -cam.y;
-
-        this.background.scrollTo(-cam.x, -cam.y);
+        if (cam.hasChanged()) {
+          var stageStyle = this.stage.style;
+          var dx = cam.deltaX;
+          var dy = cam.deltaY;
+          stageStyle.x -= dx;
+          stageStyle.y -= dy;
+          this.background.scroll(-dx, -dy);
+        }
       }
     }
   ]

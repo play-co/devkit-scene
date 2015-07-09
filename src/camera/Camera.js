@@ -14,6 +14,8 @@ exports = Class(Rect, function(supr) {
     // Must first define the walls, because of Camera's custom setters on x and y
     this._x = 0;
     this._y = 0;
+    this._prevX = 0;
+    this._prevY = 0;
 
     this.wallOffsets = {
       left: { x: 0, y: 0 },
@@ -133,6 +135,7 @@ exports = Class(Rect, function(supr) {
 
   Object.defineProperties(this, {
     x: {
+      enumerable: true,
       get: function() { return this._x; },
       set: function(value) {
         this._x = value;
@@ -144,6 +147,7 @@ exports = Class(Rect, function(supr) {
       }
     },
     y: {
+      enumerable: true,
       get: function() { return this._y; },
       set: function(value) {
         this._y = value;
@@ -153,6 +157,14 @@ exports = Class(Rect, function(supr) {
         this.topWall.y = this.wallOffsets.top.y + value;
         this.bottomWall.y = this.wallOffsets.bottom.y + value;
       }
+    },
+    deltaX: {
+      enumerable: true,
+      get: function() { return this._x - this._prevX; }
+    },
+    deltaY: {
+      enumerable: true,
+      get: function() { return this._y - this._prevY; }
     }
   });
 
@@ -169,6 +181,9 @@ exports = Class(Rect, function(supr) {
   };
 
   this.update = function(dt) {
+    this._prevX = this._x;
+    this._prevY = this._y;
+
     if (!this.following) { return; }
 
     if (!this.following.active) {
@@ -190,6 +205,10 @@ exports = Class(Rect, function(supr) {
     } else if (y > this.movementBounds.bottom) {
       this.y = this.following.y - this.movementBounds.bottom;
     }
+  };
+
+  this.hasChanged = function() {
+    return this._prevX !== this._x || this._prevY !== this._y;
   };
 
   /**
