@@ -3,7 +3,7 @@ import animate.transitions as transitions;
 
 /**
  * Map of subject instances -> animation groupId
- * @type {Object}
+ * @type Object
  */
 var subjectAnimations = {}
 

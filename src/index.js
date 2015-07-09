@@ -6,6 +6,7 @@ import scene.utils.Logger as Logger;
 /**
  * Construct the main scene for the game, this is where all of the gameplay is defined.
  * @namespace scene
+ * @global scene
  * @version 0.0.4
  * @arg {function} - The function which will initialize a new game scene
  */
@@ -14,6 +15,10 @@ var scene = window.scene = function (newGameFunc) {
   return scene._appClass;
 };
 
+/**
+ * This is a fully functional replacement for Application.js.  It is what allows the user
+ * to say `exports = scene(...)`
+ */
 scene._appClass = Class(GC.Application, function(supr) {
   this.init = function() {
     supr(this, 'init', arguments);
@@ -30,6 +35,10 @@ scene._appClass = Class(GC.Application, function(supr) {
 
 // // Internal Module Importing // //
 
+/**
+ * All scene modules should be loaded here.
+ * NO scene modules should attach things to the global scene object directly.
+ */
 var SCENE_MODULES = [
   jsio('import .core.internal'),
   jsio('import .core'),
@@ -50,12 +59,24 @@ var SCENE_MODULES = [
 
 // // Logging // //
 
+/**
+ * A global logger to be used for debugging.  Will only output `log` calls if verbose is set.
+ * @var {Logger} scene.log
+ */
 scene.log = new Logger('scene', SCENE_CONFIG.logging.scene);
 scene.log.log('Logging now ready');
 scene.performance = performance;
 
 // // Module Registration // //
 
+/**
+ * Used to add functionality to the global `scene` object.  Will automatically merge objects,
+ * and throws an error when there is a collision.
+ * @method scene.registerModule
+ * @param  {Class}        module        Class obtained through `jsio('import ...')`
+ * @param  {parentObj}    [parentObj]   Do not set, used for recursion
+ * @param  {string[]}     [parentChain] Do not set, used for recursion
+ */
 scene.registerModule = function(module, parentObj, parentChain) {
   parentObj = parentObj || scene;
   parentChain = parentChain || ['scene'];
@@ -75,7 +96,8 @@ scene.registerModule = function(module, parentObj, parentChain) {
         // Try to merge the objects
         scene.registerModule(module[key], parentObj[key], chain);
       } else {
-        scene.log.warn('Module export collision: ', typeof module[key], chain.join('.'), module[key]);
+        scene.log.error('Module export collision: ', typeof module[key], chain.join('.'), module[key]);
+        throw new Error('module export collision');
       }
       continue;
     }

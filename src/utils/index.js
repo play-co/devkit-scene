@@ -1,12 +1,13 @@
-// This file contains utility functions that are exposed game-side
+/** This file contains utility functions that are exposed game-side */
 
 /**
   * Choose a random number between a and b.
   * @example randRange([a, b], bipolar)
   * @example randRange(a, b, bipolar)
-  * @arg {number} a
-  * @arg {number} b
-  * @arg {boolean} [bipolar] - If true, then the returned value will be inverted half of the time
+  * @global
+  * @arg     {number}  a
+  * @arg     {number}  b
+  * @arg     {boolean} [bipolar=false] Should the returned value will be inverted half of the time
   * @returns {number}
   */
 randRange = function(a, b, bipolar) {
@@ -32,6 +33,15 @@ randRange = function(a, b, bipolar) {
   return n;
 };
 
+/**
+ * Basic 2D distance
+ * @global
+ * @arg    {number} x
+ * @arg    {number} y
+ * @arg    {number} x2
+ * @arg    {number} y2
+ * @return {number}
+ */
 dist = function(x, y, x2, y2) {
   var dx = x - x2;
   var dy = y - y2;
@@ -40,10 +50,11 @@ dist = function(x, y, x2, y2) {
 
 /**
   * Choose a random int between a and b
-  * @arg {number} a
-  * @arg {number} [b=0]
-  * @arg {boolean} [bipolar]
-  * @returns {int}
+  * @global
+  * @arg     {number}  a
+  * @arg     {number}  [b=0]
+  * @arg     {boolean} [bipolar=false] Should the returned value will be inverted half of the time
+  * @returns {number}
   */
 randRangeI = function(a, b, bipolar) {
   b = b || 0;
@@ -54,8 +65,9 @@ randRangeI = function(a, b, bipolar) {
  * Merges object b into object a. This is destructive, object a will be changed
  * regardless of the return value. Keys in object b will overwrite those already
  * existing in object a.
- * @arg {object} - The base object
- * @arg {object} - The object whose values will will be overlayed on a
+ * @global
+ * @arg     {object} The base object
+ * @arg     {object} The object whose values will will be overlayed on a
  * @returns {object} The updated {@link a}
  */
 combine = function(a, b) {
@@ -64,8 +76,9 @@ combine = function(a, b) {
 };
 
 /**
-  * Choose a random element from {@link array}. Checks for undefined and array length of 0.
-  * @arg {array} array
+  * Choose a random element from the array. Checks for undefined and array length of 0.
+  * @global
+  * @arg     {array}  array
   * @returns {object} randomElement A random element from the array
   */
 choose = function(array) {
@@ -75,8 +88,9 @@ choose = function(array) {
 };
 
 /**
-  * Randomize the elements in an {@link array}.
-  * @arg {array} Array
+  * Randomize the elements in the array.
+  * @global
+  * @arg     {array} array
   * @returns {array} The shuffled Array
   */
 shuffle = function(array) {
@@ -97,8 +111,9 @@ shuffle = function(array) {
 
 /**
   * Choose a random element using the key array returned from Object.keys
-  * @arg {Object} object
-  * @returns {Object} objectProperty A random element from the object
+  * @global
+  * @arg     {object} object
+  * @returns {object} objectProperty A random element from the object
   */
 pickRandomProperty = function(obj) {
   var result = choose(Object.keys(obj));

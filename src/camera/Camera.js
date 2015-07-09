@@ -223,7 +223,7 @@ exports = Class(Rect, function(supr) {
     * Determines which wall was hit, and inverts the actors velocity in the respective axis.
     * One argument must be a {@link Wall} and one must be an {@link Actor}.
     * @func Camera#bounceOff
-    * @type {cameraUpdateFunction}
+    * @type cameraUpdateFunction
     * @todo
     */
   this.bounce = function(actor) {
@@ -250,7 +250,7 @@ exports = Class(Rect, function(supr) {
     * Determines which wall was hit, and wraps the actor around to the other side of the screen.
     * One argument must be a {@link Wall} and one must be an {@link Actor}.
     * @func Camera#wrap
-    * @type {cameraUpdateFunction}
+    * @type cameraUpdateFunction
     * @todo
     */
   this.wrap = function(actor) {
@@ -284,7 +284,7 @@ exports = Class(Rect, function(supr) {
   /**
     * Keeps the actor completely in the view of the camera.
     * @func Camera#fullyOn
-    * @type {cameraUpdateFunction}
+    * @type cameraUpdateFunction
     */
   this.fullyOn = function(actor) {
     var flagX = this.fullyOnX(actor);
