@@ -44,8 +44,8 @@ exports = Class(View, function(supr) {
     viewOpts.autoSize = viewOpts.autoSize !== undefined
         ? viewOpts.autoSize
         : (viewOpts.width === undefined && viewOpts.height === undefined);
-    viewOpts.x = x || viewOpts.x;
-    viewOpts.y = y || viewOpts.y;
+    viewOpts.x = x !== undefined ? x : viewOpts.x || 0;
+    viewOpts.y = y !== undefined ? y : viewOpts.y || 0;
 
     // Set up the view
     var viewClass = (viewOpts.scaleMethod === undefined) ? SceneImageView : SceneImageScaleView;
