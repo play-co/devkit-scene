@@ -3,8 +3,17 @@ import ui.ImageView as ImageView;
 
 import .SceneImageView;
 
+/** @lends ProgressBar */
 exports = Class(SceneImageView, function(supr) {
 
+  /**
+   * @constructs
+   * @param  {object} opts
+   * @param  {View[]} [opts.backgrounds] Used for multi-fill progress bars
+   * @param  {View}   [opts.image]       Either this or opts.backgrounds must be defined.
+   * @param  {View[]} [opts.fills]       The images to use for filling the progress bar
+   * @param  {View}   [opts.fillImage]   The defualt fill image (when not multi-filling)
+   */
   this.init = function(opts) {
     opts.autoSize = true;
     opts.image = opts.backgrounds ? opts.backgrounds[0] : opts.image;
@@ -35,8 +44,16 @@ exports = Class(SceneImageView, function(supr) {
     this.animObject = {};
   };
 
+  /**
+   * The amount of fill the bar currently is representing.
+   * @returns {number}
+   */
   this.getValue = function() { return this._value; }
 
+  /**
+   * @param  {number} value             Value between 0 and 1. The value can be greater than 1 when using multi-fill
+   * @param  {number} animationDuration In milliseconds
+   */
   this.setValue = function(value, animationDuration) {
     if (this._value === value) { return; }
     var startValue = this._value;
@@ -51,6 +68,11 @@ exports = Class(SceneImageView, function(supr) {
     this._value = value;
   };
 
+  /**
+   * Actually runs the calculations for multi-fill and clipping.
+   * @private
+   * @param  {number} value
+   */
   this._setFillValue = function(value) {
     // Subtract the tiniest amount so we can have 100% filled bars on whole numbers
     value -= 0.0001;

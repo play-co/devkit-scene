@@ -5,16 +5,17 @@ import scene.input.TouchManager as TouchManager;
 exports = Class(Rect, function(supr) {
 
   /**
-    * @class Screen
-    * @param {Number} width
-    * @param {Number} height
-    */
+   * @class Screen
+   * @extends Rect
+   * @param {number} width
+   * @param {number} height
+   */
   this.init = function(width, height) {
     var suprOpts = {
       width: width,
       height: height
     };
-    supr(this, "init", [suprOpts]);
+    supr(this, 'init', [suprOpts]);
 
     /** @var {TouchManager} Screen#touchManager */
     this.touchManager = new TouchManager();
@@ -54,7 +55,10 @@ exports = Class(Rect, function(supr) {
     this.removeOnTap  = bind(this.defaultTouch, this.defaultTouch.removeOnTap);
   };
 
-  /** @method Screen#reset */
+  /**
+   * Reset the touchManager instance
+   * @method Screen#reset
+   */
   this.reset = function() {
     this.touchManager.reset();
   };

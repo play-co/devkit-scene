@@ -229,7 +229,7 @@ exports = {
    * The defualt scale mode is {@link ScaleManager.SCALE_MODE.LOCK_HEIGHT}
    * @type ScaleManager
    */
-  scaleManager: new ScaleManager(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT, ScaleManager.SCALE_MODE.LOCK_HEIGHT),
+  scaleManager: new ScaleManager(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT),
 
   /**
    * Update the scaleManager as well as the scene screen dimensions.
@@ -383,7 +383,6 @@ exports = {
         // TODO: Why is there an updatescreendimensions called at reset and init?
         this.updateScreenDimensions();
         this.screen.reset();
-        this.background.reset();
 
         for (var k in this.extraViews) {
           this.extraViews[k].removeFromSuperview();
@@ -392,7 +391,7 @@ exports = {
         this.extraViews = [];
 
         delete this._scoreView;
-        this.background.destroy();
+        this.background.reset();
 
         this.stage.removeAllSubviews();
       }
