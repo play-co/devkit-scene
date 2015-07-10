@@ -5,11 +5,11 @@
   "version": "0.2.0",
   "repository": {},
   "dependencies": {
-    "devkit-entities": "git://github.com/gameclosure/devkit-entities.git#233996bb04d4286ba335617cc91a48453f72a757",
-    "devkit-parallax": "git://github.com/gameclosure/devkit-parallax.git#v0.1.5",
-    "community-art": "git://github.com/weebygames/community-art.git#e90d3b25eb1a1773a9b42fe447c9af5921bc1a51",
+    "devkit-entities": "git://github.com/gameclosure/devkit-entities.git#495ca986c00fd09f36cceebbe9eae3181ccc4e2c",
+    "devkit-parallax": "git://github.com/gameclosure/devkit-parallax.git#a7d29d3a0785727b7a8fe1b2bc8fe8e6544de9f1",
+    "community-art": "git://github.com/weebygames/community-art.git#504b490164d2283a3ed51f600b6a3bb8ad7dec66",
     "devkit-accelerometer": "git://github.com/gameclosure/accelerometer.git#v3.0.1",
-    "devkit-effects": "git://github.com/gameclosure/devkit-effects.git#ec1a3094b90af3a4fcfef57dfa49745303990e4f"
+    "devkit-effects": "git://github.com/gameclosure/devkit-effects.git#b23bb316c111c79fcb298ed493f12c418d9f5e90"
   },
   "_devDependencies": {
     "command-line-args": "^0.5.9",
