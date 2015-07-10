@@ -38,7 +38,6 @@ exports = {
       event: 'tickUI',
       cb: function(dt) {
         var cam = this.camera;
-        cam.update(dt);
 
         if (cam.hasChanged()) {
           var stageStyle = this.stage.style;
@@ -48,6 +47,8 @@ exports = {
           stageStyle.y -= dy;
           this.background.scroll(-dx, -dy);
         }
+
+        cam.update(dt);
       }
     }
   ]

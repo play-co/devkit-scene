@@ -349,6 +349,7 @@ exports = {
       event: 'initUI',
       priority: 10,
       cb: function (app) {
+
         this.updateScreenDimensions();
 
         this.background = new Background({

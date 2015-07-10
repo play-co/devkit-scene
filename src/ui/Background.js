@@ -185,7 +185,7 @@ exports = Class(View, function (supr) {
 
       this.config.push(config_opts);
       var layer = new Layer(config_opts, this);
-      layer._setScroll(opts.scrollX, opts.scrollY);
+      layer.setScroll(opts.scrollX, opts.scrollY);
     }
 
     this.zIndex = Math.max(this.zIndex - 1, 0);

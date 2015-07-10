@@ -1,4 +1,5 @@
 import .TimerManager;
+import .Timer;
 
 exports = {
   /**
