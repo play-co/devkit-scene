@@ -275,6 +275,13 @@ exports = {
     vs.y = (device.height - vs.height) / 2;
     vs.anchorX = vs.width / 2;
     vs.anchorY = vs.height / 2;
+
+    if (this.background) {
+      var bs = this.background.style;
+      var ts = this.textContainer.style;
+      ts.width = bs.width = vs.width;
+      ts.height = bs.height = vs.height;
+    }
   },
 
   /**
