@@ -1,30 +1,46 @@
 import effects;
 
-/**
-  * This is the basic entity for all things in a scene game.  If it moves, it's and actor.
-  * @class Actor
-  * @extends Entity
-  * @arg {Object}         [opts]
-  * @arg {boolean|Object} [opts.followTouches] - Follow touches on the screen, or follow one or both axis (if argument type is Object)
-  * @arg {boolean}        [opts.followTouches.x]
-  * @arg {boolean}        [opts.followTouches.y]
-  * @arg {boolean}        [opts.followTouches.instant=false] - causes the actor to be at the touch position instantly, without smoothing
-  * @arg {number}         [opts.followTouches.xMultipier=0.1] - When not instant, this is used for velocity smoothing
-  * @arg {number}         [opts.followTouches.yMultipier=0.1] - When not instant, this is used for velocity smoothing
-  * @arg {cameraUpdateFunction|cameraUpdateFunction[]} [opts.cameraFunction]
-  * @arg {number}         [opts.health]
-  * @arg {boolean|object} [opts.faceForward] - Causes the actor to always face in the direction it is heading (determined by velocity)
-  * @arg {number}         [opts.faceForward.offset] - An offset for the actor to use while facing forward
-  */
+// TODO: this is a fairly bad solution to a problem, find a better solution (two different inheritance trees)
+// TODO: jsdoc doesnt understand this witchcraft, make it do so
+
 exports = function(inherits) {
   return Class(inherits, function() {
 
     var suprPrototype = inherits.prototype;
 
+    /**
+     * @class ActorTemplate
+     * @param {object}         [opts]
+     * @param {boolean|object} [opts.followTouches] - Follow touches on the screen, or follow one or both axis (if argument type is Object)
+     * @param {boolean}        [opts.followTouches.x]
+     * @param {boolean}        [opts.followTouches.y]
+     * @param {boolean}        [opts.followTouches.instant=false] - causes the actor to be at the touch position instantly, without smoothing
+     * @param {number}         [opts.followTouches.xMultipier=0.1] - When not instant, this is used for velocity smoothing
+     * @param {number}         [opts.followTouches.yMultipier=0.1] - When not instant, this is used for velocity smoothing
+     * @param {cameraUpdateFunction|cameraUpdateFunction[]} [opts.cameraFunction]
+     * @param {number}         [opts.health]
+     * @param {boolean|object} [opts.faceForward] - Causes the actor to always face in the direction it is heading (determined by velocity)
+     * @param {number}         [opts.faceForward.offset] - An offset for the actor to use while facing forward
+     */
     this.init = function(opts) {
       suprPrototype.init.call(this, opts);
     }
 
+    /**
+     * Reset the actor using the given config
+     * @method ActorTemplate#reset
+     * @param  {object}  [config]
+     * @param  {boolean} [config.followTouches]
+     * @param  {function|function[]} [config.cameraFunction]
+     * @param  {number}  [config.health]
+     * @param  {boolean} [config.faceForward]
+     * @param  {number}  [config.scale]
+     * @param  {number}  [config.frameRate]
+     * @param  {number}  [config.rotation]
+     * @param  {boolean} [config.flipX]
+     * @param  {boolean} [config.flipY]
+     * @param  {number}  [config.zIndex]
+     */
     this.reset = function(config) {
       suprPrototype.reset.call(this, config);
 
@@ -59,12 +75,24 @@ exports = function(inherits) {
       this.zIndex = config.zIndex || 0;
     }
 
+    /**
+     * Utility function, multiply all numbers in source array by scale into target array
+     * @method ActorTemplate#applyScaledBounds
+     * @param  {number[]} sourceBounds
+     * @param  {number[]} targetBounds
+     * @param  {number}   scale
+     */
     this.applyScaledBounds = function(sourceBounds, targetBounds, scale) {
       for (var i in sourceBounds) {
         targetBounds[i] = sourceBounds[i] * scale;
       }
     };
 
+    /**
+     * Update whether or not this actor should follow touches on screen
+     * @method ActorTemplate#updateFollowTouches
+     * @param  {boolean|{boolean: x, boolean: y}} opts
+     */
     this.updateFollowTouches = function(opts) {
       // Follow touches?
       if (opts && typeof opts === 'boolean') {
@@ -81,9 +109,16 @@ exports = function(inherits) {
       }
     };
 
-    // Cached reference to make faster direct calls
+    /**
+     * Cached reference to make faster direct calls.  See parent classes update function.
+     * @method ActorTemplate#updateEntity
+     */
     this.updateEntity = suprPrototype.update;
 
+    /**
+     * @method ActorTemplate#update
+     * @param  {number} dt Time in milliseconds
+     */
     this.update = function(dt) {
       if (!this.active) {
         console.warn('Will not update inactive Actor.');
@@ -92,7 +127,7 @@ exports = function(inherits) {
 
       this.dtExisted += dt;
 
-      this.followTouch(dt);
+      this._followTouch(dt);
       this.updateEntity(dt);
 
       if (this.faceForward) {
@@ -118,7 +153,12 @@ exports = function(inherits) {
       }
     };
 
-    this.followTouch = function(dt) {
+    /**
+     * @method ActorTemplate#_followTouch
+     * @param  {number} dt Time in milliseconds
+     * @private
+     */
+    this._followTouch = function(dt) {
       // Move toward the current touch or mouse down, if followTouches
       if (!this.followTouches) { return; }
       // We are dividing by dt in here, cannot have dt of 0
@@ -150,10 +190,10 @@ exports = function(inherits) {
     };
 
     /**
-      * Remove an amount of health, and destroy if dead.
-      * @func Actor#hurt
-      * @arg {number} amount
-      */
+     * Remove an amount of health, and destroy if dead.
+     * @method ActorTemplate#hurt
+     * @param  {number} amount
+     */
     this.hurt = function(amount) {
       this.health -= amount;
 
@@ -163,36 +203,46 @@ exports = function(inherits) {
     };
 
     /**
-      * Add an amount of health
-      * @func Actor#heal
-      * @arg {number} amount
-      */
+     * Add an amount of health
+     * @method ActorTemplate#heal
+     * @param  {number} amount
+     */
     this.heal = function(amount) {
       this.health += amount;
     };
 
     /**
-      * Fire {@link callback} when this {@link Actor} is completely inside {@link target}
-      * @func Actor#onEntered
-      * @arg {Actor|Shape|Collidable} target
-      * @arg {function} callback
-      * @returns {number} collisionCheckID
-      */
+     * Fire {@link callback} when this instance is completely inside target
+     * @method ActorTemplate#onEntered
+     * @param  {ActorTemplate|Shape|Collidable} target
+     * @param  {function} callback
+     * @return {number} collisionCheckID
+     */
     this.onEntered = function(target, callback) {
       this._registerCollision(target, callback, 'ON_ENTERED');
     };
 
     /**
-      * Fire {@link callback} when this {@link Actor} is completely outside of {@link target}
-      * @func Actor#onExited
-      * @arg {Actor|Shape|Collidable} target
-      * @arg {function} callback
-      * @returns {number} collisionCheckID
-      */
+     * Fire {@link callback} when this instance is completely outside of target
+     * @method ActorTemplate#onExited
+     * @param  {Actor|Shape|Collidable} target
+     * @param  {function} callback
+     * @return {number} collisionCheckID
+     */
     this.onExited = function(target, callback) {
       this._registerCollision(target, callback, 'ON_EXITED');
     };
 
+    /**
+     * Register a new collision with scene, and return
+     * @method ActorTemplate#_registerCollision
+     * @param  {object}   target
+     * @param  {function} callback
+     * @param  {string}   type
+     * @return {number} collisionCheckID
+     * @see CollisionManager.registerCollision
+     * @private
+     */
     this._registerCollision = function(target, callback, type) {
       return scene.collisions.registerCollision(
         new scene.collision.CollisionChecker({
@@ -205,34 +255,42 @@ exports = function(inherits) {
     }
 
     /**
-      * Set {@link Actor#vx} and {@link Actor#vy} to aim for the specified point, with the specified speed.
-      * @func Actor#headToward
-      * @arg {number} x
-      * @arg {number} y
-      * @arg {number} speed
-      */
+     * Set vx and vy to aim for the specified point, with the specified speed.
+     * @method ActorTemplate#headToward
+     * @param  {number} x
+     * @param  {number} y
+     * @param  {number} speed
+     */
     this.headToward = function(x, y, speed) {
       var targetAngle = Math.atan2(y - this.y, x - this.x);
       this.vx = speed * Math.cos(targetAngle);
       this.vy = speed * Math.sin(targetAngle);
     };
 
+    /**
+     * Rotate the actor at the specified point with the specified rotation offset
+     * @method ActorTemplate#rotateAt
+     * @param  {number} x
+     * @param  {number} y
+     * @param  {number} offset
+     */
     this.rotateAt = function(x, y, offset) {
       var targetAngle = Math.atan2(y - this.y, x - this.x) + Math.PI / 2;
       this.view.style.r = targetAngle + (offset || 0);
     };
 
     /**
-      * Register a new tick handler
-      * @func Actor#onTick
-      * @arg {onTickCallback} callback
-      */
+     * Register a new tick handler
+     * @method ActorTemplate#onTick
+     * @param  {onTickCallback} callback
+     */
     this.onTick = function(callback) {
       this.tickHandlers.push(callback);
     };
 
     /**
      * This function destroys the Actor, as in, removes it from the scene
+     * @param {boolean} [runDestroyHandlers]
      */
     this.destroy = function(runDestroyHandlers) {
       runDestroyHandlers = runDestroyHandlers !== undefined ? runDestroyHandlers : true;
@@ -251,9 +309,9 @@ exports = function(inherits) {
     };
 
     /**
-     * This function stops all input to the actor
-     * @func Actor#stopInput
-     * @returns {Actor} self
+     * Stops all input to the actor
+     * @method ActorTemplate#stopInput
+     * @return {Actor} self
      */
     this.stopInput = function() {
       scene.screen.removeOnDown(this._inputCb);
@@ -261,8 +319,9 @@ exports = function(inherits) {
     };
 
     /**
-     * onTouch
-     * ~ callback function for an onTouch event
+     * @method ActorTemplate#onTouch
+     * @param {function} cb Function for an onTouch event
+     * @return {Actor} self
      */
     this.onTouch = function(cb) {
       this._inputCb = scene.screen.onDown(function(pt) {
@@ -274,7 +333,9 @@ exports = function(inherits) {
     };
 
     /**
-     * play(animation)
+     * @method ActorTemplate#play
+     * @param {string}   [animation]  The animation to start playing (or use the default animation)
+     * @param {function} [onComplete] Run when the animation is complete
      */
     this.play = function(animation, onComplete) {
       animation = animation || this.view._opts.defaultAnimation;
@@ -292,7 +353,10 @@ exports = function(inherits) {
     };
 
     /**
-     * loop(animation)
+     * Start looping the specified animation
+     * @method ActorTemplate#loop
+     * @param {string} [animation] The animation to start looping (or use the default animation)
+     * @return {Actor} self
      */
     this.loop = function(animation) {
       animation = animation || this.view._opts.defaultAnimation;
@@ -302,26 +366,40 @@ exports = function(inherits) {
     };
 
     /**
-     * stop(animation)
+     * Actually pauses the current animation
+     * @method ActorTemplate#stop
+     * @return {Actor} self
      */
     this.stop = function() {
       this.view.pause();
       return this;
     };
 
+    /**
+     * The current absolute velocity
+     * @method ActorTemplate#getSpeed
+     * @return {number}
+     */
     this.getSpeed = function() {
       return Math.sqrt(this.vx * this.vx + this.vy * this.vy);
     };
 
     /**
-      * Register a new destroy handler, will be called after {@link Actor#destroy} has been called.
-      * @func Actor#onDestroy
-      * @arg {function} callback
-      */
+     * Register a new destroy handler, will be called after destroy has been called
+     * Note: This is not gaurenteed, as destroy can potentially be invoked with an option to ignore destroy handlers
+     * @method ActorTemplate#onDestroy
+     * @param {function} callback
+     */
     this.onDestroy = function(callback) {
       this.destroyHandlers.push(callback);
     };
 
+    /**
+     * @method ActorTemplate#_addStyleProperty
+     * @param  {string} styleName A valid style property
+     * @param  {string} [newName] A different name to use for the local property
+     * @private
+     */
     this._addStyleProperty = function(styleName, newName) {
       newName = newName || styleName;
       Object.defineProperty(this, newName, {
@@ -330,17 +408,36 @@ exports = function(inherits) {
       });
     };
 
+    /** Shortcut to this.view.style.opacity
+        @var {number} ActorTemplate#opacity */
     this._addStyleProperty('opacity');
+    /** Shortcut to this.view.style.fliipX
+        @var {number} ActorTemplate#fliipX */
     this._addStyleProperty('flipX');
+    /** Shortcut to this.view.style.flipY
+        @var {number} ActorTemplate#flipY */
     this._addStyleProperty('flipY');
+    /** Shortcut to this.view.style.r
+        @var {number} ActorTemplate#rotation */
     this._addStyleProperty('r', 'rotation');
+    /** Shortcut to this.view.style.zIndex
+        @var {number} ActorTemplate#zIndex */
     this._addStyleProperty('zIndex');
 
-    Object.defineProperty(this, "currentAnimation", {
-      get: function() { return this.view.isSprite ? this.view._currentAnimationName : ""; }
+    /**
+     * The current sprite animation, or an empty string if this is not a sprite
+     * @var {number} ActorTemplate#currentAnimation
+     * @readonly
+     */
+    Object.defineProperty(this, 'currentAnimation', {
+      get: function() { return this.view.isSprite ? this.view._currentAnimationName : ''; }
     });
 
-    Object.defineProperty(this, "scale", {
+    /**
+     * Shortcut to this.view.style.scale. Updates bounds on set.
+     * @var {number} ActorTemplate#scale
+     */
+    Object.defineProperty(this, 'scale', {
       get: function() { return this.view.style.scale },
       set: function(value) {
         this.view.style.scale = value;
@@ -348,13 +445,18 @@ exports = function(inherits) {
       }
     });
 
+    /** Shortcut to this.view.clipRect
+        @var {number} ActorTemplate#clipRect */
     Object.defineProperty(this, 'clipRect', {
       get: function() { return this.view.clipRect; },
       set: function(value) { this.view.clipRect = value; }
     });
 
+    /** Shortcut to this.view.showHitBounds
+        @method ActorTemplate#showHitBounds */
     this.showHitBounds = function() {
       this.view.showHitBounds();
     };
+
   });
 };

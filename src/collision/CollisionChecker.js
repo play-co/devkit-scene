@@ -4,42 +4,75 @@ import scene.group.Group as Group;
 import entities.shapes.Shape as Shape;
 import entities.physics as EntityPhysics;
 
-var CC = Class(function() {
+/** @lends CollisionChecker */
+exports = Class(function() {
 
   /**
-    * Called when a collision occurs
-    * @callback onCollisionCallback
-    * @arg {Actor} a
-    * @arg {Actor} b
-    */
+   * Called when a collision occurs
+   * @callback onCollisionCallback
+   * @param {Actor} a
+   * @param {Actor} b
+   */
   /**
-    * @class CollisionChecker
-    * @arg {Object} opts
-    * @arg {Object} opts.a
-    * @arg {Object} opts.b
-    * @arg {Object} opts.callback
-    * @arg {Object} [opts.allCollisions=false]
-    * @arg {Object} [opts.collisionType='CONTINUOUS']
-    */
+   * Collision checks in scene are all handled by a CollisionChecker.
+   * It is essentially a utility for operating EntityPhysics' collsiion support.
+   * @constructs
+   * @param {object}  opts
+   * @param {object}  opts.a
+   * @param {object}  opts.b
+   * @param {onCollisionCallback} opts.callback
+   * @param {boolean} [opts.allCollisions=false]
+   * @param {string}  [opts.collisionType='CONTINUOUS'] Must be a valid key from {@link CollisionChecker.COLLISION_FUNCTIONS}
+   */
   this.init = function(opts) {
     // From user
+    /** @type {object}
+        @private */
     this._a = opts.a;
+    /** @type {object}
+        @private */
     this._b = opts.b;
+    /** @type {onCollisionCallback}
+        @private */
     this._callback = opts.callback;
+    /** @type {boolean}
+        @private */
     this._allCollisions = opts.allCollisions || false;
 
+    /** @type {string}
+        @private */
     this._collisionType = opts.collisionType || 'CONTINUOUS';
-    this._collisionTypeObject = CC.COLLISION_FUNCTIONS[this._collisionType];
+    /** @type {object}
+        @private */
+    this._collisionTypeObject = exports.COLLISION_FUNCTIONS[this._collisionType];
 
+    // defaults
+    /** @type {boolean} */
     this.lastCollisionState = false;
+    /** @type {boolean} */
     this.collisionState = false;
+
+    /** @type {number}
+        @private */
+    this._collisionCheckID = null;
   };
 
+  /**
+   * Internally how the {@link CollisionManager} sets the ID of this check
+   * @param  {object}     opts
+   * @param  {number}     opts.collisionCheckID
+   */
   this.onRegistered = function(opts) {
-    // From CollisionManager
     this._collisionCheckID = opts.collisionCheckID;
   };
 
+  /**
+   * @param  {object}   a
+   * @param  {object}   b
+   * @param  {onCollisionCallback} cb
+   * @param  {boolean}  runAll Run against all items, or stop after the first positive result.
+   * @return {boolean}  Whether a positive result was obtained
+   */
   this.test = function(a, b, cb, runAll) {
 
     // Expected functionality by EntityPhysics:
@@ -110,6 +143,10 @@ var CC = Class(function() {
     return collidedFlag;
   };
 
+  /**
+   * Run the test between collidables a and b
+   * @return {boolean} Whether a test was run
+   */
   this.run = function() {
     if (this._a.active === false || this._b.active === false) { return false; }
 
@@ -126,7 +163,14 @@ var CC = Class(function() {
 
 });
 
-CC.COLLISION_FUNCTIONS = {
+/**
+ * Different modes for the collision checker to use
+ * @var      {object} CollisionChecker.COLLISION_FUNCTIONS
+ * @property {object} CONTINUOUS
+ * @property {object} ON_EXITED
+ * @property {object} ON_ENTERED
+ */
+exports.COLLISION_FUNCTIONS = {
   CONTINUOUS: {
     collisionFn: function(a, b) { return EntityPhysics.collide(a, b); }, // are two things colliding
     fireCallbackFn: function(collisionChecker) { return true; } // should the callback be fired in the case of a collision
@@ -146,5 +190,3 @@ CC.COLLISION_FUNCTIONS = {
     }
   },
 };
-
-exports = CC;

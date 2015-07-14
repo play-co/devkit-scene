@@ -104,6 +104,10 @@ exports = Class(function() {
     this._exitFunctions.push(exitFunction);
   };
 
+  /**
+   * Run all of the exit functions, then reset the array
+   * @private
+   */
   this._runStateExitFunctions = function() {
     for (var i = 0; i < this._exitFunctions.length; i++ ) {
       this._exitFunctions[i]();
@@ -111,7 +115,11 @@ exports = Class(function() {
     this._exitFunctions.length = 0;
   };
 
-  Object.defineProperty(this, "currentState", {
+  /**
+   * @var {string} StateManager#currentState
+   * @readonly
+   */
+  Object.defineProperty(this, 'currentState', {
     get: function() { return this._state; }
   });
 
