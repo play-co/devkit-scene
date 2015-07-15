@@ -1,53 +1,71 @@
 import entities.shapes.Rect as Rect;
 
+/** @lends Camera */
 exports = Class(Rect, function(supr) {
 
-  /** @var {number} Camera._MAX_SIZE */
+  /** @var {number} Camera._MAX_SIZE
+      @private */
   this._MAX_SIZE = 32767;
 
   /**
-    * Origin at top left, all numbers are in world positions, not screen positions
-    * @class Camera
-    * @extends Rect
-    */
+   * Origin at top left, all numbers are in world positions, not screen positions
+   * @constructs
+   * @extends Rect
+   */
   this.init = function(width, height) {
     // Must first define the walls, because of Camera's custom setters on x and y
+    /** @type number
+        @private */
     this._x = 0;
+    /** @type number
+        @private */
     this._y = 0;
+    /** @type number
+        @private */
     this._prevX = 0;
+    /** @type number
+        @private */
     this._prevY = 0;
 
+    /**
+     * @type object
+     * @property {object} left
+     * @property {object} top
+     * @property {object} right
+     * @property {object} bottom
+     */
     this.wallOffsets = {
-      left: { x: 0, y: 0 },
-      top: { x: 0, y: 0 },
-      right: { x: 0, y: 0 },
+      left:   { x: 0, y: 0 },
+      top:    { x: 0, y: 0 },
+      right:  { x: 0, y: 0 },
       bottom: { x: 0, y: 0 }
     };
 
     var wallOpts = { width: this._MAX_SIZE, height: this._MAX_SIZE };
     /** A collidable element representing the entire space left of the camera.
-        @var {Rect} Camera#leftWall **/
+        @type Rect */
     this.leftWall = new Rect(wallOpts);
     this.leftWall.fixed = true;
     this.leftWall.wallName = 'left';
     /** A collidable element representing the entire space right of the camera.
-        @var {Rect} Camera#rightWall **/
+        @type Rect */
     this.rightWall = new Rect(wallOpts);
     this.rightWall.fixed = true;
     this.rightWall.wallName = 'right';
     /** A collidable element representing the entire space above the camera.
-        @var {Rect} Camera#topWall **/
+        @type Rect */
     this.topWall = new Rect(wallOpts);
     this.topWall.fixed = true;
     this.topWall.wallName = 'top';
     /** A collidable element representing the entire space below the camera.
-        @var {Rect} Camera#bottomWall **/
+        @type Rect */
     this.bottomWall = new Rect(wallOpts);
     this.bottomWall.fixed = true;
     this.bottomWall.wallName = 'bottom';
 
     /** An array of all the walls for easy reference.
-        @var {Rect[]} Camera#walls **/
+        @type Rect[]
+        @readonly */
     this.walls = [this.leftWall, this.rightWall, this.topWall, this.bottomWall];
 
     // Now initilize super
@@ -58,15 +76,20 @@ exports = Class(Rect, function(supr) {
     supr(this, 'init', [suprOpts]);
 
     /** The camera will keep this {@link Actor} inside of the {@link Camera#movementBounds}
-        @var {Actor} Camera#following **/
+        @type Actor */
     this.following = null;
     /** The camera will keep the {@link Camera#following} inside of this {@link Shape} when set.
-        @var {Shape} Camera#movementBounds **/
+        @type Shape */
     this.movementBounds = null;
 
     this.resize(width, height);
   };
 
+  /**
+   * Update the camera with a new width and height
+   * @param  {number} width
+   * @param  {number} height
+   */
   this.resize = function(width, height) {
     this.width = width;
     this.height = height;
@@ -89,11 +112,10 @@ exports = Class(Rect, function(supr) {
   };
 
   /**
-    * Set the target for the camera to follow
-    * @func Camera#follow
-    * @arg {Actor} target - This is the actor the camera will try to follow
-    * @arg {Rect} [movementBounds] - The camera will keep the actor within these screen bounds
-    */
+   * Set the target for the camera to follow
+   * @param {Actor} target This is the actor the camera will try to follow
+   * @param {Rect}  [movementBounds] The camera will keep the actor within these screen bounds
+   */
   this.follow = function(target, movementBounds) {
     // define default movementBounds based on background scrolling
     if (!movementBounds) {
@@ -118,21 +140,31 @@ exports = Class(Rect, function(supr) {
   };
 
   /**
-    * Stop the camera from following an actor
-    * @func Camera#stopFollowing
-    */
+   * Stop the camera from following an actor
+   */
   this.stopFollowing = function() {
     this.following = null;
   };
 
   /**
-    * Remove the current {@link Camera#movementBounds}
-    * @func Camera#clearMovementBounds
-    */
+   * Remove the current {@link Camera#movementBounds}
+   */
   this.clearMovementBounds = function() {
     this.movementBounds = null;
   }
 
+  /** @var {number} Camera#x */
+  /** @var {number} Camera#y */
+  /**
+   * Delta position since last tick
+   * @var {number} Camera#deltaX
+   * @readonly
+   */
+  /**
+   * Delta position since last tick
+   * @var {number} Camera#deltaY
+   * @readonly
+   */
   Object.defineProperties(this, {
     x: {
       enumerable: true,
@@ -169,10 +201,10 @@ exports = Class(Rect, function(supr) {
   });
 
   /**
-    * Return a point which has been translated to world coordinates
-    * @arg {Point} pt
-    * @returns {Point} worldPt
-    */
+   * Return a point which has been translated to world coordinates
+   * @param  {Point} pt
+   * @return {Point} worldPt
+   */
   this.screenToWorld = function(pt) {
     return {
       x: pt.x + this.x,
@@ -180,6 +212,9 @@ exports = Class(Rect, function(supr) {
     };
   };
 
+  /**
+   * @param {number} dt Time in milliseconds
+   */
   this.update = function(dt) {
     this._prevX = this._x;
     this._prevY = this._y;
@@ -207,30 +242,33 @@ exports = Class(Rect, function(supr) {
     }
   };
 
+  /**
+   * Whether or not the camera position has moved since last tick
+   * @return {boolean}
+   */
   this.hasChanged = function() {
     return this._prevX !== this._x || this._prevY !== this._y;
   };
 
   /**
-    * Handle some sort of check and update on an actor, based on the camera and actor positions.
-    * @typedef {function} cameraUpdateFunction
-    * @this Scene.camera
-    * @arg {Actor} actor
-    * @returns {boolean} shouldUpdateView
-    */
+   * Handle some sort of check and update on an actor, based on the camera and actor positions.
+   * @typedef {function} cameraUpdateFunction
+   * @this Scene.camera
+   * @arg {Actor} actor
+   * @returns {boolean} shouldUpdateView
+   */
 
   /**
-    * Determines which wall was hit, and inverts the actors velocity in the respective axis.
-    * One argument must be a {@link Wall} and one must be an {@link Actor}.
-    * @func Camera#bounceOff
-    * @type {cameraUpdateFunction}
-    * @todo
-    */
+   * Determines which wall was hit, and inverts the actors velocity in the respective axis.
+   * One argument must be a {@link Wall} and one must be an {@link Actor}.
+   * @type cameraUpdateFunction
+   */
   this.bounce = function(actor) {
     var flagX = this.bounceX(actor);
     var flagY = this.bounceY(actor);
     return flagX || flagY;
   };
+  /** {@link Camera#bounce} in only the x direction */
   this.bounceX = function(actor) {
     if (actor.viewMaxX >= this.right || actor.viewMinX <= this.left) {
       actor.vx *= -1;
@@ -238,6 +276,7 @@ exports = Class(Rect, function(supr) {
     }
     return false;
   };
+  /** {@link Camera#bounce} in only the y direction */
   this.bounceY = function(actor) {
     if (actor.viewMaxY >= this.bottom || actor.viewMinY <= this.top) {
       actor.vy *= -1;
@@ -247,18 +286,16 @@ exports = Class(Rect, function(supr) {
   };
 
   /**
-    * Determines which wall was hit, and wraps the actor around to the other side of the screen.
-    * One argument must be a {@link Wall} and one must be an {@link Actor}.
-    * @func Camera#wrap
-    * @type {cameraUpdateFunction}
-    * @todo
-    */
+   * Determines which wall was hit, and wraps the actor around to the other side of the screen.
+   * One argument must be a {@link Wall} and one must be an {@link Actor}.
+   * @type cameraUpdateFunction
+   */
   this.wrap = function(actor) {
     var flagX = this.wrapX(actor);
     var flagY = this.wrapY(actor);
     return flagX || flagY;
   };
-
+  /** {@link Camera#wrap} in only the x direction */
   this.wrapX = function(actor) {
     if (actor.viewMinX > this.right) {
       actor.x = this.left - actor.view.style.offsetX - actor.getViewWidth();
@@ -269,7 +306,7 @@ exports = Class(Rect, function(supr) {
     }
     return false;
   };
-
+  /** {@link Camera#wrap} in only the y direction */
   this.wrapY = function(actor) {
     if (actor.viewMinY > this.bottom) {
       actor.y = this.top - actor.view.style.offsetY - actor.getViewHeight();
@@ -282,15 +319,15 @@ exports = Class(Rect, function(supr) {
   };
 
   /**
-    * Keeps the actor completely in the view of the camera.
-    * @func Camera#fullyOn
-    * @type {cameraUpdateFunction}
-    */
+   * Keeps the actor completely in the view of the camera.
+   * @type cameraUpdateFunction
+   */
   this.fullyOn = function(actor) {
     var flagX = this.fullyOnX(actor);
     var flagY = this.fullyOnY(actor);
     return flagX || flagY;
   };
+  /** {@link Camera#fullyOn} in only the x direction */
   this.fullyOnX = function(actor) {
     var actorLeft = actor.viewMinX;
     var thisLeft = this.x;
@@ -311,6 +348,7 @@ exports = Class(Rect, function(supr) {
     }
     return false;
   };
+  /** {@link Camera#fullyOn} in only the y direction */
   this.fullyOnY = function(actor) {
     var actorTop = actor.viewMinY;
     var thisTop = this.top;
@@ -327,4 +365,5 @@ exports = Class(Rect, function(supr) {
     }
     return false;
   };
+
 });

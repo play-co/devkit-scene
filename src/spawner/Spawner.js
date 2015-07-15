@@ -2,57 +2,68 @@ import math.geom.Point as Point;
 
 import scene.group.Group as Group;
 
+/**
+ * @callback SpawnFunction
+ * @arg    {number}  x
+ * @arg    {number}  y
+ * @arg    {number}  index Index (since beginning of game) of the currently spawned element
+ * @arg    {Spawner} spawner Spawner instance
+ * @this   {Spawner}
+ * @return {Actor|Actor[]} newly spawned actor/s
+ */
+
+/** @lends Spawner */
 exports = Class(function() {
+
   /**
-    * @callback SpawnFunction
-    * @arg {number} x
-    * @arg {number} y
-    * @arg {number} index - the index (since beginning of game) of the currently spawned element
-    * @arg {Spawner} spawner - the spawner instance
-    * @this {Spawner}
-    * @return {Actor|Actor[]} newly spawned actor/s
-    */
-  /**
-    * Calls {@link Spawner#spawnFunction} every {@link Spawner#spawnDelay}
-    * @class Spawner
-    * @arg {Shape} spawnAt
-    * @arg {SpawnFunction} spawnFunction
-    * @arg {Number} spawnDelay - Either expressed as pixels or as milliseconds until the next spawn
-    * @arg {Boolean} useWorldSpace (false) - positions will be considered in-world positions
-    */
+   * Calls {@link Spawner#spawnFunction} every {@link Spawner#spawnDelay}
+   * @constructs
+   * @arg {Shape}         spawnAt
+   * @arg {SpawnFunction} spawnFunction
+   * @arg {number}        [spawnDelay]     Either expressed as pixels or as milliseconds until the next spawn
+   * @arg {boolean}       [useWorldSpace]  Positions will be considered in-world positions
+   */
   this.init = function(spawnAt, spawnFunction, spawnDelay, useWorldSpace) {
 
     /**
       * This is where the spawning should occur. Positions will always be screen space, not world space, unless {@link Spawner#useWorldSpace} is set
-      * @var {Shape|Shape[]|Point} Spawner#spawnAt
+      * @type {Shape|Shape[]|Point}
       */
     this.spawnAt = spawnAt || { x: 0, y: 0 };
 
-    /** @var {function} Spawner#spawnFunction */
+    /** @type {function} */
     this.spawnFunction = spawnFunction || function () {};
 
-    /** @var {number} Spawner#spawnDelay */
+    /** @type {number} */
     this.spawnDelay = spawnDelay !== undefined ? spawnDelay : 500;
     /**
       * When true, {@link Spawner#spawnAt} positions will be considered in-world positions
-      * @var {boolean} Spawner#useWorldSpace
+      * @type {boolean}
       */
     this.useWorldSpace = useWorldSpace === true;
 
-    this._cachedPoint = new Point();
-    this._spawnIndex = -1;
-    this._lastSpawnTime = scene.totalDt;
-
+    /** @type {boolean} */
     this.active = true;
 
+    /** @type {Point}
+        @private */
+    this._cachedPoint = new Point();
+    /** @type {number}
+        @private */
+    this._spawnIndex = -1;
+    /** @type {number}
+        @private */
+    this._lastSpawnTime = scene.totalDt;
+
+    /** @type {SpawnerManager}
+        @private */
     this._manager = null;
   };
 
   /**
-    * Set the spawner's manager.  Remove from the current manager if there is one.
-    * @func Spawner#setManager
-    * @arg {SpawnerManager} manager
-    */
+   * Set the spawner's manager.  Remove from the current manager if there is one.
+   * @arg {SpawnerManager} manager
+   */
   this.setManager = function(manager) {
     if (this._manager) {
       this._manager.removeSpawner(this);
@@ -62,21 +73,19 @@ exports = Class(function() {
   };
 
   /**
-    * Get a new spawn point using {@link Spawner#getSpawnPoint} and then call {@link Spawner#spawnFunction}.
-    * @func Spawner#spawn
-    */
+   * Get a new spawn point using {@link Spawner#getSpawnPoint} and then call {@link Spawner#spawnFunction}.
+   */
   this.spawn = function() {
     var spawnPoint = this.getSpawnPoint();
     this.spawnFunction(spawnPoint.x, spawnPoint.y, this._spawnIndex++, this);
   };
 
   /**
-    * Returns a point from somewhere on {@link Spawner#spawnAt}, translated based on the current {@link scene.cam} position.
-    * @func Spawner#getSpawnPoint
-    * @returns {Point}
-    */
+   * Returns a point from somewhere on {@link Spawner#spawnAt}, translated based on the current {@link scene.cam} position.
+   * @arg     {Shape|Shape[]|Point} [spawnAt] Optionally use a new spawnAt
+   * @returns {Point}
+   */
   this.getSpawnPoint = function(spawnAt) {
-
     spawnAt = spawnAt || this.spawnAt;
 
     if (Array.isArray(spawnAt)) {
@@ -97,13 +106,12 @@ exports = Class(function() {
     }
 
     return this._cachedPoint;
-
   };
 
   /**
-    * Called every update by scene, check to see if we should spawn or not
-    * @func Spawner#update
-    */
+   * Called every update by scene, check to see if we should spawn or not
+   * @arg  {number} dt In milliseconds
+   */
   this.update = function(dt) {
     if (!this.active) { return; }
     if (scene.totalDt - this._lastSpawnTime > this.spawnDelay) {
@@ -113,9 +121,8 @@ exports = Class(function() {
   };
 
   /**
-    * If the spawner is tracked by a manager, it will be removed from that manager.
-    * @func Spawner#destroy
-    */
+   * If the spawner is tracked by a manager, it will be removed from that manager.
+   */
   this.destroy = function() {
     if (this._manager) {
       this._manager.removeSpawner(this);

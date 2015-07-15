@@ -6,63 +6,76 @@ import communityart;
 import parallax.Parallax as Parallax;
 
 import scene.utils.performance as performance;
+import .BackgroundLayer;
 
-// The background serves as a generator for this class
-// Those instances are exposed to the user
-var Layer = Class(function () {
-  this.init = function(config, background) {
-    this.config = config;
-    this.background = background;
-  }
-
-  this._setScroll = function(sx, sy) {
-    this.config.xMultiplier = sx !== undefined ? sx : 1;
-    this.config.yMultiplier = sy !== undefined ? sy : 1;
-    // TODO fix it so we can set scrolling mid-game
-    //this.config.xOffset = -(sx || 0) * this.background.offsetX;
-    //this.config.yOffset = -(sy || 0) * this.background.offsetY;
-    return this;
-  }
-
-  // This function doesn't fully work right now
-  this.setScroll = function(sx, sy) {
-    this._setScroll(sx, sy);
-    this.background.reloadConfig();
-  }
-});
-
+/** @lends Background */
 exports = Class(View, function (supr) {
+
   /**
-    * The generic background class for a scene game.
-    * @class Background
-    * @arg {Object} [opts]
-    * @extends View
-    */
+   * The generic background class for a scene game.
+   * @constructs
+   * @arg {object} [opts]
+   * @extends View
+   */
   this.init = function(opts) {
     supr(this, 'init', arguments);
 
+    /** @type Parallax */
     this.parallax = new Parallax({
       parent: this
     });
-    this.offsetX = 0;
-    this.offsetY = 0;
+
+    /**
+     * The current total offset of the background (individual layers may vary based on their scroll rate)
+     * @type number
+     */
+    this._offsetX = 0;
+    /**
+     * The current total offset of the background (individual layers may vary based on their scroll rate)
+     * @type number
+     */
+    this._offsetY = 0;
+
+    /**
+     * The rate at which the background should scroll automatically.
+     * @type number
+     * @default 0
+     */
     this.autoX = 0;
+    /**
+     * The rate at which the background should scroll automatically.
+     * @type number
+     * @default 0
+     */
     this.autoY = 0;
-    this.destroy();
+
+    /** @type number */
+    this.zIndex = 0;
+    /**
+     * A dynamically built parallax config.
+     * @type array
+     */
+    this.config = null;
+
+    this.reset();
   };
 
-  this.destroy = function() {
-    this.zIndex = -1;
-    this.config = [];
-  };
-
+  /**
+   * Reload the underlying parallax instance using either a new or the existing config.
+   * @param  {array} config A valid parallax config
+   */
   this.reloadConfig = function(config) {
     this.config = config || this.config;
     this.parallax.reset(this.config);
   };
 
+  /**
+   * Reset this and the parallax instance to their fresh states.
+   */
   this.reset = function() {
+    this.zIndex = -1;
     this.config = [];
+
     this.reloadConfig();
     // Clear all subviews, except parallax
     var subviews = this.getSubviews();
@@ -75,29 +88,41 @@ exports = Class(View, function (supr) {
     }
   };
 
+  /**
+   * Used by scene internally
+   * @param  {number} dt In seconds
+   */
   this.update = function(dt) {
     this.scroll(dt * this.autoX, dt * this.autoY);
   };
 
+  /**
+   * Add an amount to the current offsets
+   * @param  {number} x
+   * @param  {number} y
+   */
   this.scroll = function(x, y) {
-    this.offsetX += x;
-    this.offsetY += y;
+    this._offsetX += x;
+    this._offsetY += y;
     this._updateParallax();
   };
 
+  /**
+   * Updates the parallax instance
+   */
   this._updateParallax = function() {
     performance.start('Background:updateParallax');
-    this.parallax.update(this.offsetX, this.offsetY);
+    this.parallax.update(this._offsetX, this._offsetY);
     performance.stop('Background:updateParallax');
   };
 
   /**
-   * autoScroll(autoScroll)
-   * autoScroll(autoScrollX, autoScrollY)
+   * Set the rate of the auto scrolling of the background
+   * @arg {number} autoX
+   * @arg {number} autoY
    *
-   * Set the rate of the auto scrolling of the background (by default it is 1, 1).
-   * This multiplicativly affects the scrolling of the parallax
-   * (false or 0 disables)
+   * @also
+   * @arg {number} amount Used for both x and y
    */
   this.autoScroll = function(autoX, autoY) {
     if (autoY === undefined) {
@@ -108,24 +133,29 @@ exports = Class(View, function (supr) {
   };
 
   /**
-   * scrollTo(x, y)
+   * Used set the offsets to an exact number.  In most cases you should use {@link Background#autoScroll}
+   * @param  {number} x
+   * @param  {number} y
    */
   this.scrollTo = function(x, y) {
-    if (this.offsetX === x && this.offsetY === y) { return; }
-    this.offsetX = x;
-    this.offsetY = y;
+    if (this._offsetX === x && this._offsetY === y) { return; }
+    this._offsetX = x;
+    this._offsetY = y;
     this._updateParallax();
   };
 
   /**
-    * @alias scene.addBackground
-    * @arg {ArtObject} art
-    * @arg {Object} [opts] - Contains options to be applied to the underlying {@link Layer}. If not specified, a static {@link View} is displayed.
-    * @arg {number} [opts.scrollX] - Marks the parallax layer to sroll in the X direction, by the specified amount
-    * @arg {number} [opts.scrollY] - Marks the parallax layer to sroll in the Y direction, by the specified amount
-    * @arg {number} [opts.align] - Either `left`, `right`, `top`, or `bottom`
-    * @returns {Layer|View}
-    */
+   * @arg {object} resource Can be a parallax config, an array of parallax layer configs, or a static background (no opts specified)
+   * @arg {Object} [opts] Contains options to be applied to the underlying {@link Layer}. If not specified, a static {@link View} is displayed.
+   * @arg {number} [opts.scrollX] Marks the parallax layer to sroll in the X direction at the specified speed
+   * @arg {number} [opts.scrollY] Marks the parallax layer to sroll in the Y direction at the specified speed
+   * @arg {number} [opts.repeatX]
+   * @arg {number} [opts.repeatY]
+   * @arg {number} [opts.x] Forwarded to the parallax config pieceOptions
+   * @arg {number} [opts.y] Forwarded to the parallax config pieceOptions
+   * @arg {number} [opts.align] Either `left`, `right`, `top`, or `bottom`
+   * @returns {BackgroundLayer|View}
+   */
   this.addLayer = function(resource, opts) {
     performance.start('Background:addLayer');
     if (Array.isArray(resource)) {
@@ -138,7 +168,7 @@ exports = Class(View, function (supr) {
     if (resource.type === 'ParallaxConfig') {
       for (var l in resource.config) {
         var layerConfig = resource.config[l];
-        var layer = new Layer(layerConfig, this);
+        var layer = new BackgroundLayer(layerConfig, this);
         this.config.push(layerConfig);
         layer.setScroll(layerConfig.xMultiplier, layerConfig.yMultiplier);
       }
@@ -184,7 +214,7 @@ exports = Class(View, function (supr) {
       };
 
       this.config.push(config_opts);
-      var layer = new Layer(config_opts, this);
+      var layer = new BackgroundLayer(config_opts, this);
       layer.setScroll(opts.scrollX, opts.scrollY);
     }
 
@@ -192,4 +222,5 @@ exports = Class(View, function (supr) {
     performance.stop('Background:addLayer');
     return layer;
   }
+
 });

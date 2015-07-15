@@ -21,36 +21,29 @@ var DEFAULT_SCREEN_WIDTH = 576;
 var DEFAULT_SCREEN_HEIGHT = 1024;
 
 
+/** @lends scene */
 exports = {
+
+  /**
+   * Values to apply to text added to the game using scene
+   * @type object
+   * @property {number} DEFAULT_TEXT_WIDTH
+   * @property {number} DEFAULT_TEXT_HEIGHT
+   * @property {string} color see {@link scene.setTextColor}
+   * @property {string} font see {@link scene.setTextFont}
+   */
   text: {
-    /** @type {Number} scene.text.DEFAULT_TEXT_WIDTH
-     * @private
-     * @default 350 */
     DEFAULT_TEXT_WIDTH: 350,
-    /** @type {Number} scene.text.DEFAULT_TEXT_HEIGHT
-     * @private
-     * @default 75 */
     DEFAULT_TEXT_HEIGHT: 75,
-
-    /** @type {String} scene.text.color
-     * @private
-     * @default '#FFF'
-     * @see scene.setTextColor
-     */
     color: '#FFF',
-
-    /** @type {String} scene.text.font
-     * @private
-     * @default 'Arial'
-     * @see scene.setTextFont
-     */
     font: 'Arial'
   },
 
   /**
    * Construct a splash screen to show at the beginning of the game, click once anywhere to hide the screen.
-   * @func scene.splash
    * @arg {function} func
+   * @arg {object} [opts]
+   * @see scene.mode
    */
   splash: function(fun, opts) {
     // TODO: Check for an existing splash screen?
@@ -60,9 +53,9 @@ exports = {
 
   /**
    * Add a background layer to your game.
-   * @method scene.addBackground
-   * @param  {Object} resource
-   * @param  {Object} [opts]
+   * @param  {object} resource
+   * @param  {object} [opts]
+   * @see Background#addLayer
    */
   addBackground: function(art, opts) {
     return this.background.addLayer(art, opts);
@@ -72,7 +65,7 @@ exports = {
    * Displays text
    * @func scene.addText
    * @arg {string} text
-   * @arg {Object} [opts] - contains options to be applied to {@link TextView}
+   * @arg {object} [opts] contains options to be applied to {@link TextView}
    * @returns {TextView}
    */
   /**
@@ -80,7 +73,7 @@ exports = {
    * @arg {string} text
    * @arg {number} x
    * @arg {number} y
-   * @arg {Object} [opts] - contains options to be applied to {@link SceneText}
+   * @arg {object} [opts] contains options to be applied to {@link SceneText}
    * @returns {SceneText}
    */
   addText: function(text, x, y, opts) {
@@ -119,8 +112,7 @@ exports = {
 
   /**
    * Remove a text view from the scene.
-   * @method scene.removeText
-   * @param  {SceneText} sceneText - The instance to be removed
+   * @param {SceneText} sceneText The instance to be removed
    */
   removeText: function(sceneText) {
     var extraViews = this.extraViews;
@@ -136,8 +128,7 @@ exports = {
 
   /**
    * Set the default text color to be applied to any new text view created using {@link scene.addText}
-   * @method scene.setTextColor
-   * @param  {String} color
+   * @param {string} color
    */
   setTextColor: function(color) {
     // TODO validate?
@@ -146,8 +137,7 @@ exports = {
 
   /**
    * Set the default text font to be applied to any new text view created using {@link scene.addText}
-   * @method scene.setTextFont
-   * @param  {String} font
+   * @param {string} font
    */
   setTextFont: function(font) {
     // TODO validate?
@@ -158,20 +148,20 @@ exports = {
    * Set the x and y coordinates in screen space for the score text. The score text remains invisible
    * until this function is called.
    * @method  scene.showScore
-   * @param   {Number} x
-   * @param   {Number} y
-   * @param   {Object} [opts] contains options to be applied to the underlying {@link View}
-   * @param   {String} [opts.color]
-   * @param   {String} [opts.font]
+   * @param   {number} x
+   * @param   {number} y
+   * @param   {object} [opts] contains options to be applied to the underlying {@link View}
+   * @param   {string} [opts.color]
+   * @param   {string} [opts.font]
    * @returns {TextView}
    */
   /**
    * If a resource is specified, a {@link ScoreView} will be used (because they look great).
    * @method scene.showScore(2)
-   * @param   {String|Object} resource - resource key to be resolved by community art, or opts
-   * @param   {Number}        x
-   * @param   {Number}        y
-   * @param   {Object}        [opts]
+   * @param   {string|object} resource - resource key to be resolved by community art, or opts
+   * @param   {number}        x
+   * @param   {number}        y
+   * @param   {object}        [opts]
    * @returns {SceneScoreView}
    */
   showScore: function(resource, x, y, opts) {
@@ -229,7 +219,7 @@ exports = {
 
   /**
    * Easy access to {@link ScaleManager.SCALE_MODE}
-   * @var {Object} scene.SCALE_MODE
+   * @type object
    */
   SCALE_MODE: ScaleManager.SCALE_MODE,
 
@@ -237,16 +227,15 @@ exports = {
    * The scene scale manager is responsible for automatically fitting your game to any resolution in a reasonable way.
    * The default width and height are 576 and 1024 respectively.
    * The defualt scale mode is {@link ScaleManager.SCALE_MODE.LOCK_HEIGHT}
-   * @type {ScaleManager} scene.scaleManager
+   * @type ScaleManager
    */
-  scaleManager: new ScaleManager(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT, ScaleManager.SCALE_MODE.LOCK_HEIGHT),
+  scaleManager: new ScaleManager(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT),
 
   /**
    * Update the scaleManager as well as the scene screen dimensions.
-   * @method scene.setScaleOptions
-   * @param  {Number} width
-   * @param  {Number} height
-   * @param  {String} scaleMode
+   * @param  {number} width
+   * @param  {number} height
+   * @param  {string} scaleMode A valid {@link ScaleManager.SCALE_MODE} scale mode
    * @see ScaleManager#resize
    * @see scene.updateScreenDimensions
    */
@@ -256,8 +245,7 @@ exports = {
   },
 
   /**
-   * This automatically updates the internal scene variables relying on the scaleManager sizes
-   * @method scene.updateScreenDimensions
+   * Updates the internal scene variables relying on the scaleManager sizes
    */
   updateScreenDimensions: function() {
     var scaleManager = this.scaleManager;
@@ -287,49 +275,49 @@ exports = {
   /**
    * The screen object is the rectangle where all UI lives.  Its dimensions match that of the device screen.
    * Default size is 576 x 1024
-   * @var {Screen} scene.screen
+   * @type Screen
    */
   screen: new Screen(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT),
 
   /**
-    * The devkit {@link View} which contains the entire scene.
-    * @var {View} scene.view
-    */
+   * The devkit {@link View} which contains the entire scene.
+   * @type View
+   */
   view: null,
 
   /**
-  * The devkit {@link View} which all backgrounds should be added to.
-  * @var {Background} scene.background
-  */
+   * The devkit {@link View} which all backgrounds should be added to.
+   * @type Background
+   */
   background: null,
 
   /**
-    * The devkit {@link View} which all actors should be added to.
-    * @var {View} scene.stage
-    */
+   * The devkit {@link View} which all actors should be added to.
+   * @type View
+   */
   stage: null,
 
   /**
-    * @method scene.addImage
-    * @see BaseView#addImage
-    */
+   * @type function
+   * @see BaseView#addImage
+   */
   addImage: null,
 
   /**
    * The devkit {@link View} which all UI should be added to.
-   * @var {UIView} scene.ui
+   * @type UIView
    */
   ui: null,
 
   /**
    * The devkit {@link View} which all text should be added to.
-   * @var {View} scene.textContainer
+   * @type View
    */
   textContainer: null,
 
   /**
    * An empty devkit {@link View} which is overtop of the entire game, used to catch input.
-   * @var {View} scene.inputOverlay
+   * @type View
    */
   inputOverlay: null,
 
@@ -347,7 +335,6 @@ exports = {
     },
     {
       event: 'initUI',
-      priority: 10,
       cb: function (app) {
 
         this.updateScreenDimensions();
@@ -396,7 +383,6 @@ exports = {
         // TODO: Why is there an updatescreendimensions called at reset and init?
         this.updateScreenDimensions();
         this.screen.reset();
-        this.background.reset();
 
         for (var k in this.extraViews) {
           this.extraViews[k].removeFromSuperview();
@@ -405,7 +391,7 @@ exports = {
         this.extraViews = [];
 
         delete this._scoreView;
-        this.background.destroy();
+        this.background.reset();
 
         this.stage.removeAllSubviews();
       }

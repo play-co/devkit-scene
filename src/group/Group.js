@@ -6,31 +6,31 @@ import scene.utils.performance as performance;
 import scene.actor.Actor as Actor;
 import scene.spawner.SpawnerManager as SpawnerManager;
 
-
+/** @lends Group */
 exports = Class(EntityPool, function(supr) {
 
-  // Cache a reference to make faster direct calls
+  /** @var {function} Group.updatePool - Cache a reference to make faster direct calls */
   this.updatePool = EntityPool.prototype.update;
 
   /**
-    * A group of {@link Actor}s, with various functionality for operating on the group as a whole.
-    * @class Group
-    */
+   * A group of {@link Actor}s, with various functionality for operating on the group as a whole.
+   * @constructs
+   */
   this.init = function(opts) {
     opts = opts || {};
     opts.ctor = opts.ctor || scene.groupConfig._actorCtor;
-    supr(this, "init", [opts]);
+    supr(this, 'init', [opts]);
 
-    /** @var {SpawnerManager} Group#_spawnerManager */
+    /** @var {SpawnerManager} Group#_spawnerManager
+        @private */
     this._spawnerManager = null;
   };
 
   /**
-    * A function which adds an actor to the scene, using this group.
-    * @func Group#addActor
-    * @param  {String|Object} resource - resource key to be resolved by community art, or opts
-    * @param  {Object} [opts] - contains options to be applied to the underlying {@link Actor}
-    */
+   * A function which adds an actor to the scene, using this group.
+   * @param  {string|object} resource - Resource key to be resolved by community art, or opts
+   * @param  {object} [opts] - Contains options to be applied to the underlying {@link Actor}
+   */
   this.addActor = function(resource, opts) {
     performance.start('Group:addActor');
     var resourceOpts = resource ? communityart.getConfig(resource, 'Actor') : {};
@@ -53,12 +53,11 @@ exports = Class(EntityPool, function(supr) {
   };
 
   /**
-    * Ensures that {@link Group._spawnerManager} is initilized, then adds the spawner to it.
-    * @func Group#addSpawner
-    * @arg {Spawner} spawner
-    * @returns {Spawner} spawner
-    * @see SpawnerManager#addSpawner
-    */
+   * Ensures that the {@link SpawnerManager} instance is initialized, then adds the spawner to it.
+   * @param  {Spawner} spawner
+   * @return {Spawner} spawner
+   * @see SpawnerManager#addSpawner
+   */
   this.addSpawner = function(spawner) {
     if (!this._spawnerManager) {
       this._spawnerManager = new SpawnerManager();
@@ -68,10 +67,9 @@ exports = Class(EntityPool, function(supr) {
   };
 
   /**
-    * @func Group#removeSpawner
-    * @arg {Spawner} spawner
-    * @see SpawnerManager#removeSpawner
-    */
+   * @param {Spawner} spawner
+   * @see SpawnerManager#removeSpawner
+   */
   this.removeSpawner = function(spawner) {
     if (!this._spawnerManager) { return; }
 
@@ -79,9 +77,8 @@ exports = Class(EntityPool, function(supr) {
   };
 
   /**
-    * @func Group#destroySpawners
-    * @see SpawnerManager#reset
-    */
+   * @see SpawnerManager#reset
+   */
   this.destroySpawners = function() {
     if (!this._spawnerManager) { return; }
 
@@ -89,15 +86,17 @@ exports = Class(EntityPool, function(supr) {
   };
 
   /**
-    * @func Group#spawn
-    * @see SpawnerManager#spawn
-    */
+   * @see SpawnerManager#spawn
+   */
   this.spawn = function() {
     if (!this._spawnerManager) { return; }
 
     return this._spawnerManager.spawn();
   };
 
+  /**
+   * @param  {number} dt In milliseconds
+   */
   this.update = function(dt) {
     if (this._spawnerManager) {
       this._spawnerManager.update(dt);
@@ -108,6 +107,13 @@ exports = Class(EntityPool, function(supr) {
     performance.stop('Group:update');
   };
 
+  /**
+   * Get the closest item in the group to the specified points
+   * @param  {number}   x
+   * @param  {number}   y
+   * @param  {Entity}   [ignore] - An instance to ignore
+   * @return {Entity}   null if no entity can be found
+   */
   this.getClosest = function(x, y, ignore) {
     var closestDist = 0;
     var closestEnt = null;
@@ -130,11 +136,11 @@ exports = Class(EntityPool, function(supr) {
   };
 
   /**
-    * Destroys everything related to the group
-    * @func Group#destroy
-    * @see {Group#destroySpawners}
-    * @see {Group#releaseAll}
-    */
+   * Destroys everything related to the group
+   * @param {boolean} [runDestroyHandlers]
+   * @see {Group#destroySpawners}
+   * @see {Group#releaseAll}
+   */
   this.destroy = function(runDestroyHandlers) {
     runDestroyHandlers = runDestroyHandlers !== undefined ? runDestroyHandlers : true;
     this.destroySpawners();
@@ -145,4 +151,3 @@ exports = Class(EntityPool, function(supr) {
   };
 
 });
-

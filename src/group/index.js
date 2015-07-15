@@ -3,28 +3,20 @@ import scene.actor.Actor as Actor;
 
 var _customActorGroups = null;
 
-var addCustomActor = function(ctor, opts) {
-  if (!_customActorGroups) { throw new Error('custom actor groups not yet initilized'); }
 
-  var lookupName = ctor.name;
-  if (!lookupName) { console.error(ctor); throw new Error('no name available on ctor'); }
-
-  var group = _customActorGroups[lookupName];
-  if (!group) {
-    _customActorGroups[lookupName] = group = scene.addGroup({ ctor: ctor });
-  }
-
-  return group.addActor(null, opts);
-};
-
+/** @lends scene */
 exports = {
+
+  /**
+   * @type {object}
+   * @property {Class} _actorCtor
+   */
   groupConfig: {
     _actorCtor: Actor
   },
 
   /**
    * Change the default class for actors
-   * @method scene.setActorCtor
    * @param  {Class} actorCtor
    */
   setActorCtor: function(actorCtor) {
@@ -33,7 +25,6 @@ exports = {
 
   /**
    * Create a new actor in the defualt scene group
-   * @method  scene.addActor
    * @see Group#addActor
    */
   addActor: function(resource, opts) {
@@ -42,8 +33,7 @@ exports = {
 
   /**
    * Add a new actor group to scene tracking
-   * @func    scene.addGroup
-   * @arg     {Object} [opts]
+   * @param   {object} [opts]
    * @returns {Group}
    */
   addGroup: function(opts) {
@@ -57,19 +47,34 @@ exports = {
   /**
    * Automatically obtain a group for this class, and return an actor instance from that group.
    * This function provides an easy way to add custom actors to scene.
-   * @func scene.addCustomActor
-   * @arg     {Actor}  ctor
-   * @arg     {object} [opts]
+   * @param   {Actor}  ctor
+   * @param   {object} [opts]
    * @returns {Actor}  newInstance
    */
-  addCustomActor: addCustomActor,
+  addCustomActor: function(ctor, opts) {
+    if (!_customActorGroups) { throw new Error('custom actor groups not yet initialized'); }
+
+    var lookupName = ctor.name;
+    if (!lookupName) { console.error(ctor); throw new Error('no name available on ctor'); }
+
+    var group = _customActorGroups[lookupName];
+    if (!group) {
+      _customActorGroups[lookupName] = group = scene.addGroup({ ctor: ctor });
+    }
+
+    return group.addActor(null, opts);
+  },
 
   /**
    * The default group for actors (if no other group is used).
-   * @var {Group} scene.group
+   * @type Group
    */
   group: null,
 
+  /**
+   * Array holding all groups from {@link scene.addGroup}
+   * @type {Group[]}
+   */
   groups: null,
 
   __listeners__: [
@@ -105,4 +110,5 @@ exports = {
       }
     }
   ]
+
 };

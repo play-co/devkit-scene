@@ -1,36 +1,38 @@
 import accelerometer;
 
 /**
- * @var {Boolean} _accelerometerStarted
+ * @typedef  {object} AccellerometerData
+ * @property {number} x
+ * @property {number} y
+ * @property {number} z
+ * @property {number} forwardTilt
+ * @property {number} tilt
+ * @property {number} twist
+ */
+/**
+ * Called every tick with accellerometer data
+ * @callback onAccelerometerCallback
+ * @param {AccellerometerData} e
+ */
+
+/**
+ * @var {boolean} _accelerometerStarted
  * @private
  */
 var _accelerometerStarted = false;
 /**
- * @var {Boolean} _accelerometerHandlers
+ * @var {onAccelerometerCallback[]} _accelerometerHandlers
  * @private
  */
 var _accelerometerHandlers = [];
 
+
+/** @lends scene */
 exports = {
 
   /**
-   * @typedef {Object} AccellerometerData
-   * @property {Number} x
-   * @property {Number} y
-   * @property {Number} z
-   * @property {Number} forwardTilt
-   * @property {Number} tilt
-   * @property {Number} twist
-   */
-  /**
-   * Called every tick with accellerometer data
-   * @callback onAccelerometerCallback
-   * @arg {AccellerometerData} e
-   */
-  /**
    * Register a new accelerometer callback
-   * @func scene.onAccelerometer
-   * @arg {onAccelerometerCallback} callback
+   * @param {onAccelerometerCallback} callback
    */
   onAccelerometer: function(cb) {
     if (!_accelerometerStarted) {
@@ -65,7 +67,6 @@ exports = {
 
   /**
    * Stop and clear accelerometer handlers.
-   * @method scene.stopAccelerometer
    */
   stopAccelerometer: function() {
     if (_accelerometerStarted) {

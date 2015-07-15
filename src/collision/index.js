@@ -1,22 +1,24 @@
 import .CollisionManager;
 import .CollisionChecker;
 
+/** @lends scene */
 exports = {
+
   /**
    * The collision manager is responsible for tracking all scene collisions.
-   * @var {CollisionManager} scene.collisions
+   * @type CollisionManager
    * @see scene.onCollision
    */
   collisions: new CollisionManager(),
 
   /**
    * This collision check will be run each tick. The callback will be called only once per tick by default.
-   * @func scene.onCollision
-   * @arg {Actor|Actor[]|Group|Collidable} a
-   * @arg {Actor|Actor[]|Group|Collidable} b
-   * @arg {onCollisionCallback}            callback
-   * @arg {boolean}                        [allCollisions] - {@link callback} may be called more than once per tick
-   * @returns {number} collisionCheckID
+   * @method scene.onCollision
+   * @param  {Actor|Actor[]|Group|Collidable} a
+   * @param  {Actor|Actor[]|Group|Collidable} b
+   * @param  {onCollisionCallback}            callback
+   * @param  {boolean}                        [allCollisions] - {@link callback} may be called more than once per tick
+   * @return {number} collisionCheckID
    * @see CollisionChecker
    */
   onCollision: function(a, b, callback, allCollisions) {
@@ -33,8 +35,8 @@ exports = {
 
   /**
    * Easy access to collision classes
-   * @var  {Object}             scene.collision
-   * @prop {CollisionChecker}   scene.collision.CollisionChecker
+   * @type object
+   * @property {CollisionChecker} CollisionChecker
    */
   collision: {
     CollisionChecker: CollisionChecker
@@ -56,4 +58,5 @@ exports = {
       }
     }
   ]
+
 };
