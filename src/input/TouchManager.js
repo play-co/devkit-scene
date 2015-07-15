@@ -18,8 +18,8 @@ exports = Class(function() {
     this.touchInstances = null;
 
     /**
-     * because safari doesnt give logical IDs
-     * dont reset this, touch events can span resets
+     * Because safari does not give logical IDs.
+     * Note: Do not reset this, touch events can span resets.
      * @type {object}
      * @private
      */

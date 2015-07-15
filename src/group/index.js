@@ -52,7 +52,7 @@ exports = {
    * @returns {Actor}  newInstance
    */
   addCustomActor: function(ctor, opts) {
-    if (!_customActorGroups) { throw new Error('custom actor groups not yet initilized'); }
+    if (!_customActorGroups) { throw new Error('custom actor groups not yet initialized'); }
 
     var lookupName = ctor.name;
     if (!lookupName) { console.error(ctor); throw new Error('no name available on ctor'); }

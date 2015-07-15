@@ -6,8 +6,8 @@ exports = Class(function(supr) {
 
   /**
    * Responsible for updating and managing collision checks.
-   * Collisions are registered as 2 things, `a` and `b`. The check is run every tick to see if
-   * `a` and `b` have collided.
+   * Collision checks are registered for two subjects (or collections of subjects), `a` and `b`.
+   * The check is run every tick to see if `a` and `b` have collided.
    * {@link CollisionManager#stop}, {@link CollisionManager#start}, {@link CollisionManager#remove}
    * are exposed in case you want to control the collisions manually; however, the Collision Manager is
    * smart about running collisions. If a group, `a` or `b`, is a single {@link Actor} or an array of

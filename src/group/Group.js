@@ -53,7 +53,7 @@ exports = Class(EntityPool, function(supr) {
   };
 
   /**
-   * Ensures that the {@link SpawnerManager} instance is initilized, then adds the spawner to it.
+   * Ensures that the {@link SpawnerManager} instance is initialized, then adds the spawner to it.
    * @param  {Spawner} spawner
    * @return {Spawner} spawner
    * @see SpawnerManager#addSpawner
@@ -112,7 +112,7 @@ exports = Class(EntityPool, function(supr) {
    * @param  {number}   x
    * @param  {number}   y
    * @param  {Entity}   [ignore] - An instance to ignore
-   * @return {Entity}   null if no entitiy can be found
+   * @return {Entity}   null if no entity can be found
    */
   this.getClosest = function(x, y, ignore) {
     var closestDist = 0;

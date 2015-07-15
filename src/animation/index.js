@@ -108,7 +108,7 @@ exports = {
    * @param {number}   [opts.duration]    The duration of the animation
    * @param {number}   [opts.rotation]    The amount to rotate
    * @param {function} [opts.transition]  The transition to use for easing
-   * @param {function} [opts.rotateActor] The transition to use for easing
+   * @param {function} [opts.rotateActor] Set to true to update actor rotation as well as position
    */
   rotateAround: function(opts) {
     var target = opts.target;

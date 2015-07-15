@@ -76,10 +76,11 @@ exports = function(inherits) {
     }
 
     /**
-     * Utility function, multiply all numbers in source array by scale into target array
+     * Utility function, multiply all numbers in source by scale into target
+     * Note: Both arrays or objects should have the same length or key set
      * @method ActorTemplate#applyScaledBounds
-     * @param  {number[]} sourceBounds
-     * @param  {number[]} targetBounds
+     * @param  {number[]|Object.<?, number>} sourceBounds
+     * @param  {number[]|Object.<?, number>} targetBounds
      * @param  {number}   scale
      */
     this.applyScaledBounds = function(sourceBounds, targetBounds, scale) {
@@ -268,11 +269,11 @@ exports = function(inherits) {
     };
 
     /**
-     * Rotate the actor at the specified point with the specified rotation offset
+     * Rotate the actor to point at the specified x and y coordinates (with an optional rotation offset)
      * @method ActorTemplate#rotateAt
      * @param  {number} x
      * @param  {number} y
-     * @param  {number} offset
+     * @param  {number} [offset]
      */
     this.rotateAt = function(x, y, offset) {
       var targetAngle = Math.atan2(y - this.y, x - this.x) + Math.PI / 2;
@@ -386,7 +387,7 @@ exports = function(inherits) {
 
     /**
      * Register a new destroy handler, will be called after destroy has been called
-     * Note: This is not gaurenteed, as destroy can potentially be invoked with an option to ignore destroy handlers
+     * Note: This is not guaranteed, as destroy can potentially be invoked with an option to ignore destroy handlers
      * @method ActorTemplate#onDestroy
      * @param {function} callback
      */
@@ -434,7 +435,7 @@ exports = function(inherits) {
     });
 
     /**
-     * Shortcut to this.view.style.scale. Updates bounds on set.
+     * Shortcut to this.view.style.scale. Updates hit bounds on set.
      * @var {number} ActorTemplate#scale
      */
     Object.defineProperty(this, 'scale', {

@@ -2,7 +2,7 @@
 /**
  * @callback TouchCallback
  * @param {Point}         point         Location of the touch event
- * @param {TouchInstance} touchInstance The touch instance where the event is originating from
+ * @param {TouchInstance} touchInstance The touch instance from which the event originates
  */
 
 /** @lends TouchInstance */

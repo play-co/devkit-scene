@@ -11,14 +11,14 @@ exports = Class(function() {
    */
   this.init = function(width, height, scaleMode) {
     /** @type {number} */
-    this.width = null;
+    this.width = 0;
     /** @type {number} */
-    this.height = null;
+    this.height = 0;
     /** @type {string} */
-    this.scaleMode = null;
+    this.scaleMode = '';
 
     /** @type {number} */
-    this.width = null;
+    this.scale = 0;
 
     this.resize(width, height, scaleMode || exports.SCALE_MODE.LOCK_HEIGHT);
   };
@@ -71,7 +71,7 @@ exports = Class(function() {
  * @property {string} LOCK_HEIGHT
  */
 exports.SCALE_MODE = {
-  NONE:        'scaleModeNone',
-  LOCK_WIDTH:  'scaleModeLockWidth',
-  LOCK_HEIGHT: 'scaleModeLockHeight'
+  NONE:        'NONE',
+  LOCK_WIDTH:  'LOCK_WIDTH',
+  LOCK_HEIGHT: 'LOCK_HEIGHT'
 };
