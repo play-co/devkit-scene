@@ -1,51 +1,61 @@
 
+/** @lends StateManager */
 exports = Class(function() {
 
   /**
-   * @class StateManager
+   * @constructs
    */
   this.init = function() {
-    this._state = "";
+    /** @type string
+        @private */
+    this._state = '';
+    /** @type object
+        @private */
     this._states = {};
+    /** @type array
+        @private */
     this._exitFunctions = [];
+    /** @type boolean
+        @private */
     this._enteringState = false;
+
+    /** @type object */
     this.gameData = null;
   };
 
   /**
-    * @arg {string} stateName
-    * @arg {stateSetupFn} setupFn
-    */
+   * Add a new state by name
+   * @param {string}       stateName
+   * @param {stateSetupFn} setupFn
+   */
   this.add = function(name, initializer) {
     this._states[name] = initializer;
   };
 
   /**
    * Check if a state has been registered for name
-   * @method StateManager#has
    * @param  {string} name
-   * @return {Boolean}
+   * @return {boolean}
    */
   this.has = function(name) {
     return !!this._states[name];
   }
 
+  /**
+   * Reset the game data and enter the default state
+   */
   this.reset = function() {
     this.gameData = {};
-    if (this._state !== "") { this.enter(""); }
+    if (this._state !== '') {
+      this.enter('');
+    }
   };
 
   /**
-    * You can only register exit functions inside the state function currently running.
-    * All onExitStates are cleared on a state change
-    * @arg {teardownFn} teardownFn
-    */
-  /**
-    * NOTE: Cannot set states during a state change !!!!
-    * @arg {string} stateName
-    * @arg {boolean=true} [runSetupFunction]
-    */
-
+   * NOTE: Cannot set states during a state change!!!
+   * @arg {string} stateName
+   * @arg {boolean=true} [runSetupFunction]
+   */
   // TODO: Implement clearScene
   this.enter = function(name, runInitializer, clearScene) {
     var warning;
@@ -85,10 +95,19 @@ exports = Class(function() {
     this._enteringState = false;
   };
 
+  /**
+   * You can only register exit functions inside the state function currently running.
+   * All onExitStates are cleared on a state change
+   * @arg {teardownFn} teardownFn
+   */
   this.onExit = function(exitFunction) {
     this._exitFunctions.push(exitFunction);
   };
 
+  /**
+   * Run all of the exit functions, then reset the array
+   * @private
+   */
   this._runStateExitFunctions = function() {
     for (var i = 0; i < this._exitFunctions.length; i++ ) {
       this._exitFunctions[i]();
@@ -96,7 +115,11 @@ exports = Class(function() {
     this._exitFunctions.length = 0;
   };
 
-  Object.defineProperty(this, "currentState", {
+  /**
+   * @var {string} StateManager#currentState
+   * @readonly
+   */
+  Object.defineProperty(this, 'currentState', {
     get: function() { return this._state; }
   });
 

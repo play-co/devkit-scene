@@ -16,45 +16,44 @@ var _score = 0;
 var _using_score = false;
 var _game_running = false;
 
+/** @lends scene */
 exports = {
 
   /**
    * There can be only one player. {@link scene.gameOver} is automatically called when the player is destroyed.
-   * @var {Actor} scene.player
+   * @type Actor
    * @see scene.addPlayer
    */
   player: null,
 
   /**
    * The total number of milliseconds that have elapsed since the start of the game.
-   * @var {number} scene.totalDt
+   * @type number
    */
   totalDt: 0,
 
   /**
    * The total number of milliseconds that have elapsed since the start of the app.
-   * @var {number} scene.totalAppDt
+   * @type number
    */
   totalAppDt: 0,
 
   /**
    * Called every tick with the dt in milliseconds since the last tick.
    * @callback onTickCallback
-   * @arg {number} [dt] - Used to normalise game speed based on real time
+   * @param    {number} [dt] - Used to normalise game speed based on real time
    */
   /**
    * Register a new tick handler
-   * @func scene.onTick
-   * @arg {onTickCallback} callback
+   * @param  {onTickCallback} callback
    */
   onTick: function(cb) {
     _onTickHandlers.push(cb);
   },
 
   /**
-   * Calling this function will set {@link scene._score} and update the score view.
-   * @func scene.setScore
-   * @arg {number} newScore
+   * Calling this function will set the score and update the score view.
+   * @param {number} newScore
    */
   setScore: function(score) {
     if (_game_running) {
@@ -67,8 +66,8 @@ exports = {
   },
 
   /**
-   * @func scene.addScore
-   * @arg {number} amount
+   * Add an amount to the current score (using {@link scene.setScore})
+   * @param {number} amount
    * @see scene.setScore
    */
   addScore: function(add) {
@@ -76,7 +75,6 @@ exports = {
   },
 
   /**
-   * @func scene.getScore
    * @returns {number}
    */
   getScore: function() {
@@ -87,10 +85,10 @@ exports = {
   /**
    * When called, this function will restart the game.
    * If scene has been set to use Weeby, calling this will return the user to the Weeby UI.
-   * @func scene.gameOver
-   * @arg {Object}  [opts]
-   * @arg {number}  [opts.delay] - A delay between when this function is called and when the endgame logic is run.
-   * @arg {boolean} [opts.noGameoverScreen] - Optionally skip the "Game Over" text.
+   * @method scene.gameOver
+   * @param  {object}  [opts]
+   * @param  {number}  [opts.delay] - A delay between when this function is called and when the endgame logic is run.
+   * @param  {boolean} [opts.noGameoverScreen] - Optionally skip the "Game Over" text.
    */
   gameOver: function(opts) {
 
@@ -115,20 +113,19 @@ exports = {
           } else {
             this.addText('Game Over!');
           }
-
-          this.screen.onDown(function () {
-            setTimeout(function () { scene.internal.game.start(); });
-          }, true);
         }
+
+        this.screen.onDown(function () {
+          setTimeout(function () { scene.internal.game.start(); });
+        }, true);
       }
     }.bind(this), opts.delay);
   },
 
   /**
    * Sets the scene player, makes sure not to override an existing player.
-   * @method  scene.addPlayer
-   * @param   {String|Object} resource - resource key to be resolved by community art, or opts
-   * @param   {Object}        [opts]   - contains options to be applied to the underlying {@link Actor}
+   * @param   {string|object} resource - resource key to be resolved by community art, or opts
+   * @param   {object}        [opts]   - contains options to be applied to the underlying {@link Actor}
    * @returns {View}                   - The newly set player
    * @see scene.addActor
    */
@@ -148,9 +145,9 @@ exports = {
 
   /**
    * Easy access to shape classes
-   * @var  {Object} scene.shape
-   * @prop {Rect}   scene.shape.Rect
-   * @prop {Line}   scene.shape.Line
+   * @type object
+   * @property {Rect}   scene.shape.Rect
+   * @property {Line}   scene.shape.Line
    */
   shape: {
     Rect: Rect,

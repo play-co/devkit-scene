@@ -127,8 +127,13 @@ var tickGame = function(dt) {
   performance.stop('tick');
 };
 
-
+/** @lends scene */
 exports = {
+  /**
+   * Internal functionality for working with scene
+   * @type {object}
+   * @private
+   */
   internal: {
     registerListeners: registerListeners,
     registerListener: registerListener,

@@ -1,17 +1,19 @@
+
+/** @lends SpawnerManager */
 exports = Class(function() {
 
   /**
-    * Manages {@link Spawner} instances.
-    * @Class SpawnerManager
-    */
+   * Manages {@link Spawner} instances.
+   * @constructs
+   */
   this.init = function() {
+    /** @type {Spawner[]} */
     this.spawners = [];
   };
 
   /**
-    * Call {@link Spawner#destroy} for each tracked spawner, then reset self.
-    * @func SpawnerManager#reset
-    */
+   * Call {@link Spawner#destroy} for each tracked spawner, then reset self.
+   */
   this.reset = function() {
     for (var i = this.spawners.length - 1; i >= 0; i--) {
       this.spawners[i].destroy();
@@ -21,10 +23,9 @@ exports = Class(function() {
   };
 
   /**
-    * Update tracked spawners, remove complete spawners.
-    * @func SpawnerManager#update
-    * @arg {number} dt
-    */
+   * Update tracked spawners, remove complete spawners.
+   * @param {number} dt In milliseconds
+   */
   this.update = function(dt) {
     for (var i = this.spawners.length - 1; i >= 0; i--) {
       var spawner = this.spawners[i];
@@ -37,10 +38,9 @@ exports = Class(function() {
   };
 
   /**
-    * Choose a random spawner, and then call spawn.
-    * @func SpawnerManager#spawn
-    * @returns {Spawner#spawn}
-    */
+   * Choose a random spawner, and then call spawn.
+   * @returns {?} The results of {@link Spawner#spawn}
+   */
   this.spawn = function() {
     var spawner = choose(this.spawners);
     if (spawner) {
@@ -49,11 +49,10 @@ exports = Class(function() {
   };
 
   /**
-    * Add a new spawner to the manager to be automatically updated and removed when appropriate.
-    * @func SpawnerManager#addSpawner
-    * @arg {Spawner} spawner
-    * @returns {Spawner} spawner
-    */
+   * Add a new spawner to the manager to be automatically updated and removed when appropriate.
+   * @param  {Spawner} spawner
+   * @return {Spawner} spawner
+   */
   this.addSpawner = function(spawner) {
     this.spawners.push(spawner);
     spawner.setManager(this);
@@ -61,10 +60,9 @@ exports = Class(function() {
   };
 
   /**
-    * Remove a spawner from the manager.
-    * @func SpawnerManager#removeSpawner
-    * @arg {Spawner} spawner
-    */
+   * Remove a spawner from the manager.
+   * @param {Spawner} spawner
+   */
   this.removeSpawner = function(spawner) {
     var index = this.spawners.indexOf(spawner);
     if (index >= 0) {
@@ -72,7 +70,12 @@ exports = Class(function() {
     }
   };
 
+  /**
+   * Remove a spawner from the spawners array by index
+   * @param {number} spawnerIndex
+   */
   this._removeSpawner = function(spawnerIndex) {
     this.spawners.splice(spawnerIndex, 1);
   };
+
 });

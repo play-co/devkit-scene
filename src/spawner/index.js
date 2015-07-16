@@ -2,6 +2,7 @@ import .HorizontalSpawner;
 import .VerticalSpawner;
 import .Spawner;
 
+/** @lends scene */
 exports = {
   /**
    * Will add a new spawner to the scene default group.
@@ -25,10 +26,9 @@ exports = {
 
   /**
    * Easy access to spawner classes
-   * @var  {Object}     scene.spawner
-   * @prop {Timed}      scene.spawner.Spawner
-   * @prop {Horizontal} scene.spawner.Horizontal
-   * @prop {Vertical}   scene.spawner.Vertical
+   * @prop {Spawner}      spawner.Timed
+   * @prop {HorizontalSpawner} spawner.Horizontal
+   * @prop {VerticalSpawner}   spawner.Vertical
    */
   spawner: {
     Horizontal: HorizontalSpawner,

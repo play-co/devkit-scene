@@ -22,39 +22,13 @@ var clearSubjectAnimations = function(subject) {
   }
 };
 
-var rotateAround = function(opts) {
-  var target = opts.target;
-  var x = opts.x;
-  var y = opts.y;
-  var duration = opts.duration || 0;
-  var rotation = opts.rotation || 0;
-  var transition = opts.transition || transitions.linear;
-  var rotateActor = opts.rotateActor || false;
-  var actorRotation = target.rotation;
-  var dx = target.x - x;
-  var dy = target.y - y;
-  var distance = Math.sqrt(dx * dx + dy * dy);
-  var startAngle = Math.atan2(dy, dx);
 
-  if (duration === 0) {
-    var endAngle = startAngle + rotation;
-    target.x = x + Math.cos(endAngle) * distance;
-    target.y = y + Math.sin(endAngle) * distance;
-    target.rotation += rotation;
-  } else {
-    this.animate(target, 'rotateAround').now({}, duration, transition, function(tt) {
-      var targetAngle = startAngle + rotation * tt;
-      target.x = x + Math.cos(targetAngle) * distance;
-      target.y = y + Math.sin(targetAngle) * distance;
-      if (rotateActor) { target.rotation = actorRotation + rotation * tt; }
-    });
-  }
-
-};
-
+/** @lends scene */
 exports = {
+
   /**
    * Easy access to {@link animate.transitions}
+   * @type {object}
    * @todo Document animate
    */
   transitions: transitions,
@@ -76,10 +50,9 @@ exports = {
   },
 
   /**
-   * @func scene.animate
-   * @arg {View}         subject
-   * @arg {string}       [groupName]
-   * @returns {Animator} anim
+   * @param  {View}       subject
+   * @param  {string}     [groupName]
+   * @return {Animator}   anim
    */
   animate: function(subject, groupID) {
     var anim = animate(subject, groupID);
@@ -89,17 +62,43 @@ exports = {
 
   /**
    * Animate an actor around an x, y position
-   * @func AnimationHelper.rotateAround
-   * @arg {Object}   opts
-   * @arg {Actor}    opts.target        - The target actor you wish to move
-   * @arg {number}   opts.x             - The x coordinate of the rotation point
-   * @arg {number}   opts.y             - The y coordinate of the rotation point
-   * @arg {number}   [opts.duration]    - The duration of the animation
-   * @arg {number}   [opts.rotation]    - The amount to rotate
-   * @arg {Function} [opts.transition]  - The transition to use for easing
-   * @arg {Function} [opts.rotateActor] - The transition to use for easing
+   * @param {object}   opts
+   * @param {Actor}    opts.target        The target actor you wish to move
+   * @param {number}   opts.x             The x coordinate of the rotation point
+   * @param {number}   opts.y             The y coordinate of the rotation point
+   * @param {number}   [opts.duration]    The duration of the animation
+   * @param {number}   [opts.rotation]    The amount to rotate
+   * @param {function} [opts.transition]  The transition to use for easing
+   * @param {function} [opts.rotateActor] Set to true to update actor rotation as well as position
    */
-  rotateAround: rotateAround,
+  rotateAround: function(opts) {
+    var target = opts.target;
+    var x = opts.x;
+    var y = opts.y;
+    var duration = opts.duration || 0;
+    var rotation = opts.rotation || 0;
+    var transition = opts.transition || transitions.linear;
+    var rotateActor = opts.rotateActor || false;
+    var actorRotation = target.rotation;
+    var dx = target.x - x;
+    var dy = target.y - y;
+    var distance = Math.sqrt(dx * dx + dy * dy);
+    var startAngle = Math.atan2(dy, dx);
+
+    if (duration === 0) {
+      var endAngle = startAngle + rotation;
+      target.x = x + Math.cos(endAngle) * distance;
+      target.y = y + Math.sin(endAngle) * distance;
+      target.rotation += rotation;
+    } else {
+      this.animate(target, 'rotateAround').now({}, duration, transition, function(tt) {
+        var targetAngle = startAngle + rotation * tt;
+        target.x = x + Math.cos(targetAngle) * distance;
+        target.y = y + Math.sin(targetAngle) * distance;
+        if (rotateActor) { target.rotation = actorRotation + rotation * tt; }
+      });
+    }
+  },
 
   __listeners__: [
     {
@@ -109,4 +108,5 @@ exports = {
       }
     }
   ]
+
 };

@@ -1,15 +1,17 @@
 import .Actor;
 import .SATActor;
 
+/** @lends scene */
 exports = {
+
   /**
    * Easy access to actor classes
-   * @var      {Object}   scene.actor
-   * @property {Actor}    scene.actor.Actor
-   * @property {SATActor} scene.actor.SAT
+   * @property {Actor}    Actor
+   * @property {SATActor} SAT
    */
   actor: {
     Actor: Actor,
     SAT: SATActor
   }
+
 };
