@@ -18,11 +18,9 @@ exports = Class(BaseView, function(supr) {
    * @return {ProgressBar}
    */
   this.addProgressBar = function(viewOpts, x, y) {
-    var opts = {
-      superview: this,
-      x: x,
-      y: y
-    };
+    var opts = { superview: this };
+    x !== undefined && (opts.x = x);
+    y !== undefined && (opts.y = y);
     return new ProgressBar(merge(opts, viewOpts));
   };
 
@@ -36,14 +34,11 @@ exports = Class(BaseView, function(supr) {
    * @return {SceneScoreView}
    */
   this.addScoreText = function(viewOpts, x, y, width, height) {
-    var opts = {
-      superview: this,
-      format: SceneScoreView.FORMAT_SCORE,
-      x: x,
-      y: y,
-      width: width,
-      height: height
-    };
+    var opts = { superview: this, format: SceneScoreView.FORMAT_SCORE };
+    x !== undefined && (opts.x = x);
+    y !== undefined && (opts.y = y);
+    width !== undefined && (opts.width = width);
+    height !== undefined && (opts.height = height);
     return new SceneScoreView(merge(opts, viewOpts));
   };
 
@@ -57,14 +52,11 @@ exports = Class(BaseView, function(supr) {
    * @return {SceneScoreView}
    */
   this.addTimeText = function(viewOpts, x, y, width, height) {
-    var opts = {
-      superview: this,
-      format: SceneScoreView.FORMAT_TIME,
-      x: x,
-      y: y,
-      width: width,
-      height: height
-    };
+    var opts = { superview: this, format: SceneScoreView.FORMAT_TIME }
+    x !== undefined && (opts.x = x);
+    y !== undefined && (opts.y = y);
+    width !== undefined && (opts.width = width);
+    height !== undefined && (opts.height = height);
     return new SceneScoreView(merge(opts, viewOpts));
   };
 
