@@ -86,6 +86,18 @@ exports = Class(EntityPool, function(supr) {
   };
 
   /**
+   * Destroy all actors in this group
+   * @param  {boolean} [runDestroyHandlers]
+   */
+  this.destroyActors = function(runDestroyHandlers) {
+    runDestroyHandlers = runDestroyHandlers !== undefined ? runDestroyHandlers : true;
+    var entities = this.entities;
+    for (var i = this._freeIndex - 1; i >= 0; i--) {
+      entities[i].destroy(runDestroyHandlers);
+    }
+  };
+
+  /**
    * @see SpawnerManager#spawn
    */
   this.spawn = function() {
@@ -142,12 +154,8 @@ exports = Class(EntityPool, function(supr) {
    * @see {Group#releaseAll}
    */
   this.destroy = function(runDestroyHandlers) {
-    runDestroyHandlers = runDestroyHandlers !== undefined ? runDestroyHandlers : true;
     this.destroySpawners();
-    var entities = this.entities;
-    for (var i = this._freeIndex - 1; i >= 0; i--) {
-      entities[i].destroy(runDestroyHandlers);
-    }
+    this.destroyActors(runDestroyHandlers);
   };
 
 });
