@@ -113,11 +113,11 @@ exports = {
           } else {
             this.addText('Game Over!');
           }
-
-          this.screen.onDown(function () {
-            setTimeout(function () { scene.internal.game.start(); });
-          }, true);
         }
+
+        this.screen.onDown(function () {
+          setTimeout(function () { scene.internal.game.start(); });
+        }, true);
       }
     }.bind(this), opts.delay);
   },
