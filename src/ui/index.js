@@ -247,8 +247,8 @@ exports = {
     scaleManager.scaleView(this.view);
 
     var vs = this.view.style;
-    vs.x = (device.width - vs.width) / 2;
-    vs.y = (device.height - vs.height) / 2;
+    vs.x = (scene.app.style.width - vs.width) / 2;
+    vs.y = (scene.app.style.height - vs.height) / 2;
     vs.anchorX = vs.width / 2;
     vs.anchorY = vs.height / 2;
 
@@ -315,8 +315,8 @@ exports = {
       cb: function () {
         this.view = new View({
           parent: scene.app,
-          width: scene.app.width,
-          height: scene.app.height,
+          width: scene.app.style.width,
+          height: scene.app.style.height,
           infinite: true
         });
       }
