@@ -174,16 +174,17 @@ exports = Class(View, function (supr) {
       }
     } else if (!opts) {
       // Static image - auto-fits width, centered, maintains aspect ratio
-      var view = new ImageView({
+      // TODO: handle edge cases ... LOCK_WIDTH vs HEIGHT, no resource.width / height provided, etc.
+      var w = this.style.width;
+      var h = resource.height * this.style.width / resource.width;
+      return new ImageView({
         superview: this,
-        image: resource.url || resource.image,
-        width: this.style.width,
-        autoSize: true,
-        fixedAspectRatio: true
+        x: (this.style.width - w) / 2,
+        y: (this.style.height - h) / 2,
+        width: w,
+        height: h,
+        image: resource.url || resource.image
       });
-      view.style.x = (this.style.width - view.style.width) / 2;
-      view.style.y = (this.style.height - view.style.height) / 2;
-      return view;
     } else {
       // Automatic repeating
       if (!opts.repeatX && opts.scrollX) { opts.repeatX = true; }
