@@ -28,13 +28,12 @@ exports = Class(function() {
     // add default gameOver state
     this.add('gameOver', function () {
       scene.addText('Game Over!');
-      scene.state.onExit(function () {
-        setTimeout(function () { scene.internal.game.start(); });
-      });
-    }, {
-      order: Number.MAX_VALUE,
-      tapToContinue: true
-    });
+    }, { order: Number.MAX_VALUE - 1, tapToContinue: true });
+
+    // add default final state to automatically restart the game
+    this.add('restartGame', function () {
+      setTimeout(function () { scene.internal.game.start(); });
+    }, { order: Number.MAX_VALUE });
   };
 
   /**
@@ -92,6 +91,7 @@ exports = Class(function() {
   // TODO: Implement clearScene
   this.enter = function(name, runInitializer, clearScene) {
     var warning;
+    name = name === undefined ? this._getNextStateName() : name;
 
     if (this._state === name) {
       warning = "WARNING: Trying to enter state '" + name + "' when already in this state. Ignoring.";
@@ -106,6 +106,7 @@ exports = Class(function() {
       return;
     }
 
+    var data = this._states[name] || {};
     runInitializer = runInitializer === undefined ? name !== "" : runInitializer;
     clearScene = clearScene || false;
 
@@ -122,9 +123,11 @@ exports = Class(function() {
     this._state = name;
 
     if (runInitializer) {
-      var onEnter = this._states[name].onEnter;
+      var onEnter = data.onEnter;
       onEnter && onEnter.apply(null, args);
     }
+
+    data.tapToContinue && this.tapToContinue();
 
     this._enteringState = false;
   };
@@ -143,13 +146,13 @@ exports = Class(function() {
    * @param {string} nextState
    */
   this.tapToContinue = function(nextState) {
-    scene.screen.onUp(function() {
+    scene.screen.onUp(bind(this, function() {
       if (nextState) {
         this.enter(nextState);
       } else {
         this.next();
       }
-    }, true);
+    }), true);
   };
 
   /**
@@ -166,7 +169,6 @@ exports = Class(function() {
   this._getNextStateName = function() {
     var index = 0;
     var next = '';
-    var first = '';
     var currData = this._states[this.currentState];
 
     // use order by default, superceded by nextState
@@ -179,29 +181,17 @@ exports = Class(function() {
     }
 
     // find the next state based on the order property
-    var nextIndex = index;
-    var firstIndex = Infinity;
+    var nextIndex = Infinity;
     if (next === '') {
       for (var name in this._states) {
         var data = this._states[name];
         if (data) {
-          // find the next state in order
           if (data.order >= index && data.order <= nextIndex) {
             next = name;
             nextIndex = data.order;
           }
-          // find the first state in case next isn't found
-          if (data.order <= firstIndex) {
-            first = name;
-            firstIndex = data.order;
-          }
         }
       }
-    }
-
-    // if we're out of states, loop around to the first
-    if (next === '') {
-      next = first;
     }
 
     return next;
