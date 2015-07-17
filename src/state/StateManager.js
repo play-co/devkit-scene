@@ -24,6 +24,17 @@ exports = Class(function() {
 
     /** @type object */
     this.gameData = null;
+
+    // add default gameOver state
+    this.add('gameOver', function () {
+      scene.addText('Game Over!');
+      scene.state.onExit(function () {
+        setTimeout(function () { scene.internal.game.start(); });
+      });
+    }, {
+      order: Number.MAX_VALUE,
+      tapToContinue: true
+    });
   };
 
   /**
@@ -159,7 +170,7 @@ exports = Class(function() {
 
     // use order by default, superceded by nextState
     if (currData) {
-      if (currData.nextState) {
+      if (currData.nextState && this.has(currData.nextState)) {
         next = currData.nextState;
       } else {
         index = currData.order + 1;

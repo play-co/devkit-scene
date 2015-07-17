@@ -103,21 +103,7 @@ exports = {
       if (this.weebyData) {
         weeby.finishGame({ score: this.getScore() });
       } else {
-        if (!opts.noGameoverScreen) {
-          var bgHeight = this.screen.height;
-
-          // TODO: This should be a scene splash ... not random text. Allows the player to set their own game over splash.
-          if (_using_score) {
-            this.addText('Game Over!', { y: bgHeight / 2 - this.text.DEFAULT_TEXT_HEIGHT });
-            this.addText('Score: ' + _score, { y: bgHeight / 2 + 10 });
-          } else {
-            this.addText('Game Over!');
-          }
-        }
-
-        this.screen.onDown(function () {
-          setTimeout(function () { scene.internal.game.start(); });
-        }, true);
+        scene.state.enter('gameOver');
       }
     }.bind(this), opts.delay);
   },
