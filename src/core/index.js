@@ -1,6 +1,6 @@
 import communityart;
 import effects;
-
+import ui.resource.loader as loader;
 import entities.shapes.Line as Line;
 import entities.shapes.Rect as Rect;
 
@@ -49,6 +49,28 @@ exports = {
    */
   onTick: function(cb) {
     _onTickHandlers.push(cb);
+  },
+
+  /**
+   * Preload a set of image / sound resources into memory
+   * @param {string|string[]} resources - A string or array of strings referencing assets or directories of assets to preload
+   * @param {function} [cb] - A callback function to call once the preloading is completed
+   * @param {object} [opts] - A few options to modify preloading behavior
+   * @param {number} [opts.minDelay] - Allow a minimum amount of time to pass before the callback fires
+   */
+  preload: function(resources, cb, opts) {
+    opts = opts || {};
+
+    // wrap in setTimeouts for safest preloading, new images render a tick etc
+    var start = Date.now();
+    setTimeout(function() {
+      loader.preload(resources, function() {
+        var elapsed = Date.now() - start;
+        setTimeout(function() {
+          cb && cb();
+        }, Math.max(0, (opts.minDelay || 0) - elapsed));
+      });
+    }, 0);
   },
 
   /**
