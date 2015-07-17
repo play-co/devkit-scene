@@ -40,18 +40,6 @@ exports = {
   },
 
   /**
-   * Construct a splash screen to show at the beginning of the game, click once anywhere to hide the screen.
-   * @arg {function} func
-   * @arg {object} [opts]
-   * @see scene.mode
-   */
-  splash: function(fun, opts) {
-    // TODO: Check for an existing splash screen?
-    // TODO: How does it know that clicking once goes to the game? Should be more configurable here and not hardcoded
-    this.mode('splash', fun, opts);
-  },
-
-  /**
    * Add a background layer to your game.
    * @param  {object} resource
    * @param  {object} [opts]
