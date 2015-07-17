@@ -122,7 +122,8 @@ exports = Class(function() {
     this._state = name;
 
     if (runInitializer) {
-      this._states[name].apply(null, args);
+      var onEnter = this._states[name].onEnter;
+      onEnter && onEnter.apply(null, args);
     }
 
     this._enteringState = false;
