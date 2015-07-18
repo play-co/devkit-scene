@@ -19,6 +19,6 @@ exports = scene(function() {
     effects.explode(myText);
     myText.destroy();
     scene.gameOver();
-  });
+  }, true);
 
 });

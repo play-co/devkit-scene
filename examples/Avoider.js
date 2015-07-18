@@ -1,25 +1,20 @@
 import scene, effects, communityart;
 
-/**
-  * @requires scene x.x.x
-  */
-scene.splash(function() {
-  scene.addText('Avoider: Tap to start!');
+scene.state.add('splash', function() {
+  var text = scene.addText('Avoider: Tap to start!');
   scene.addBackground(communityart('avoider/starscape'));
-});
+  scene.state.onExit(function () { text.destroy(); });
+}, { tapToContinue: true });
 
 exports = scene(function() {
-  var bg = scene.addBackground(communityart('avoider/starscape'));
+  scene.showScore(10, 10);
 
   var player = scene.addPlayer(communityart('avoider/rocket_ship'), {
     followTouches: true
   });
 
-  scene.showScore(10, 10);
-
-  var enemies = scene.addGroup();
-
   // Set up enemies
+  var enemies = scene.addGroup();
   var enemySpawner = scene.addSpawner(new scene.spawner.Timed(
     [
       new scene.shape.Line({ x: -100, y: scene.screen.height, y2: 0 }),
@@ -34,7 +29,7 @@ exports = scene(function() {
   ));
 
   scene.onCollision(player, enemies, function() {
-    effects.shake(GC.app);
+    effects.shake(scene);
     effects.explode(player);
     player.destroy();
   });
