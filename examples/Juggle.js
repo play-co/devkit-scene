@@ -5,13 +5,13 @@
   */
 import scene, communityart;
 
-scene.splash(function() {
-  scene.addText('Juggle bird: Tap to start!');
+scene.state.add('splash', function() {
+  var text = scene.addText('Juggle bird: Tap to start!');
   scene.addBackground(communityart('abduction/bg'));
-});
+  scene.state.onExit(function () { text.destroy(); });
+}, { tapToContinue: true });
 
 exports = scene(function() {
-  var bg = scene.addBackground(communityart('abduction/bg'));
   var actor = scene.addActor(communityart('abduction/player'), {
     ay: 500,
     cameraFunction: scene.camera.bounceX

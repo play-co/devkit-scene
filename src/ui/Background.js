@@ -1,5 +1,6 @@
 import ui.View as View;
 import ui.ImageView as ImageView;
+import ui.resource.Image as Image;
 
 import communityart;
 
@@ -173,17 +174,30 @@ exports = Class(View, function (supr) {
         layer.setScroll(layerConfig.xMultiplier, layerConfig.yMultiplier);
       }
     } else if (!opts) {
-      // Static image - auto-fits width, centered, maintains aspect ratio
-      // TODO: handle edge cases ... LOCK_WIDTH vs HEIGHT, no resource.width / height provided, etc.
-      var w = this.style.width;
-      var h = resource.height * this.style.width / resource.width;
+      // Static image - auto-fits, centered, maintains aspect ratio
+      var url = resource.url || resource.image;
+      var img = new Image({ url: url });
+      var map = img.getMap();
+      var w = resource.width || map.width || this.style.width;
+      var h = resource.height || map.height || this.style.height;
+      var scale = 1;
+      var scaleMode = scene.scaleManager.scaleMode;
+      if (scaleMode === scene.SCALE_MODE.LOCK_WIDTH) {
+        scale = this.style.width / w;
+      } else if (scaleMode === scene.SCALE_MODE.LOCK_HEIGHT) {
+        scale = this.style.height / h;
+      }
+
       return new ImageView({
         superview: this,
         x: (this.style.width - w) / 2,
         y: (this.style.height - h) / 2,
+        anchorX: w / 2,
+        anchorY: h / 2,
         width: w,
         height: h,
-        image: resource.url || resource.image
+        scale: scale,
+        image: img
       });
     } else {
       // Automatic repeating
