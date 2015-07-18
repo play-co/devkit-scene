@@ -4,10 +4,10 @@ var PARALLAX_THEME = 'flappybee/parallax/forest';
 
 scene.setTextColor("#FFFFFF");
 
-scene.splash(function() {
+scene.state.add('splash', function() {
   scene.addImage(communityart('flappybee/instructions'), scene.screen.centerX, scene.screen.centerY);
   scene.addBackground(communityart(PARALLAX_THEME));
-});
+}, { tapToContinue: true });
 
 /**
   * @requires scene master
