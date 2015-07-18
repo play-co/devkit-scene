@@ -1,8 +1,8 @@
 import .Group;
 import scene.actor.Actor as Actor;
 
-var _customActorGroups = null;
-
+var _customActorGroups = {};
+var _groupUID = 0;
 
 /** @lends scene */
 exports = {
@@ -52,10 +52,10 @@ exports = {
    * @returns {Actor}  newInstance
    */
   addCustomActor: function(ctor, opts) {
-    if (!_customActorGroups) { throw new Error('custom actor groups not yet initialized'); }
-
-    var lookupName = ctor.name;
-    if (!lookupName) { console.error(ctor); throw new Error('no name available on ctor'); }
+    var lookupName = ctor.name || ctor.__groupUID;
+    if (!lookupName) {
+      ctor.__groupUID = _groupUID++;
+    }
 
     var group = _customActorGroups[lookupName];
     if (!group) {
@@ -95,7 +95,6 @@ exports = {
         }
 
         this.groups = [];
-
         _customActorGroups = {};
       }
     },
