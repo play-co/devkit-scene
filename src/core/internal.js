@@ -82,18 +82,7 @@ var initGame = function() {
 
 var startGame = function() {
   scene.performance.dump();
-
-  // show the splash screen
-  if (scene.state.has('splash')) {
-    scene.internal.game.reset('splash');
-
-    // start the game when you click
-    scene.screen.onDown(function() {
-      scene.internal.game.reset('game');
-    }.bind(this), true);
-  } else {
-    scene.internal.game.reset();
-  }
+  scene.internal.game.reset();
 };
 
 var resetGame = function(mode) {
@@ -106,7 +95,6 @@ var resetGame = function(mode) {
 
   performance.start('reset');
 
-  if (mode === undefined) mode = 'game';
   fire('restartUI', mode);
   fire('restartGame', mode);
   fire('restartState', mode);
