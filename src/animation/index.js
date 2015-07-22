@@ -13,15 +13,6 @@ var addAnimationSubject = function(subject) {
   }
 };
 
-var clearSubjectAnimations = function(subject) {
-  var anims = subject.__anims;
-  if (anims) {
-    for (var groupID in anims) {
-      animate(subject, groupID).clear();
-    }
-  }
-};
-
 
 /** @lends scene */
 exports = {
@@ -40,10 +31,10 @@ exports = {
    */
   clearAnimations: function(subject) {
     if (subject) {
-      clearSubjectAnimations(subject);
+      animate.clearSubjectAnimations(subject);
     } else {
       for (var i = 0; i < animSubjects.length; i++) {
-        clearSubjectAnimations(animSubjects[i]);
+        animate.clearSubjectAnimations(animSubjects[i]);
       }
       animSubjects.length = 0;
     }
