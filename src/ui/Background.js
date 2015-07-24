@@ -218,6 +218,13 @@ exports = Class(View, function (supr) {
       }
       if (opts.x !== undefined) { pieceOptions.x = opts.x; }
       if (opts.y !== undefined) { pieceOptions.y = opts.y; }
+      if (opts.width !== undefined) { pieceOptions.width = opts.width; }
+      if (opts.height !== undefined) { pieceOptions.height = opts.height; }
+      if (opts.scaleX !== undefined) { pieceOptions.scaleX = opts.scaleX; }
+      if (opts.scaleY !== undefined) { pieceOptions.scaleY = opts.scaleY; }
+      if (opts.scale !== undefined) { pieceOptions.scale = opts.scale; }
+      if (opts.anchorX !== undefined) { pieceOptions.anchorX = opts.anchorX; }
+      if (opts.anchorY !== undefined) { pieceOptions.anchorY = opts.anchorY; }
 
       var config_opts = {
         zIndex: this.zIndex,
