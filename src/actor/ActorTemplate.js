@@ -73,6 +73,7 @@ exports = function(inherits) {
       this.flipX = config.flipX || false;
       this.flipY = config.flipY || false;
       this.zIndex = config.zIndex || 0;
+      this.opacity = config.opacity !== undefined ? config.opacity : 1;
     }
 
     /**
