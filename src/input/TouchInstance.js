@@ -216,9 +216,12 @@ exports = Class(function() {
    */
   this._unregister = function(type, cb) {
     var callbacks = this._callbacks[type];
-    var i = callbacks.indexOf(cb);
-    if (i >= 0) {
-      callbacks.splice(i, 1);
+    var index = -1;
+    for (var i = 0; i < callbacks.length; i++) {
+      if (callbacks[i].cb === cb) {
+        callbacks.splice(i, 1);
+        return;
+      }
     }
   };
 
