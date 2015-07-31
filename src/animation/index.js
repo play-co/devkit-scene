@@ -2,35 +2,14 @@ import animate;
 import animate.transitions as transitions;
 
 /**
- * Map of subject instances -> animation groupId
- * @type {object}
+ * Array of animation subjects to clear on clean-up
+ * @type {Object}
  */
-var subjectAnimations = {}
+var animSubjects = [];
 
-var addSubjectAnimation = function(subject, groupId) {
-  var subjectKey = subject.__anim_id;
-  if (subjectKey === undefined) {
-    throw new Error('Cannot add subject animation, no __anim_id present on the subject.');
-  }
-
-  if (!subjectAnimations[subjectKey]) {
-    subjectAnimations[subjectKey] = [groupId];
-  } else {
-    var animationGroups = subjectAnimations[subjectKey];
-    if (animationGroups.indexOf(groupId) === -1) {
-      animationGroups.push(groupId);
-    }
-  }
-};
-
-var clearSubjectAnimations = function(subject) {
-  var subjectKey = subject.__anim_id || "";
-  var animationGroups = subjectAnimations[subjectKey];
-  if (animationGroups) {
-    for (var i = 0, len = animationGroups.length; i < len; i++) {
-      animate(subject, animationGroups[i]).clear();
-    }
-    delete subjectAnimations[subjectKey];
+var addAnimationSubject = function(subject) {
+  if (animSubjects.indexOf(subject) === -1) {
+    animSubjects.push(subject);
   }
 };
 
@@ -46,38 +25,18 @@ exports = {
   transitions: transitions,
 
   /**
-   * Animation groups to be tracked and auto cleaned up by scene
-   * @type {string[]}
-   * @default ['scene']
-   */
-  // TODO: seems like this calls for ... another manager!
-  animationGroups: null,
-
-  /**
-   * Clear all the tracked animation groups, or a specific subject's animations
-   * @param {object} [subject] Optionally clear animations for a specific subject
+   * Clear all the tracked animations, or a specific subject's animations
+   * @method scene.clearAnimations
+   * @param {Object} [subject] - optionally clear animations for a specific subject
    */
   clearAnimations: function(subject) {
     if (subject) {
-      clearSubjectAnimations(subject);
+      animate.clearSubjectAnimations(subject);
     } else {
-      if (this.animationGroups) {
-        // Clear old animaion groups
-        for (var i = 0; i < this.animationGroups.length; i++) {
-          var group = animate.getGroup(this.animationGroups[i]);
-          if (!group) { continue; }
-          var animations = group._anims;
-          for (var key in animations) {
-            animations[key].commit();
-            animations[key].clear();
-            delete animations[key];
-          }
-        }
+      for (var i = 0; i < animSubjects.length; i++) {
+        animate.clearSubjectAnimations(animSubjects[i]);
       }
-
-      // Reset
-      this.animationGroups = ['scene'];
-      subjectAnimations = {};
+      animSubjects.length = 0;
     }
   },
 
@@ -86,16 +45,9 @@ exports = {
    * @param  {string}     [groupName]
    * @return {Animator}   anim
    */
-  animate: function(subject, groupId) {
-    groupId = groupId === undefined ? "scene" : "scene_" + groupId;
-    var anim = animate(subject, groupId);
-    if (groupId !== "scene" && this.animationGroups.indexOf(groupId) === -1) {
-      this.animationGroups.push(groupId);
-    }
-
-    // For individual subject animation tracking
-    addSubjectAnimation(subject, groupId);
-
+  animate: function(subject, groupID) {
+    var anim = animate(subject, groupID);
+    addAnimationSubject(subject, groupID);
     return anim;
   },
 
