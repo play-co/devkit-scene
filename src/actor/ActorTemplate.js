@@ -346,6 +346,8 @@ exports = function(inherits) {
         loop: false,
         callback: function () {
           this.view.pause();
+          var currentAnimation = this.view._animations[animation];
+          if (currentAnimation) { this.view.setImage(currentAnimation.frames[currentAnimation.frames.length - 1]); }
           if (onComplete) { onComplete(); }
         }.bind(this)
       });
