@@ -21,6 +21,7 @@ exports = {
 
   /**
    * There can be only one player. {@link scene.gameOver} is automatically called when the player is destroyed.
+   * After all, how can the play proceed without the main character?
    * @type Actor
    * @see scene.addPlayer
    */
@@ -107,6 +108,7 @@ exports = {
   /**
    * When called, this function will restart the game.
    * If scene has been set to use Weeby, calling this will return the user to the Weeby UI.
+   * Alas, it is inevitable that the final act must end, the curtain fall, and the players leave the stage.
    * @method scene.gameOver
    * @param  {object}  [opts]
    * @param  {number}  [opts.delay] - A delay between when this function is called and when the endgame logic is run.
