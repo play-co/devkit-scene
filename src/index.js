@@ -73,7 +73,7 @@ scene.performance = performance;
  * Used to add functionality to the global `scene` object.  Will automatically merge objects,
  * and throws an error when there is a collision.
  * @method scene.registerModule
- * @param  {Class}        module        Class obtained through `jsio('import ...')`
+ * @param  {Class}        module        Class obtained through `jsio(`import ...`)`
  * @param  {parentObj}    [parentObj]   Do not set, used for recursion
  * @param  {string[]}     [parentChain] Do not set, used for recursion
  */
