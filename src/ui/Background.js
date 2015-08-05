@@ -74,6 +74,10 @@ exports = Class(View, function (supr) {
    * Reset this and the parallax instance to their fresh states.
    */
   this.reset = function() {
+    this._offsetX = 0;
+    this._offsetY = 0;
+    this.autoX = 0;
+    this.autoY = 0;
     this.zIndex = -1;
     this.config = [];
 
