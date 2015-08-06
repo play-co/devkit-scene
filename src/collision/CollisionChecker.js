@@ -75,6 +75,10 @@ exports = Class(function() {
    */
   this.test = function(a, b, cb, runAll) {
 
+    if (a.noCollide || b.noCollide) {
+      return false;
+    }
+
     // Expected functionality by EntityPhysics:
     // vars : isCircle
     // funcs: getHitX, getHitY, getHitWidth, getHitHeight
