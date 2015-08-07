@@ -5,7 +5,7 @@
   "version": "0.2.0",
   "repository": {},
   "dependencies": {
-    "devkit-entities": "git://github.com/gameclosure/devkit-entities.git#c4e7767632c1add005f88a0a8b94679969732d37",
+    "devkit-entities": "git://github.com/gameclosure/devkit-entities.git#f102bc215a051b3b4ba21a73bf00622923a9ac24",
     "devkit-parallax": "git://github.com/gameclosure/devkit-parallax.git#c10c12c2399c6a05e53ae719b6bd56952b0679f3",
     "community-art": "git://github.com/weebygames/community-art.git#504b490164d2283a3ed51f600b6a3bb8ad7dec66",
     "devkit-accelerometer": "git://github.com/gameclosure/accelerometer.git#v3.0.1",
