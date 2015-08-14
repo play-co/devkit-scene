@@ -33,6 +33,9 @@ exports = {
         this.camera.stopFollowing();
         this.camera.x = 0;
         this.camera.y = 0;
+        this.camera.update();
+        this.stage.style.x = 0;
+        this.stage.style.y = 0;
       }
     },
     // Tick
