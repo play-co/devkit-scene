@@ -14,6 +14,10 @@ exports = Class(function() {
     this.width = 0;
     /** @type {number} */
     this.height = 0;
+    /** @type {number} */
+    this.offsetX = 0;
+    /** @type {number} */
+    this.offsetY = 0;
     /** @type {string} */
     this.scaleMode = '';
 
@@ -32,6 +36,8 @@ exports = Class(function() {
   this.resize = function(width, height, scaleMode) {
     this.width = width;
     this.height = height;
+    this.paddingX = 0;
+    this.paddingY = 0;
     this.scaleMode = scaleMode;
 
     var scaleModes = exports.SCALE_MODE;
@@ -48,6 +54,16 @@ exports = Class(function() {
       case scaleModes.LOCK_HEIGHT:
         this.scale = device.height / height;
         this.width = device.width / this.scale;
+        break;
+
+      case scaleModes.LETTERBOX:
+        if (width > height) {
+          this.scale = device.width / width;
+          this.paddingY = (device.height / this.scale - this.height) / 2;
+        } else {
+          this.scale = device.height / height;
+          this.paddingX = (device.width / this.scale - this.width) / 2;
+        }
         break;
     }
   };
@@ -73,5 +89,6 @@ exports = Class(function() {
 exports.SCALE_MODE = {
   NONE:        'NONE',
   LOCK_WIDTH:  'LOCK_WIDTH',
-  LOCK_HEIGHT: 'LOCK_HEIGHT'
+  LOCK_HEIGHT: 'LOCK_HEIGHT',
+  LETTERBOX: 'LETTERBOX'
 };

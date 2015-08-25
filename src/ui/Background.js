@@ -220,6 +220,8 @@ exports = Class(View, function (supr) {
       }
       if (opts.x !== undefined) { pieceOptions.x = opts.x; }
       if (opts.y !== undefined) { pieceOptions.y = opts.y; }
+      if (opts.flipX !== undefined) { pieceOptions.flipX = opts.flipX; }
+      if (opts.flipY !== undefined) { pieceOptions.flipY = opts.flipY; }
       if (opts.width !== undefined) { pieceOptions.width = opts.width; }
       if (opts.height !== undefined) { pieceOptions.height = opts.height; }
       if (opts.scaleX !== undefined) { pieceOptions.scaleX = opts.scaleX; }
@@ -227,6 +229,7 @@ exports = Class(View, function (supr) {
       if (opts.scale !== undefined) { pieceOptions.scale = opts.scale; }
       if (opts.anchorX !== undefined) { pieceOptions.anchorX = opts.anchorX; }
       if (opts.anchorY !== undefined) { pieceOptions.anchorY = opts.anchorY; }
+      if (opts.width === undefined && opts.height === undefined) { pieceOptions.autoSize = true; }
 
       var config_opts = {
         zIndex: this.zIndex,
