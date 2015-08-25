@@ -28,7 +28,6 @@ exports = Class(EntityPool, function () {
    */
   this.addActor = function (opts) {
     performance.start('Group:addActor');
-
     // set some defaults
     opts = opts || {};
     opts.x = opts.x === void 0 ? scene.camera.x + scene.camera.width / 2 : opts.x;

@@ -6,8 +6,6 @@ import ui.SpriteView as SpriteView;
 import ui.ScoreView as ScoreView;
 import ui.TextView as TextView;
 
-import communityart;
-
 import scene.ui.BaseView as BaseView;
 import scene.ui.Background as Background;
 import scene.ui.UIView as UIView;
@@ -145,7 +143,7 @@ exports = {
   /**
    * If a resource is specified, a {@link ScoreView} will be used (because they look great).
    * @method scene.showScore(2)
-   * @param   {string|object} resource - resource key to be resolved by community art, or opts
+   * @param   {string|object} resource - resource object, or opts
    * @param   {number}        x
    * @param   {number}        y
    * @param   {object}        [opts]
@@ -187,7 +185,7 @@ exports = {
     // function type (2)
     else {
       // Make a new ScoreView
-      var resourceOpts = communityart.getConfig(resource, 'ScoreView');
+      var resourceOpts = resource;
       opts = opts || {};
 
       opts.superview = opts.superview || this.textContainer;

@@ -1,4 +1,3 @@
-import communityart;
 import effects;
 import ui.resource.loader as loader;
 import entities.shapes.Line as Line;
