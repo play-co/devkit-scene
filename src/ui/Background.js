@@ -185,7 +185,7 @@ exports = Class(View, function () {
         this.config.push(layerConfig);
         layer.setScroll(layerConfig.xMultiplier, layerConfig.yMultiplier);
       }
-    } else if (!opts.scrollX && !opts.scrollY) {
+    } else if (opts.scrollX === void 0 && opts.scrollY === void 0) {
       // Static image - auto-fits, centered, maintains aspect ratio
       var img = new Image({ url: opts.url || opts.image });
       var map = img.getMap();
