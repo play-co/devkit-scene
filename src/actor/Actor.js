@@ -6,7 +6,7 @@ import entities.Entity as Entity;
  * @class Actor
  * @extends {Entity}
  */
-exports = Class(Entity, function() {
+exports = Class(Entity, function () {
   var suprPrototype = Entity.prototype;
 
   /**
@@ -23,7 +23,7 @@ exports = Class(Entity, function() {
    * @param {boolean|object} [opts.faceForward] - Causes the actor to always face in the direction it is heading (determined by velocity)
    * @param {number}         [opts.faceForward.offset] - An offset for the actor to use while facing forward
    */
-  this.init = function(opts) {
+  this.init = function (opts) {
     suprPrototype.init.call(this, opts);
   };
 
@@ -42,7 +42,7 @@ exports = Class(Entity, function() {
    * @param  {boolean} [config.flipY]
    * @param  {number}  [config.zIndex]
    */
-  this.reset = function(config) {
+  this.reset = function (config) {
     suprPrototype.reset.call(this, config);
 
     effects.clear(this);
@@ -67,14 +67,14 @@ exports = Class(Entity, function() {
     this.faceForward = config.faceForward || false;
 
     this.unscaledHitBounds = this.model.hitBounds;
-    this.scale = config.scale !== undefined ? config.scale : 1;
-    this.view.setFramerate(config.frameRate !== undefined ? config.frameRate : 30);
+    this.scale = config.scale !== void 0 ? config.scale : 1;
+    this.view.setFramerate(config.frameRate !== void 0 ? config.frameRate : 30);
 
     this.rotation = config.rotation || 0;
     this.flipX = config.flipX || false;
     this.flipY = config.flipY || false;
     this.zIndex = config.zIndex || 0;
-    this.opacity = config.opacity !== undefined ? config.opacity : 1;
+    this.opacity = config.opacity !== void 0 ? config.opacity : 1;
   };
 
   /**
@@ -85,7 +85,7 @@ exports = Class(Entity, function() {
    * @param  {number[]|Object.<?, number>} targetBounds
    * @param  {number}   scale
    */
-  this.applyScaledBounds = function(sourceBounds, targetBounds, scale) {
+  this.applyScaledBounds = function (sourceBounds, targetBounds, scale) {
     for (var i in sourceBounds) {
       targetBounds[i] = sourceBounds[i] * scale;
     }
@@ -96,7 +96,7 @@ exports = Class(Entity, function() {
    * @method Actor#updateFollowTouches
    * @param  {boolean|{boolean: x, boolean: y}} opts
    */
-  this.updateFollowTouches = function(opts) {
+  this.updateFollowTouches = function (opts) {
     // Follow touches?
     if (opts && typeof opts === 'boolean') {
       opts = { x: true, y: true };
@@ -105,9 +105,9 @@ exports = Class(Entity, function() {
     this.followTouches = opts;
 
     if (this.followTouches) {
-      this.followTouches.xMultiplier = this.followTouches.xMultiplier !== undefined
+      this.followTouches.xMultiplier = this.followTouches.xMultiplier !== void 0
           ? this.followTouches.xMultiplier : 0.1;
-      this.followTouches.yMultiplier = this.followTouches.yMultiplier !== undefined
+      this.followTouches.yMultiplier = this.followTouches.yMultiplier !== void 0
           ? this.followTouches.yMultiplier : 0.1;
     }
   };
@@ -122,7 +122,7 @@ exports = Class(Entity, function() {
    * @method Actor#update
    * @param  {number} dt Time in milliseconds
    */
-  this.update = function(dt) {
+  this.update = function (dt) {
     if (!this.active) {
       console.warn('Will not update inactive Actor.');
       return;
@@ -161,7 +161,7 @@ exports = Class(Entity, function() {
    * @param  {number} dt Time in milliseconds
    * @private
    */
-  this._followTouch = function(dt) {
+  this._followTouch = function (dt) {
     // Move toward the current touch or mouse down, if followTouches
     if (!this.followTouches) { return; }
     // We are dividing by dt in here, cannot have dt of 0
@@ -197,7 +197,7 @@ exports = Class(Entity, function() {
    * @method Actor#hurt
    * @param  {number} amount
    */
-  this.hurt = function(amount) {
+  this.hurt = function (amount) {
     this.health -= amount;
 
     if (this.health <= 0) {
@@ -210,7 +210,7 @@ exports = Class(Entity, function() {
    * @method Actor#heal
    * @param  {number} amount
    */
-  this.heal = function(amount) {
+  this.heal = function (amount) {
     this.health += amount;
   };
 
@@ -221,7 +221,7 @@ exports = Class(Entity, function() {
    * @param  {function} callback
    * @return {number} collisionCheckID
    */
-  this.onEntered = function(target, callback) {
+  this.onEntered = function (target, callback) {
     this._registerCollision(target, callback, 'ON_ENTERED');
   };
 
@@ -232,7 +232,7 @@ exports = Class(Entity, function() {
    * @param  {function} callback
    * @return {number} collisionCheckID
    */
-  this.onExited = function(target, callback) {
+  this.onExited = function (target, callback) {
     this._registerCollision(target, callback, 'ON_EXITED');
   };
 
@@ -246,7 +246,7 @@ exports = Class(Entity, function() {
    * @see CollisionManager.registerCollision
    * @private
    */
-  this._registerCollision = function(target, callback, type) {
+  this._registerCollision = function (target, callback, type) {
     return scene.collisions.registerCollision(
       new scene.collision.CollisionChecker({
         a: this,
@@ -264,7 +264,7 @@ exports = Class(Entity, function() {
    * @param  {number} y
    * @param  {number} speed
    */
-  this.headToward = function(x, y, speed) {
+  this.headToward = function (x, y, speed) {
     var targetAngle = Math.atan2(y - this.y, x - this.x);
     this.vx = speed * Math.cos(targetAngle);
     this.vy = speed * Math.sin(targetAngle);
@@ -277,7 +277,7 @@ exports = Class(Entity, function() {
    * @param  {number} y
    * @param  {number} [offset]
    */
-  this.rotateAt = function(x, y, offset) {
+  this.rotateAt = function (x, y, offset) {
     var targetAngle = Math.atan2(y - this.y, x - this.x) + Math.PI / 2;
     this.view.style.r = targetAngle + (offset || 0);
   };
@@ -287,7 +287,7 @@ exports = Class(Entity, function() {
    * @method Actor#onTick
    * @param  {onTickCallback} callback
    */
-  this.onTick = function(callback) {
+  this.onTick = function (callback) {
     this.tickHandlers.push(callback);
   };
 
@@ -295,8 +295,8 @@ exports = Class(Entity, function() {
    * This function destroys the Actor, as in, removes it from the scene
    * @param {boolean} [runDestroyHandlers]
    */
-  this.destroy = function(runDestroyHandlers) {
-    runDestroyHandlers = runDestroyHandlers !== undefined ? runDestroyHandlers : true;
+  this.destroy = function (runDestroyHandlers) {
+    runDestroyHandlers = runDestroyHandlers !== void 0 ? runDestroyHandlers : true;
 
     if (runDestroyHandlers) {
       for (var i = 0; i < this.destroyHandlers.length; i++) {
@@ -316,7 +316,7 @@ exports = Class(Entity, function() {
    * @method Actor#stopInput
    * @return {Actor} self
    */
-  this.stopInput = function() {
+  this.stopInput = function () {
     scene.screen.removeOnDown(this._inputCb);
     return this;
   };
@@ -326,8 +326,8 @@ exports = Class(Entity, function() {
    * @param {function} cb Function for an onTouch event
    * @return {Actor} self
    */
-  this.onTouch = function(cb) {
-    this._inputCb = scene.screen.onDown(function(pt) {
+  this.onTouch = function (cb) {
+    this._inputCb = scene.screen.onDown(function (pt) {
       if (this.model.shape.contains(pt.x, pt.y)) {
         cb();
       }
@@ -340,7 +340,7 @@ exports = Class(Entity, function() {
    * @param {string}   [animation]  The animation to start playing (or use the default animation)
    * @param {function} [onComplete] Run when the animation is complete
    */
-  this.play = function(animation, onComplete) {
+  this.play = function (animation, onComplete) {
     animation = animation || this.view._opts.defaultAnimation;
 
     this.view.startAnimation(animation, {
@@ -363,7 +363,7 @@ exports = Class(Entity, function() {
    * @param {string} [animation] The animation to start looping (or use the default animation)
    * @return {Actor} self
    */
-  this.loop = function(animation) {
+  this.loop = function (animation) {
     animation = animation || this.view._opts.defaultAnimation;
     this.view.startAnimation(animation, { loop: true });
     this.view.resume();
@@ -375,7 +375,7 @@ exports = Class(Entity, function() {
    * @method Actor#stop
    * @return {Actor} self
    */
-  this.stop = function() {
+  this.stop = function () {
     this.view.pause();
     return this;
   };
@@ -385,7 +385,7 @@ exports = Class(Entity, function() {
    * @method Actor#getSpeed
    * @return {number}
    */
-  this.getSpeed = function() {
+  this.getSpeed = function () {
     return Math.sqrt(this.vx * this.vx + this.vy * this.vy);
   };
 
@@ -395,7 +395,7 @@ exports = Class(Entity, function() {
    * @method Actor#onDestroy
    * @param {function} callback
    */
-  this.onDestroy = function(callback) {
+  this.onDestroy = function (callback) {
     this.destroyHandlers.push(callback);
   };
 
@@ -405,11 +405,11 @@ exports = Class(Entity, function() {
    * @param  {string} [newName] A different name to use for the local property
    * @private
    */
-  this._addStyleProperty = function(styleName, newName) {
+  this._addStyleProperty = function (styleName, newName) {
     newName = newName || styleName;
     Object.defineProperty(this, newName, {
-      get: function() { return this.view.style[styleName]; },
-      set: function(value) { this.view.style[styleName] = value; }
+      get: function () { return this.view.style[styleName]; },
+      set: function (value) { this.view.style[styleName] = value; }
     });
   };
 
@@ -435,7 +435,7 @@ exports = Class(Entity, function() {
    * @readonly
    */
   Object.defineProperty(this, 'currentAnimation', {
-    get: function() { return this.view.isSprite ? this.view._currentAnimationName : ''; }
+    get: function () { return this.view.isSprite ? this.view._currentAnimationName : ''; }
   });
 
   /**
@@ -443,8 +443,8 @@ exports = Class(Entity, function() {
    * @var {number} Actor#scale
    */
   Object.defineProperty(this, 'scale', {
-    get: function() { return this.view.style.scale },
-    set: function(value) {
+    get: function () { return this.view.style.scale },
+    set: function (value) {
       this.view.style.scale = value;
       this.applyScaledBounds(this.unscaledHitBounds, this.model.hitBounds, value);
     }
@@ -453,13 +453,13 @@ exports = Class(Entity, function() {
   /** Shortcut to this.view.clipRect
       @var {number} Actor#clipRect */
   Object.defineProperty(this, 'clipRect', {
-    get: function() { return this.view.clipRect; },
-    set: function(value) { this.view.clipRect = value; }
+    get: function () { return this.view.clipRect; },
+    set: function (value) { this.view.clipRect = value; }
   });
 
   /** Shortcut to this.view.showHitBounds
       @method Actor#showHitBounds */
-  this.showHitBounds = function() {
+  this.showHitBounds = function () {
     this.view.showHitBounds();
   };
 

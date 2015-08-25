@@ -1,60 +1,25 @@
 import ui.View as View;
-
 import scene.ui.SceneImageView as SceneImageView;
 import scene.ui.SceneImageScaleView as SceneImageScaleView;
-
-import communityart;
 
 /**
  * @class BaseView
  * @extends View
  */
-exports = Class(View, function(supr) {
+exports = Class(View, function () {
   /**
    * @method BaseView#addImage
-   * @param  {String|Object} resource - resource key to be resolved by community art, or opts
-   * @param  {Number} x
-   * @param  {Number} y
-   * @param  {Object} [opts]
-   * @return {View} imageView
+   * @param {object} opts - options that define the image
+   * @param {number} [opts.image|opts.url] - path to the image asset
+   * @param {number} [opts.superview] - the parent view in the view hierarchy
+   * @param {boolean} [opts.autoSize] - determine view dimensions based on the image asset
+   * @return {SceneImageView|SceneImageScaleView} 
    */
-  /**
-   * @method BaseView#addImage(1)
-   * @param  {String|Object} resource
-   * @param  {Number} x
-   * @param  {Number} y
-   * @param  {Number} width
-   * @param  {Number} height
-   * @param  {Object} [opts]
-   * @return {View} imageView
-   */
-  this.addImage = function(resource, x, y, width, height, opts) {
-    var resourceOpts = communityart.getConfig(resource, 'ImageView');
-    if (!resourceOpts.image && resourceOpts.url) {
-      resourceOpts.image = resourceOpts.url;
-    }
-
-    // Check for signature (1)
-    if (typeof width === 'object') {
-      opts = width;
-    } else {
-      opts = opts || {};
-      opts.width = width || resourceOpts.width;
-      opts.height = height || resourceOpts.height;
-    }
-
-    var viewOpts = merge(opts, resourceOpts);
-    viewOpts.superview = viewOpts.superview || this;
-    viewOpts.autoSize = viewOpts.autoSize !== undefined
-        ? viewOpts.autoSize
-        : (viewOpts.width === undefined && viewOpts.height === undefined);
-    viewOpts.x = x !== undefined ? x : viewOpts.x || 0;
-    viewOpts.y = y !== undefined ? y : viewOpts.y || 0;
-
-    // Set up the view
-    var viewClass = (viewOpts.scaleMethod === undefined) ? SceneImageView : SceneImageScaleView;
-    var result = new viewClass(viewOpts);
-
-    return result;
+  this.addImage = function (opts) {
+    opts.image = opts.image || opts.url;
+    opts.superview = opts.superview || this;
+    opts.autoSize = opts.autoSize !== void 0 ? opts.autoSize : (opts.width === void 0 && opts.height === void 0);
+    var viewClass = (opts.scaleMethod === void 0) ? SceneImageView : SceneImageScaleView;
+    return new viewClass(opts);
   };
 });
