@@ -242,6 +242,7 @@ exports = {
     if (!this.view) { return; }
 
     scaleManager.scaleView(this.view);
+    this.updateLetterBox();
 
     var vs = this.view.style;
     vs.x = (scene.app.style.width - vs.width) / 2;
@@ -255,6 +256,26 @@ exports = {
       ts.width = bs.width = vs.width;
       ts.height = bs.height = vs.height;
     }
+  },
+
+  updateLetterBox: function() {
+    var pls = this.paddingLeft.style;
+    var prs = this.paddingRight.style;
+    var pts = this.paddingTop.style;
+    var pbs = this.paddingBottom.style;
+    var sm = this.scaleManager;
+
+    pts.y = -sm.paddingY;
+    pbs.y = sm.height;
+    pts.width = pbs.width = sm.width;
+    pts.height = pbs.height = sm.paddingY;
+    pts.visible = sm.paddingY > 0;
+
+    pls.x = -sm.paddingX;
+    prs.x = sm.width;
+    pls.width = prs.width = sm.paddingX;
+    pls.height = prs.height = sm.height;
+    pls.visible = prs.visible = sm.paddingX > 0;
   },
 
   /**
@@ -322,6 +343,17 @@ exports = {
       event: 'initUI',
       cb: function (app) {
 
+        this.inputOverlay = new View({ parent: this.view, infinite: true, zIndex: 999999 });
+        var touchManager = this.screen.touchManager;
+        // forward input events
+        this.inputOverlay.onInputStart = bind(touchManager, touchManager.downHandler);
+        this.inputOverlay.onInputSelect = bind(touchManager, touchManager.upHandler);
+        this.inputOverlay.onInputMove = bind(touchManager, touchManager.moveHandler);
+
+        this.paddingLeft = new View({ backgroundColor: "#000000", parent: this.inputOverlay });
+        this.paddingRight = new View({ backgroundColor: "#000000", parent: this.inputOverlay });
+        this.paddingTop = new View({ backgroundColor: "#000000", parent: this.inputOverlay });
+        this.paddingBottom = new View({ backgroundColor: "#000000", parent: this.inputOverlay });
         this.updateScreenDimensions();
 
         this.background = new Background({
@@ -345,13 +377,6 @@ exports = {
           canHandleEvents: false,
           zIndex: 100000
         });
-
-        this.inputOverlay = new View({ parent: this.view, infinite: true, zIndex: 999999 });
-        var touchManager = this.screen.touchManager;
-        // forward input events
-        this.inputOverlay.onInputStart = bind(touchManager, touchManager.downHandler);
-        this.inputOverlay.onInputSelect = bind(touchManager, touchManager.upHandler);
-        this.inputOverlay.onInputMove = bind(touchManager, touchManager.moveHandler);
 
         this.ui = new UIView({
           parent: this.inputOverlay,
