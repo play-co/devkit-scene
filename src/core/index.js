@@ -1,4 +1,3 @@
-import communityart;
 import effects;
 import ui.resource.loader as loader;
 import entities.shapes.Line as Line;
@@ -132,7 +131,7 @@ exports = {
 
   /**
    * Sets the scene player, makes sure not to override an existing player.
-   * @param   {string|object} resource - resource key to be resolved by community art, or opts
+   * @param   {string|object} resource - resource key to be resolved by registered art, or opts
    * @param   {object}        [opts]   - contains options to be applied to the underlying {@link Actor}
    * @returns {View}                   - The newly set player
    * @see scene.addActor

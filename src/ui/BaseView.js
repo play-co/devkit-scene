@@ -3,8 +3,6 @@ import ui.View as View;
 import scene.ui.SceneImageView as SceneImageView;
 import scene.ui.SceneImageScaleView as SceneImageScaleView;
 
-import communityart;
-
 /**
  * @class BaseView
  * @extends View
@@ -12,7 +10,7 @@ import communityart;
 exports = Class(View, function(supr) {
   /**
    * @method BaseView#addImage
-   * @param  {String|Object} resource - resource key to be resolved by community art, or opts
+   * @param  {String|Object} resource - resource object, or opts
    * @param  {Number} x
    * @param  {Number} y
    * @param  {Object} [opts]
@@ -29,31 +27,30 @@ exports = Class(View, function(supr) {
    * @return {View} imageView
    */
   this.addImage = function(resource, x, y, width, height, opts) {
-    var resourceOpts = communityart.getConfig(resource, 'ImageView');
-    if (!resourceOpts.image && resourceOpts.url) {
-      resourceOpts.image = resourceOpts.url;
-    }
-
     // Check for signature (1)
     if (typeof width === 'object') {
       opts = width;
     } else {
       opts = opts || {};
-      opts.width = width || resourceOpts.width;
-      opts.height = height || resourceOpts.height;
+      opts.width = width || opts.width;
+      opts.height = height || opts.height;
     }
 
-    var viewOpts = merge(opts, resourceOpts);
-    viewOpts.superview = viewOpts.superview || this;
-    viewOpts.autoSize = viewOpts.autoSize !== undefined
-        ? viewOpts.autoSize
-        : (viewOpts.width === undefined && viewOpts.height === undefined);
-    viewOpts.x = x !== undefined ? x : viewOpts.x || 0;
-    viewOpts.y = y !== undefined ? y : viewOpts.y || 0;
+    opts = merge(opts, resource);
+    if (!opts.image && opts.url) {
+      opts.image = opts.url;
+    }
+
+    opts.superview = opts.superview || this;
+    opts.autoSize = opts.autoSize !== undefined
+        ? opts.autoSize
+        : (opts.width === undefined && opts.height === undefined);
+    opts.x = x !== undefined ? x : opts.x || 0;
+    opts.y = y !== undefined ? y : opts.y || 0;
 
     // Set up the view
-    var viewClass = (viewOpts.scaleMethod === undefined) ? SceneImageView : SceneImageScaleView;
-    var result = new viewClass(viewOpts);
+    var viewClass = (opts.scaleMethod === undefined) ? SceneImageView : SceneImageScaleView;
+    var result = new viewClass(opts);
 
     return result;
   };

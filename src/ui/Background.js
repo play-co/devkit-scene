@@ -2,8 +2,6 @@ import ui.View as View;
 import ui.ImageView as ImageView;
 import ui.resource.Image as Image;
 
-import communityart;
-
 import parallax.Parallax as Parallax;
 
 import scene.utils.performance as performance;

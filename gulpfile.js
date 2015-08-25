@@ -110,8 +110,7 @@ gulp.task('compile', [], function(cb) {
     'devkit-effects',
     'devkit-parallax',
     'devkit-entities',
-    'devkit-accelerometer',
-    'community-art'
+    'devkit-accelerometer'
   ]);
   pathCache['squill'] = paths.squill;
   pathCache['src'] = paths.js;

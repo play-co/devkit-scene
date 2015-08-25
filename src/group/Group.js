@@ -1,4 +1,3 @@
-import communityart;
 import entities.EntityPool as EntityPool;
 
 import scene.utils.performance as performance;
@@ -28,12 +27,12 @@ exports = Class(EntityPool, function(supr) {
 
   /**
    * A function which adds an actor to the scene, using this group.
-   * @param  {string|object} resource - Resource key to be resolved by community art, or opts
+   * @param  {string|object} resource - Resource object, or opts
    * @param  {object} [opts] - Contains options to be applied to the underlying {@link Actor}
    */
   this.addActor = function(resource, opts) {
     performance.start('Group:addActor');
-    var resourceOpts = resource ? communityart.getConfig(resource, 'Actor') : {};
+    var resourceOpts = resource || {};
 
     opts = opts || {};
     opts = merge(opts, resourceOpts);
