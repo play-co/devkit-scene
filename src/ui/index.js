@@ -40,13 +40,12 @@ exports = {
   },
 
   /**
-   * Add a background layer to your game.
-   * @param  {object} resource
-   * @param  {object} [opts]
+   * Add a background layer to your game
+   * @param {object} opts
    * @see Background#addLayer
    */
-  addBackground: function(art, opts) {
-    return this.background.addLayer(art, opts);
+  addBackground: function (opts) {
+    return this.background.addLayer(opts);
   },
 
   /**
@@ -64,7 +63,7 @@ exports = {
    * @arg {object} [opts] contains options to be applied to {@link SceneText}
    * @returns {SceneText}
    */
-  addText: function(text, x, y, opts) {
+  addText: function (text, x, y, opts) {
     opts = opts || {};
 
     if (typeof x === 'object') {
@@ -102,7 +101,7 @@ exports = {
    * Remove a text view from the scene.
    * @param {SceneText} sceneText The instance to be removed
    */
-  removeText: function(sceneText) {
+  removeText: function (sceneText) {
     var extraViews = this.extraViews;
     var index = extraViews.indexOf(sceneText);
     if (index !== -1) {
@@ -118,7 +117,7 @@ exports = {
    * Set the default text color to be applied to any new text view created using {@link scene.addText}
    * @param {string} color
    */
-  setTextColor: function(color) {
+  setTextColor: function (color) {
     // TODO validate?
     this.text.color = color;
   },
@@ -127,7 +126,7 @@ exports = {
    * Set the default text font to be applied to any new text view created using {@link scene.addText}
    * @param {string} font
    */
-  setTextFont: function(font) {
+  setTextFont: function (font) {
     // TODO validate?
     this.text.font = font;
   },
@@ -152,7 +151,7 @@ exports = {
    * @param   {object}        [opts]
    * @returns {SceneScoreView}
    */
-  showScore: function(resource, x, y, opts) {
+  showScore: function (resource, x, y, opts) {
     var scoreView;
 
     // function type (1)
@@ -227,7 +226,7 @@ exports = {
    * @see ScaleManager#resize
    * @see scene.updateScreenDimensions
    */
-  setScaleOptions: function(width, height, scaleMode) {
+  setScaleOptions: function (width, height, scaleMode) {
     this.scaleManager.resize(width, height, scaleMode);
     this.updateScreenDimensions();
   },
@@ -235,7 +234,7 @@ exports = {
   /**
    * Updates the internal scene variables relying on the scaleManager sizes
    */
-  updateScreenDimensions: function() {
+  updateScreenDimensions: function () {
     var scaleManager = this.scaleManager;
 
     this.internal.fire('updateScreenDimensions');
@@ -365,7 +364,7 @@ exports = {
     // Restart
     {
       event: 'restartUI',
-      cb: function(mode) {
+      cb: function (mode) {
         this.ui.reset();
 
         // TODO: Why is there an updatescreendimensions called at reset and init?
@@ -386,14 +385,14 @@ exports = {
     },
     {
       event: 'restartGame',
-      cb: function() {
+      cb: function () {
         this.background.reloadConfig();
       }
     },
     // Tick
     {
       event: 'tickSec',
-      cb: function(dt) {
+      cb: function (dt) {
         this.background.update(dt);
       }
     }

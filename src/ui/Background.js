@@ -1,16 +1,13 @@
 import ui.View as View;
 import ui.ImageView as ImageView;
 import ui.resource.Image as Image;
-
-import communityart;
-
 import parallax.Parallax as Parallax;
-
 import scene.utils.performance as performance;
 import .BackgroundLayer;
 
 /** @lends Background */
-exports = Class(View, function (supr) {
+exports = Class(View, function () {
+  var suprPrototype = View.prototype;
 
   /**
    * The generic background class for a scene game.
@@ -18,13 +15,11 @@ exports = Class(View, function (supr) {
    * @arg {object} [opts]
    * @extends View
    */
-  this.init = function(opts) {
-    supr(this, 'init', arguments);
+  this.init = function (opts) {
+    suprPrototype.init.call(this, opts);
 
     /** @type Parallax */
-    this.parallax = new Parallax({
-      parent: this
-    });
+    this.parallax = new Parallax({ parent: this });
 
     /**
      * The current total offset of the background (individual layers may vary based on their scroll rate)
@@ -65,7 +60,7 @@ exports = Class(View, function (supr) {
    * Reload the underlying parallax instance using either a new or the existing config.
    * @param  {array} config A valid parallax config
    */
-  this.reloadConfig = function(config) {
+  this.reloadConfig = function (config) {
     this.config = config || this.config;
     this.parallax.reset(this.config);
   };
@@ -73,7 +68,7 @@ exports = Class(View, function (supr) {
   /**
    * Reset this and the parallax instance to their fresh states.
    */
-  this.reset = function() {
+  this.reset = function () {
     this._offsetX = 0;
     this._offsetY = 0;
     this.autoX = 0;
@@ -97,7 +92,7 @@ exports = Class(View, function (supr) {
    * Used by scene internally
    * @param  {number} dt In seconds
    */
-  this.update = function(dt) {
+  this.update = function (dt) {
     this.scroll(dt * this.autoX, dt * this.autoY);
   };
 
@@ -106,7 +101,7 @@ exports = Class(View, function (supr) {
    * @param  {number} x
    * @param  {number} y
    */
-  this.scroll = function(x, y) {
+  this.scroll = function (x, y) {
     this._offsetX += x;
     this._offsetY += y;
     this._updateParallax();
@@ -115,7 +110,7 @@ exports = Class(View, function (supr) {
   /**
    * Updates the parallax instance
    */
-  this._updateParallax = function() {
+  this._updateParallax = function () {
     performance.start('Background:updateParallax');
     this.parallax.update(this._offsetX, this._offsetY);
     performance.stop('Background:updateParallax');
@@ -129,8 +124,8 @@ exports = Class(View, function (supr) {
    * @also
    * @arg {number} amount Used for both x and y
    */
-  this.autoScroll = function(autoX, autoY) {
-    if (autoY === undefined) {
+  this.autoScroll = function (autoX, autoY) {
+    if (autoY === void 0) {
       autoY = autoX;
     }
     this.autoX = autoX;
@@ -138,11 +133,11 @@ exports = Class(View, function (supr) {
   };
 
   /**
-   * Used set the offsets to an exact number.  In most cases you should use {@link Background#autoScroll}
-   * @param  {number} x
-   * @param  {number} y
+   * Used set the offsets to an exact number. In most cases you should use {@link Background#autoScroll}
+   * @param {number} x
+   * @param {number} y
    */
-  this.scrollTo = function(x, y) {
+  this.scrollTo = function (x, y) {
     if (this._offsetX === x && this._offsetY === y) { return; }
     this._offsetX = x;
     this._offsetY = y;
@@ -150,40 +145,52 @@ exports = Class(View, function (supr) {
   };
 
   /**
-   * @arg {object} resource Can be a parallax config, an array of parallax layer configs, or a static background (no opts specified)
-   * @arg {Object} [opts] Contains options to be applied to the underlying {@link Layer}. If not specified, a static {@link View} is displayed.
-   * @arg {number} [opts.scrollX] Marks the parallax layer to sroll in the X direction at the specified speed
-   * @arg {number} [opts.scrollY] Marks the parallax layer to sroll in the Y direction at the specified speed
-   * @arg {number} [opts.repeatX]
-   * @arg {number} [opts.repeatY]
-   * @arg {number} [opts.x] Forwarded to the parallax config pieceOptions
-   * @arg {number} [opts.y] Forwarded to the parallax config pieceOptions
-   * @arg {number} [opts.align] Either `left`, `right`, `top`, or `bottom`
-   * @returns {BackgroundLayer|View}
+   * Add a static background image
+   * @function addLayer
+   * @param {object} opts - Options applied to the {@link ImageView}
+   * @returns {ImageView}
    */
-  this.addLayer = function(resource, opts) {
+   /**
+    * Add a single parallax layer
+    * @function addLayer(2)
+    * @param {object} opts - Options applied to the {@link BackgroundLayer}; includes simple aliases for devkit-parallax API
+    * @param {number} [opts.scrollX] - Relative speed at which to scroll in the x-direction; alias for devkit-parallax xMultiplier
+    * @param {number} [opts.scrollY] - Relative speed at which to scroll in the y-direction; alias for devkit-parallax yMultiplier
+    * @param {number} [opts.repeatX] - Whether or not to continue spawning parallax pieces in the x-direction while scrolling; alias for devkit-parallax xCanSpawn and xCanRelease
+    * @param {number} [opts.repeatY] - Whether or not to continue spawning parallax pieces in the y-direction while scrolling; alias for devkit-parallax yCanSpawn and yCanRelease
+    * @param {number} [opts.align] - Either 'left', 'right', 'top', or 'bottom'
+    * @param {number} [opts.x] - x, y, scale, and other {@link View} style properties are forwarded to the parallax piece
+    * @returns {BackgroundLayer}
+    */
+    /**
+     * Add a set of parallax layers; see {@link https://github.com/gameclosure/devkit-parallax#parallax-config devkit-parallax} for config API
+     * @function addLayer(3)
+     * @param {object[]|object} opts - An array of parallax layer config objects or a parallax resource object returned by scene.registerConfig
+     * @returns {BackgroundLayer}
+     */
+  this.addLayer = function (opts) {
     performance.start('Background:addLayer');
-    if (Array.isArray(resource)) {
-      resource = {
+
+    if (Array.isArray(opts)) {
+      opts = {
         type: 'ParallaxConfig',
-        config: resource
+        config: opts
       };
     }
 
-    if (resource.type === 'ParallaxConfig') {
-      for (var l in resource.config) {
-        var layerConfig = resource.config[l];
+    if (opts.type === 'ParallaxConfig') {
+      for (var l in opts.config) {
+        var layerConfig = opts.config[l];
         var layer = new BackgroundLayer(layerConfig, this);
         this.config.push(layerConfig);
         layer.setScroll(layerConfig.xMultiplier, layerConfig.yMultiplier);
       }
-    } else if (!opts) {
+    } else if (!opts.scrollX && !opts.scrollY) {
       // Static image - auto-fits, centered, maintains aspect ratio
-      var url = resource.url || resource.image;
-      var img = new Image({ url: url });
+      var img = new Image({ url: opts.url || opts.image });
       var map = img.getMap();
-      var w = resource.width || map.width || this.style.width;
-      var h = resource.height || map.height || this.style.height;
+      var w = opts.width || map.width || this.style.width;
+      var h = opts.height || map.height || this.style.height;
       var scale = 1;
       var scaleMode = scene.scaleManager.scaleMode;
       if (scaleMode === scene.SCALE_MODE.LOCK_WIDTH) {
@@ -204,43 +211,49 @@ exports = Class(View, function (supr) {
         image: img
       });
     } else {
+      // Build a single scrolling piece
+      var piece = { image: opts.url || opts.image };
+
       // Automatic repeating
-      if (!opts.repeatX && opts.scrollX) { opts.repeatX = true; }
-      if (!opts.repeatY && opts.scrollY) { opts.repeatY = true; }
+      opts.repeatX === void 0 && opts.scrollX && (opts.repeatX = true);
+      opts.repeatY === void 0 && opts.scrollY && (opts.repeatY = true);
+
       // Automatic alignment
-      if (opts.align === 'bottom' && opts.y === undefined) { opts.y = this.style.height; }
-      else if (opts.align === 'top' && opts.y === undefined) { opts.y = 0; }
-      else if (opts.align === 'left' && opts.x === undefined) { opts.x = this.style.width; }
-      else if (opts.align === 'right' && opts.x === undefined) { opts.x = 0; }
-
-      // Build pieceOptions
-      var pieceOptions = { image: resource.url || resource.image };
-      if (opts.align === 'left' || opts.align === 'right') {
-        pieceOptions.xAlign = opts.align;
-      } else if (opts.align === 'top' || opts.align === 'bottom') {
-        pieceOptions.yAlign = opts.align;
+      switch (opts.align) {
+        case 'top':
+          piece.yAlign = opts.align;
+          if (opts.y === void 0) { opts.y = 0; }
+          break;
+        case 'bottom':
+          piece.yAlign = opts.align;
+          if (opts.y === void 0) { opts.y = this.style.height; }
+          break;
+        case 'left':
+          piece.xAlign = opts.align;
+          if (opts.x === void 0) { opts.x = 0; }
+          break;
+        case 'right':
+          piece.xAlign = opts.align;
+          if (opts.x === void 0) { opts.x = this.style.width; }
+          break;
       }
-      if (opts.x !== undefined) { pieceOptions.x = opts.x; }
-      if (opts.y !== undefined) { pieceOptions.y = opts.y; }
-      if (opts.width !== undefined) { pieceOptions.width = opts.width; }
-      if (opts.height !== undefined) { pieceOptions.height = opts.height; }
-      if (opts.scaleX !== undefined) { pieceOptions.scaleX = opts.scaleX; }
-      if (opts.scaleY !== undefined) { pieceOptions.scaleY = opts.scaleY; }
-      if (opts.scale !== undefined) { pieceOptions.scale = opts.scale; }
-      if (opts.anchorX !== undefined) { pieceOptions.anchorX = opts.anchorX; }
-      if (opts.anchorY !== undefined) { pieceOptions.anchorY = opts.anchorY; }
 
-      var config_opts = {
+      // forward view style properties to the parallax piece
+      for (var prop in opts) {
+        piece[prop] = opts[prop];
+      }
+
+      var configOpts = {
         zIndex: this.zIndex,
         xCanSpawn: opts.repeatX || false,
         xCanRelease: opts.repeatX || false,
         yCanSpawn: opts.repeatY || false,
         yCanRelease: opts.repeatY || false,
-        pieceOptions: [pieceOptions]
+        pieceOptions: [piece]
       };
 
-      this.config.push(config_opts);
-      var layer = new BackgroundLayer(config_opts, this);
+      this.config.push(configOpts);
+      var layer = new BackgroundLayer(configOpts, this);
       layer.setScroll(opts.scrollX, opts.scrollY);
     }
 
