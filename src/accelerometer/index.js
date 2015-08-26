@@ -39,19 +39,18 @@ exports = {
       _accelerometerStarted = true;
       _accelerometerHandlers = [];
 
+      var atan2 = Math.atan2;
       accelerometer.on('devicemotion', function (evt) {
-
         var x = (evt.accelerationIncludingGravity.x - evt.acceleration.x) / 10;
         var y = (evt.accelerationIncludingGravity.y - evt.acceleration.y) / 10;
         var z = (evt.accelerationIncludingGravity.z - evt.acceleration.z) / 10;
-
         var accelObj = {
           x: x,
           y: y,
           z: z,
-          forwardTilt: Math.atan2(z, y),
-          tilt: Math.atan2(x, y),
-          twist: Math.atan2(x, z),
+          forwardTilt: atan2(z, y),
+          tilt: atan2(x, y),
+          twist: atan2(x, z)
         };
 
         // Update all the handlers!
