@@ -10,40 +10,70 @@ exports = Class(Entity, function () {
   var suprPrototype = Entity.prototype;
 
   /**
-   * @class Actor
-   * @param {object}         [opts]
-   * @param {boolean|object} [opts.followTouches] - Follow touches on the screen, or follow one or both axis (if argument type is Object)
-   * @param {boolean}        [opts.followTouches.x]
-   * @param {boolean}        [opts.followTouches.y]
-   * @param {boolean}        [opts.followTouches.instant=false] - causes the actor to be at the touch position instantly, without smoothing
-   * @param {number}         [opts.followTouches.xMultipier=0.1] - When not instant, this is used for velocity smoothing
-   * @param {number}         [opts.followTouches.yMultipier=0.1] - When not instant, this is used for velocity smoothing
-   * @param {cameraUpdateFunction|cameraUpdateFunction[]} [opts.cameraFunction]
-   * @param {number}         [opts.health]
-   * @param {boolean|object} [opts.faceForward] - Causes the actor to always face in the direction it is heading (determined by velocity)
-   * @param {number}         [opts.faceForward.offset] - An offset for the actor to use while facing forward
-   */
-  this.init = function (opts) {
-    suprPrototype.init.call(this, opts);
-  };
-
-  /**
-   * Reset the actor using the given config
+   * Reset the actor using the given opts; this is called automatically by {@link scene#addActor} / {@link group#addActor}
    * @method Actor#reset
-   * @param  {object}  [config]
-   * @param  {boolean} [config.followTouches]
-   * @param  {function|function[]} [config.cameraFunction]
-   * @param  {number}  [config.health]
-   * @param  {boolean} [config.faceForward]
-   * @param  {number}  [config.scale]
-   * @param  {number}  [config.frameRate]
-   * @param  {number}  [config.rotation]
-   * @param  {boolean} [config.flipX]
-   * @param  {boolean} [config.flipY]
-   * @param  {number}  [config.zIndex]
+   * @param {object} opts
+   * @param {number} [opts.x] - the horizontal coordinate of the actor
+   * @param {number} [opts.y] - the vertical coordinate of the actor
+   * @param {number} [opts.offsetX=0] - the horizontal offset of the actor
+   * @param {number} [opts.offsetY=0] - the vertical offset of the actor
+   * @param {number} [opts.zIndex] - the sort-order for this actor's view; higher numbers render in front of lower numbers
+   * @param {number} [opts.width] - the width of the actor's view and hit bounds
+   * @param {number} [opts.height] - the height of the actor's view and hit bounds
+   * @param {boolean} [opts.flipX=false] - flip the actor's view horizontally
+   * @param {boolean} [opts.flipY=false] - flip the actor's view vertically
+   * @param {number} [opts.opacity=1] - the transparency of an actor's view, from 0 (invisible) to 1 (opaque)
+   * @param {number} [opts.vx=0] - the initial horizontal velocity of the actor
+   * @param {number} [opts.vy=0] - the initial vertical velocity of the actor
+   * @param {number} [opts.ax=0] - the initial horizontal acceleration of the actor
+   * @param {number} [opts.ay=0] - the initial vertical acceleration of the actor
+   * @param {number} [opts.rotation=0] - the rotation of the actors view around the anchor point
+   * @param {object} [opts.hitOpts] - a set of properties to apply only to the hit bounds of an actor (and not its view); the opts object itself is used if no hitOpts is specified
+   * @param {number} [opts.hitOpts.offsetX=0] - the horizontal offset of the actor's hit bounds; overrides opts.offsetX
+   * @param {number} [opts.hitOpts.offsetY=0] - the vertical offset of the actor's hit bounds; overrides opts.offsetY
+   * @param {number} [opts.hitOpts.width] - the width of the actor's hit bounds; overrides opts.width
+   * @param {number} [opts.hitOpts.height] - the height of the actor's hit bounds; overrides opts.height
+   * @param {number} [opts.hitOpts.radius] - makes the actor's hit bounds a circle and defines its radius
+   * @param {object} [opts.viewOpts] - a set of properties to apply only to the view of an actor (and not its hit bounds); accepts any devkit View style property; the opts object itself is used if no viewOpts is specified
+   * @param {number} [opts.viewOpts.offsetX=0] - the horizontal offset of the actor's view; overrides opts.offsetX
+   * @param {number} [opts.viewOpts.offsetY=0] - the vertical offset of the actor's view; overrides opts.offsetY
+   * @param {number} [opts.viewOpts.anchorX=0] - the horizontal anchor of the actor's view; used as a pivot point for rotation and scaling
+   * @param {number} [opts.viewOpts.anchorY=0] - the vertical anchor of the actor's view; used as a pivot point for rotation and scaling
+   * @param {number} [opts.viewOpts.width] - the width of the actor's view; overrides opts.width
+   * @param {number} [opts.viewOpts.height] - the height of the actor's view; overrides opts.height
+   * @param {number} [opts.viewOpts.scale=1] - multiplier to modify the actor's view dimensions around the anchor point
+   * @param {number} [opts.viewOpts.scaleX=1] - multiplier to modify the actor's view width around anchorX
+   * @param {number} [opts.viewOpts.scaleY=1] - multiplier to modify the actor's view height around anchorY
+   * @param {string} [opts.viewOpts.compositeOperation='] - a JavaScript canvas context globalCompositeOperation; try 'lighter' for a bright blend effect
+   * @param {string} [opts.viewOpts.image] - resource path to a static image to display the actor; i.e. 'resources/images/ninja.png'
+   * @param {string} [opts.viewOpts.url] - resource path to the subject of a sprite animation; i.e. 'resources/images/ninja' where an example sprite frame is 'resources/images/ninja_run_0001.png'
+   * @param {string} [opts.viewOpts.defaultAnimation] - the default sprite animation action; i.e. 'run' where an example sprite frame is 'resources/images/ninja_run_0001.png'
+   * @param {boolean} [opts.viewOpts.loop] - whether or not to loop the defaultAnimation of a sprite
+   * @param {boolean} [opts.viewOpts.autoStart] - whether or not to start the defaultAnimation immediately
+   * @param {number} [opts.viewOpts.frameRate=24] - the frames-per-second of the sprite animation
+   * @param {boolean|object} [opts.followTouches] - Follow touches on the screen, or follow one or both axis (if argument type is Object)
+   * @param {boolean} [opts.followTouches.x]
+   * @param {boolean} [opts.followTouches.y]
+   * @param {boolean} [opts.followTouches.instant=false] - causes the actor to be at the touch position instantly, without smoothing
+   * @param {number} [opts.followTouches.xMultipier=0.1] - When not instant, this is used for velocity smoothing
+   * @param {number} [opts.followTouches.yMultipier=0.1] - When not instant, this is used for velocity smoothing
+   * @param {cameraUpdateFunction|cameraUpdateFunction[]} [opts.cameraFunction]
+   * @param {number} [opts.health]
+   * @param {boolean|object} [opts.faceForward] - Causes the actor to always face in the direction it is heading (determined by velocity)
+   * @param {number} [opts.faceForward.offset] - An offset for the actor to use while facing forward
    */
-  this.reset = function (config) {
-    suprPrototype.reset.call(this, config);
+  this.reset = function (opts) {
+    // some view opts shortcuts
+    this.scale = opts.scale !== void 0 ? opts.scale : 1;
+    this.rotation = opts.rotation || 0;
+    this.flipX = opts.flipX || false;
+    this.flipY = opts.flipY || false;
+    this.zIndex = opts.zIndex || 0;
+    this.opacity = opts.opacity !== void 0 ? opts.opacity : 1;
+    this.view.setFramerate(opts.frameRate !== void 0 ? opts.frameRate : 24);
+
+    // call Entity's reset function
+    suprPrototype.reset.call(this, opts);
 
     effects.clear(this);
     this.lastFollowTarget = null;
@@ -52,38 +82,25 @@ exports = Class(Entity, function () {
 
     this.dtExisted = 0;
 
-    // Follow touches
-    this.updateFollowTouches(config.followTouches);
+    this.updateFollowTouches(opts.followTouches);
 
-    // Camera functions
-    this.cameraFunction = config.cameraFunction;
+    this.cameraFunction = opts.cameraFunction;
     if (this.cameraFunction && !Array.isArray(this.cameraFunction)) {
       this.cameraFunction = [this.cameraFunction];
     }
 
-    // Health
-    this.health = config.health || 1;
+    this.health = opts.health || 1;
 
-    this.faceForward = config.faceForward || false;
-
-    this.unscaledHitBounds = this.model.hitBounds;
-    this.scale = config.scale !== void 0 ? config.scale : 1;
-    this.view.setFramerate(config.frameRate !== void 0 ? config.frameRate : 30);
-
-    this.rotation = config.rotation || 0;
-    this.flipX = config.flipX || false;
-    this.flipY = config.flipY || false;
-    this.zIndex = config.zIndex || 0;
-    this.opacity = config.opacity !== void 0 ? config.opacity : 1;
+    this.faceForward = opts.faceForward || false;
   };
 
   /**
    * Utility function, multiply all numbers in source by scale into target
    * Note: Both arrays or objects should have the same length or key set
    * @method Actor#applyScaledBounds
-   * @param  {number[]|Object.<?, number>} sourceBounds
-   * @param  {number[]|Object.<?, number>} targetBounds
-   * @param  {number}   scale
+   * @param {number[]|Object.<?, number>} sourceBounds
+   * @param {number[]|Object.<?, number>} targetBounds
+   * @param {number}   scale
    */
   this.applyScaledBounds = function (sourceBounds, targetBounds, scale) {
     for (var i in sourceBounds) {
@@ -94,7 +111,7 @@ exports = Class(Entity, function () {
   /**
    * Update whether or not this actor should follow touches on screen
    * @method Actor#updateFollowTouches
-   * @param  {boolean|{boolean: x, boolean: y}} opts
+   * @param {boolean|{boolean: x, boolean: y}} opts
    */
   this.updateFollowTouches = function (opts) {
     // Follow touches?
@@ -120,7 +137,7 @@ exports = Class(Entity, function () {
 
   /**
    * @method Actor#update
-   * @param  {number} dt Time in milliseconds
+   * @param {number} dt Time in milliseconds
    */
   this.update = function (dt) {
     if (!this.active) {
@@ -158,7 +175,7 @@ exports = Class(Entity, function () {
 
   /**
    * @method Actor#_followTouch
-   * @param  {number} dt Time in milliseconds
+   * @param {number} dt Time in milliseconds
    * @private
    */
   this._followTouch = function (dt) {
@@ -195,7 +212,7 @@ exports = Class(Entity, function () {
   /**
    * Remove an amount of health, and destroy if dead.
    * @method Actor#hurt
-   * @param  {number} amount
+   * @param {number} amount
    */
   this.hurt = function (amount) {
     this.health -= amount;
@@ -208,7 +225,7 @@ exports = Class(Entity, function () {
   /**
    * Add an amount of health
    * @method Actor#heal
-   * @param  {number} amount
+   * @param {number} amount
    */
   this.heal = function (amount) {
     this.health += amount;
@@ -217,8 +234,8 @@ exports = Class(Entity, function () {
   /**
    * Fire {@link callback} when this instance is completely inside target
    * @method Actor#onEntered
-   * @param  {Actor|Shape|Collidable} target
-   * @param  {function} callback
+   * @param {Actor|Shape|Collidable} target
+   * @param {function} callback
    * @return {number} collisionCheckID
    */
   this.onEntered = function (target, callback) {
@@ -228,8 +245,8 @@ exports = Class(Entity, function () {
   /**
    * Fire {@link callback} when this instance is completely outside of target
    * @method Actor#onExited
-   * @param  {Actor|Shape|Collidable} target
-   * @param  {function} callback
+   * @param {Actor|Shape|Collidable} target
+   * @param {function} callback
    * @return {number} collisionCheckID
    */
   this.onExited = function (target, callback) {
@@ -239,9 +256,9 @@ exports = Class(Entity, function () {
   /**
    * Register a new collision with scene, and return
    * @method Actor#_registerCollision
-   * @param  {object}   target
-   * @param  {function} callback
-   * @param  {string}   type
+   * @param {object}   target
+   * @param {function} callback
+   * @param {string}   type
    * @return {number} collisionCheckID
    * @see CollisionManager.registerCollision
    * @private
@@ -260,9 +277,9 @@ exports = Class(Entity, function () {
   /**
    * Set vx and vy to aim for the specified point, with the specified speed.
    * @method Actor#headToward
-   * @param  {number} x
-   * @param  {number} y
-   * @param  {number} speed
+   * @param {number} x
+   * @param {number} y
+   * @param {number} speed
    */
   this.headToward = function (x, y, speed) {
     var targetAngle = Math.atan2(y - this.y, x - this.x);
@@ -273,9 +290,9 @@ exports = Class(Entity, function () {
   /**
    * Rotate the actor to point at the specified x and y coordinates (with an optional rotation offset)
    * @method Actor#rotateAt
-   * @param  {number} x
-   * @param  {number} y
-   * @param  {number} [offset]
+   * @param {number} x
+   * @param {number} y
+   * @param {number} [offset]
    */
   this.rotateAt = function (x, y, offset) {
     var targetAngle = Math.atan2(y - this.y, x - this.x) + Math.PI / 2;
@@ -285,7 +302,7 @@ exports = Class(Entity, function () {
   /**
    * Register a new tick handler
    * @method Actor#onTick
-   * @param  {onTickCallback} callback
+   * @param {onTickCallback} callback
    */
   this.onTick = function (callback) {
     this.tickHandlers.push(callback);
@@ -401,8 +418,8 @@ exports = Class(Entity, function () {
 
   /**
    * @method Actor#_addStyleProperty
-   * @param  {string} styleName A valid style property
-   * @param  {string} [newName] A different name to use for the local property
+   * @param {string} styleName A valid style property
+   * @param {string} [newName] A different name to use for the local property
    * @private
    */
   this._addStyleProperty = function (styleName, newName) {
@@ -444,10 +461,7 @@ exports = Class(Entity, function () {
    */
   Object.defineProperty(this, 'scale', {
     get: function () { return this.view.style.scale },
-    set: function (value) {
-      this.view.style.scale = value;
-      this.applyScaledBounds(this.unscaledHitBounds, this.model.hitBounds, value);
-    }
+    set: function (value) { this.view.style.scale = value; }
   });
 
   /** Shortcut to this.view.clipRect

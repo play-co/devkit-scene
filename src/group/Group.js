@@ -25,6 +25,7 @@ exports = Class(EntityPool, function () {
   /**
    * A function which adds an actor to the scene, using this group.
    * @param {object} [opts] - Contains options to be applied to the underlying {@link Actor}
+   * @see Actor#reset
    */
   this.addActor = function (opts) {
     performance.start('Group:addActor');
