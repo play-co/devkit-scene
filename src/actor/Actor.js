@@ -4,7 +4,7 @@ import entities.Entity as Entity;
 /**
  * This class is the basic building block for games in scene. An actor is a visible, interactive game element.
  * @class Actor
- * @extends {Entity}
+ * @extends {@link Entity}
  */
 exports = Class(Entity, function () {
   var suprPrototype = Entity.prototype;
@@ -13,57 +13,57 @@ exports = Class(Entity, function () {
    * Reset the actor using the given opts; this is called automatically by {@link scene#addActor} / {@link group#addActor}
    * @method Actor#reset
    * @param {object} opts
-   * @param {number} [opts.x] - the horizontal coordinate of the actor
-   * @param {number} [opts.y] - the vertical coordinate of the actor
-   * @param {number} [opts.offsetX=0] - the horizontal offset of the actor
-   * @param {number} [opts.offsetY=0] - the vertical offset of the actor
-   * @param {number} [opts.zIndex] - the sort-order for this actor's view; higher numbers render in front of lower numbers
-   * @param {number} [opts.width] - the width of the actor's view and hit bounds
-   * @param {number} [opts.height] - the height of the actor's view and hit bounds
-   * @param {boolean} [opts.flipX=false] - flip the actor's view horizontally
-   * @param {boolean} [opts.flipY=false] - flip the actor's view vertically
-   * @param {number} [opts.opacity=1] - the transparency of an actor's view, from 0 (invisible) to 1 (opaque)
-   * @param {number} [opts.vx=0] - the initial horizontal velocity of the actor
-   * @param {number} [opts.vy=0] - the initial vertical velocity of the actor
-   * @param {number} [opts.ax=0] - the initial horizontal acceleration of the actor
-   * @param {number} [opts.ay=0] - the initial vertical acceleration of the actor
-   * @param {number} [opts.rotation=0] - the rotation of the actors view around the anchor point
-   * @param {object} [opts.hitOpts] - a set of properties to apply only to the hit bounds of an actor (and not its view); the opts object itself is used if no hitOpts is specified
-   * @param {number} [opts.hitOpts.offsetX=0] - the horizontal offset of the actor's hit bounds; overrides opts.offsetX
-   * @param {number} [opts.hitOpts.offsetY=0] - the vertical offset of the actor's hit bounds; overrides opts.offsetY
-   * @param {number} [opts.hitOpts.width] - the width of the actor's hit bounds; overrides opts.width
-   * @param {number} [opts.hitOpts.height] - the height of the actor's hit bounds; overrides opts.height
-   * @param {number} [opts.hitOpts.radius] - makes the actor's hit bounds a circle and defines its radius
-   * @param {object} [opts.viewOpts] - a set of properties to apply only to the view of an actor (and not its hit bounds); accepts any devkit View style property; the opts object itself is used if no viewOpts is specified
-   * @param {number} [opts.viewOpts.offsetX=0] - the horizontal offset of the actor's view; overrides opts.offsetX
-   * @param {number} [opts.viewOpts.offsetY=0] - the vertical offset of the actor's view; overrides opts.offsetY
-   * @param {number} [opts.viewOpts.anchorX=0] - the horizontal anchor of the actor's view; used as a pivot point for rotation and scaling
-   * @param {number} [opts.viewOpts.anchorY=0] - the vertical anchor of the actor's view; used as a pivot point for rotation and scaling
-   * @param {number} [opts.viewOpts.width] - the width of the actor's view; overrides opts.width
-   * @param {number} [opts.viewOpts.height] - the height of the actor's view; overrides opts.height
-   * @param {number} [opts.viewOpts.scale=1] - multiplier to modify the actor's view dimensions around the anchor point
-   * @param {number} [opts.viewOpts.scaleX=1] - multiplier to modify the actor's view width around anchorX
-   * @param {number} [opts.viewOpts.scaleY=1] - multiplier to modify the actor's view height around anchorY
-   * @param {string} [opts.viewOpts.compositeOperation='] - a JavaScript canvas context globalCompositeOperation; try 'lighter' for a bright blend effect
-   * @param {string} [opts.viewOpts.image] - resource path to a static image to display the actor; i.e. 'resources/images/ninja.png'
-   * @param {string} [opts.viewOpts.url] - resource path to the subject of a sprite animation; i.e. 'resources/images/ninja' where an example sprite frame is 'resources/images/ninja_run_0001.png'
-   * @param {string} [opts.viewOpts.defaultAnimation] - the default sprite animation action; i.e. 'run' where an example sprite frame is 'resources/images/ninja_run_0001.png'
-   * @param {boolean} [opts.viewOpts.loop] - whether or not to loop the defaultAnimation of a sprite
-   * @param {boolean} [opts.viewOpts.autoStart] - whether or not to start the defaultAnimation immediately
-   * @param {number} [opts.viewOpts.frameRate=24] - the frames-per-second of the sprite animation
-   * @param {boolean|object} [opts.followTouches] - Follow touches on the screen, or follow one or both axis (if argument type is Object)
-   * @param {boolean} [opts.followTouches.x]
-   * @param {boolean} [opts.followTouches.y]
-   * @param {boolean} [opts.followTouches.instant=false] - causes the actor to be at the touch position instantly, without smoothing
+   * @param {number} [opts.x] - The horizontal coordinate of the actor
+   * @param {number} [opts.y] - The vertical coordinate of the actor
+   * @param {number} [opts.offsetX=0] - The horizontal offset of the actor
+   * @param {number} [opts.offsetY=0] - The vertical offset of the actor
+   * @param {number} [opts.zIndex] - The sort-order for this actor's view; higher numbers render in front of lower numbers
+   * @param {number} [opts.width] - The width of the actor's view and hit bounds
+   * @param {number} [opts.height] - The height of the actor's view and hit bounds
+   * @param {boolean} [opts.flipX=false] - Flip the actor's view horizontally
+   * @param {boolean} [opts.flipY=false] - Flip the actor's view vertically
+   * @param {number} [opts.opacity=1] - The transparency of an actor's view, from 0 (invisible) to 1 (opaque)
+   * @param {number} [opts.vx=0] - The initial horizontal velocity of the actor
+   * @param {number} [opts.vy=0] - The initial vertical velocity of the actor
+   * @param {number} [opts.ax=0] - The initial horizontal acceleration of the actor
+   * @param {number} [opts.ay=0] - The initial vertical acceleration of the actor
+   * @param {number} [opts.rotation=0] - The rotation of the actors view around the anchor point
+   * @param {object} [opts.hitOpts] - A set of properties to apply only to the hit bounds of an actor (and not its view); the opts object itself is used if no hitOpts is specified
+   * @param {number} [opts.hitOpts.offsetX=0] - The horizontal offset of the actor's hit bounds; overrides opts.offsetX
+   * @param {number} [opts.hitOpts.offsetY=0] - The vertical offset of the actor's hit bounds; overrides opts.offsetY
+   * @param {number} [opts.hitOpts.width] - The width of the actor's hit bounds; overrides opts.width
+   * @param {number} [opts.hitOpts.height] - The height of the actor's hit bounds; overrides opts.height
+   * @param {number} [opts.hitOpts.radius] - Makes the actor's hit bounds a circle and defines its radius
+   * @param {object} [opts.viewOpts] - A set of properties to apply only to the view of an actor (and not its hit bounds); accepts any devkit View style property; the opts object itself is used if no viewOpts is specified
+   * @param {number} [opts.viewOpts.offsetX=0] - The horizontal offset of the actor's view; overrides opts.offsetX
+   * @param {number} [opts.viewOpts.offsetY=0] - The vertical offset of the actor's view; overrides opts.offsetY
+   * @param {number} [opts.viewOpts.anchorX=0] - The horizontal anchor of the actor's view; used as a pivot point for rotation and scaling
+   * @param {number} [opts.viewOpts.anchorY=0] - The vertical anchor of the actor's view; used as a pivot point for rotation and scaling
+   * @param {number} [opts.viewOpts.width] - The width of the actor's view; overrides opts.width
+   * @param {number} [opts.viewOpts.height] - The height of the actor's view; overrides opts.height
+   * @param {number} [opts.viewOpts.scale=1] - Multiplier to modify the actor's view dimensions around the anchor point
+   * @param {number} [opts.viewOpts.scaleX=1] - Multiplier to modify the actor's view width around anchorX
+   * @param {number} [opts.viewOpts.scaleY=1] - Multiplier to modify the actor's view height around anchorY
+   * @param {string} [opts.viewOpts.compositeOperation=''] - A JavaScript canvas context globalCompositeOperation; try 'lighter' for a bright blend effect
+   * @param {string} [opts.viewOpts.image] - Resource path to a static image to display the actor; i.e. 'resources/images/ninja.png'
+   * @param {string} [opts.viewOpts.url] - Resource path to the subject of a sprite animation; i.e. 'resources/images/ninja' where an example sprite frame is 'resources/images/ninja_run_0001.png'
+   * @param {string} [opts.viewOpts.defaultAnimation] - The default sprite animation action; i.e. 'run' where an example sprite frame is 'resources/images/ninja_run_0001.png'
+   * @param {boolean} [opts.viewOpts.loop] - Whether or not to loop the defaultAnimation of a sprite
+   * @param {boolean} [opts.viewOpts.autoStart] - Whether or not to start the defaultAnimation immediately
+   * @param {number} [opts.viewOpts.frameRate=24] - The frames-per-second of the sprite animation
+   * @param {boolean|object} [opts.followTouches] - Whether the actor should follow touches on the screen; if type object, describes how it should follow touches
+   * @param {boolean} [opts.followTouches.x=false] - Follow touches horizontally
+   * @param {boolean} [opts.followTouches.y=false] - Follow touches vertically
+   * @param {boolean} [opts.followTouches.instant=false] - The actor moves to the touch position instantly, without smoothing
    * @param {number} [opts.followTouches.xMultipier=0.1] - When not instant, this is used for velocity smoothing
    * @param {number} [opts.followTouches.yMultipier=0.1] - When not instant, this is used for velocity smoothing
    * @param {cameraUpdateFunction|cameraUpdateFunction[]} [opts.cameraFunction]
-   * @param {number} [opts.health]
+   * @param {number} [opts.health=1] - Initial health of the actor
    * @param {boolean|object} [opts.faceForward] - Causes the actor to always face in the direction it is heading (determined by velocity)
    * @param {number} [opts.faceForward.offset] - An offset for the actor to use while facing forward
    */
   this.reset = function (opts) {
-    // some view opts shortcuts
+    // shortcuts for viewOpts if undefined
     this.scale = opts.scale !== void 0 ? opts.scale : 1;
     this.rotation = opts.rotation || 0;
     this.flipX = opts.flipX || false;
@@ -76,22 +76,18 @@ exports = Class(Entity, function () {
     suprPrototype.reset.call(this, opts);
 
     effects.clear(this);
+
+    this.dtExisted = 0;
     this.lastFollowTarget = null;
     this.destroyHandlers = [];
     this.tickHandlers = [];
-
-    this.dtExisted = 0;
-
+    this.health = opts.health || 1;
+    this.faceForward = opts.faceForward || false;
     this.updateFollowTouches(opts.followTouches);
-
     this.cameraFunction = opts.cameraFunction;
     if (this.cameraFunction && !Array.isArray(this.cameraFunction)) {
       this.cameraFunction = [this.cameraFunction];
     }
-
-    this.health = opts.health || 1;
-
-    this.faceForward = opts.faceForward || false;
   };
 
   /**
