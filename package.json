@@ -11,7 +11,7 @@
     "devkit-accelerometer": "git://github.com/gameclosure/accelerometer.git#v3.0.1",
     "devkit-effects": "git://github.com/gameclosure/devkit-effects.git#b23bb316c111c79fcb298ed493f12c418d9f5e90"
   },
-  "_devDependencies": {
+  "devDependencies": {
     "command-line-args": "^0.5.9",
     "devkit-core": "git://github.com/gameclosure/devkit-core.git#refactor-simulator-connection",
     "gulp": "^3.8.11",

@@ -3,41 +3,54 @@ var app = angular.module('scenejs.app', [
 ]);
 
 app.controller('MainCtrl', [
-  '$scope', '$location', '$rootScope',
-function($scope, $location, $rootScope) {
+  '$scope', '$location',  '$rootScope', '$sce', '$route', '$routeParams',
+function($scope, $location, $rootScope, $sce, $route, $routeParams) {
   $scope.examples = [
     {
-      title: 'Game title 1',
-      fgColor: '#378eba',
-      bgColor: '#343f4d',
-      textColor: '#fff'
+      title: 'Dragon Pong',
+      bgImg: 'resources/banner1.png',
+      iconImg: 'resources/icon1@2x.png',
+      url: 'http://www.weeby.co/flappy-pong/scene-demo/mobile/',
+      code: 'http://www.weeby.co/flappy-pong/scene-demo/docs/Application.html',
     },
     {
-      title: 'Game title 2',
-      fgColor: '#d7b664',
-      bgColor: '#f3f3f3',
-      textColor: '#3f3f3f'
+      title: 'Myth Jump',
+      bgImg: 'resources/banner2.png',
+      iconImg: 'resources/icon2@2x.png',
+      url: 'http://www.weeby.co/mythjump/mobile/',
     },
     {
-      title: 'Game title 3',
-      fgColor: '#885c10',
-      bgColor: '#f3f3f3',
-      textColor: '#3f3f3f'
+      title: 'Escape From Rainbow Land',
+      bgImg: 'resources/banner3.png',
+      iconImg: 'resources/icon3@2x.png',
+      url: 'http://www.weeby.co/vertrun/rainbowland/mobile/',
     },
   ];
   $scope.selectedExample = 0;
 
+  $scope.selectExample = function($event, id) {
+    $location.path('/example/' + id);
+    $location.search('code', null);
+  };
+
+  $scope.getUrlAtKeyAsTrusted = function(exampleId, key) {
+    if (typeof exampleId === 'number' && exampleId >= 0 && exampleId < $scope.examples.length) {
+      return $sce.trustAsResourceUrl($scope.examples[exampleId][key]);
+    } else {
+      throw new Error('exampleId "' + exampleId + '" not valid');
+    }
+  };
+
   // Update the example when the path changes
   $scope.$on('$routeChangeStart', function routeChanging(events, next, current) {
-    debugger
-    // if (next.exampleId !== undefined) {
-    //   $scope.selectedExample = next.exampleId;
-    //   console.log('Exmaple: ', $scope.selectedExample);
-    // }
+    if (next.params.exampleId !== undefined) {
+      $scope.selectedExample = parseInt(next.params.exampleId);
+      $scope.showCode = next.params.code;
+    }
   });
 
   $scope.$on('$locationChangeSuccess'), function(event, newUrl, oldUrl){
-    debugger
+    console.log('$locationChangeSuccess', event, newUrl, oldUrl)
   };
 
 }]);
@@ -45,10 +58,9 @@ function($scope, $location, $rootScope) {
 app.config(function($routeProvider, $locationProvider) {
   $routeProvider
     .when('/example/:exampleId', {
+      controller: 'MainCtrl'
     })
-    .when('/', {
-    })
-    .otherwise({redirectTo: '/'});
+    .otherwise({redirectTo: '/example/0'});
 
   $locationProvider.html5Mode(false);
 });
