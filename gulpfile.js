@@ -70,6 +70,8 @@ gulp.task('website-watch', ['website'], function() {
   gulp.watch([websitePaths.html], ['website-html']);
 });
 
+gulp.task('default', ['website-watch'], function(cb) { cb(); });
+
 var buildPathCache = function(modules) {
   var pathCache = {};
   for (var i = 0; i < modules.length; i++) {
