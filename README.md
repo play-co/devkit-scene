@@ -1,6 +1,6 @@
 # Devkit2 Scene Module
 
-The purpose of the scene module is to provide a easy to use layer of abstraction
+The purpose of the scene module is to provide an easy to use layer of abstraction
 on top of the devkit2 game engine and other devkit2 modules.
 
 
