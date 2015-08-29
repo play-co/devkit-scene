@@ -15,7 +15,7 @@ body .shadow {
 body .header {
   position: relative;
   background-color: #343f4d;
-  height: 160px;
+  height: 200px;
   display: -webkit-box;
   display: -moz-box;
   display: -webkit-flex;
@@ -55,7 +55,7 @@ body .header .background-container .logo {
   width: 120px;
   height: auto;
   margin-left: 5%;
-  margin-top: 35px;
+  margin-top: 55px;
 }
 body .content-wrapper {
   display: -webkit-box;
@@ -72,7 +72,8 @@ body .content-wrapper {
   justify-content: center;
 }
 body .content-wrapper .content {
-  width: 960px;
+  max-width: 960px;
+  width: 100%;
   display: -webkit-box;
   display: -moz-box;
   display: -webkit-flex;
@@ -94,11 +95,11 @@ body .content-wrapper .content .examples {
   -ms-flex-item-align: stretch;
   padding-right: 5%;
   padding-left: 5%;
+  font-size: 25px;
 }
 body .content-wrapper .content .examples .example-header {
   margin-top: 40px;
   margin-bottom: 25px;
-  font-size: 25px;
   color: #3f3f3f;
 }
 body .content-wrapper .content .examples .example {
@@ -178,9 +179,6 @@ body .content-wrapper .content .examples .example .left .game-info {
   -ms-flex-line-pack: start;
   -webkit-align-content: flex-start;
   align-content: flex-start;
-}
-body .content-wrapper .content .examples .example .left .game-info .title {
-  font-size: 25px;
 }
 body .content-wrapper .content .examples .example .left .game-info .subtitle {
   color: #68d44b;
@@ -286,10 +284,12 @@ body .content-wrapper .content .examples .example.selected .right {
 body .content-wrapper .content .examples .example-footer {
   position: absolute;
   bottom: 0;
+  margin-top: 40px;
   font-weight: 400;
   opacity: 0.3;
   -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=30)";
   filter: alpha(opacity=30);
+  font-size: 20px;
 }
 body .content-wrapper .content .examples .docs {
   text-decoration: none;
@@ -328,9 +328,10 @@ body .content-wrapper .content .examples .docs iframe {
 body .content-wrapper .content .phone-wrapper {
   padding-right: 5%;
   margin-top: -65px;
+  width: 30%;
 }
 body .content-wrapper .content .phone-wrapper .phone {
-  width: 250px;
+  width: 100%;
   display: inline-block;
   position: relative;
   background: #fff;
@@ -338,6 +339,7 @@ body .content-wrapper .content .phone-wrapper .phone {
   border-top-left-radius: 17% 8%;
   border-bottom-right-radius: 17% 8%;
   border-bottom-left-radius: 17% 8%;
+  min-width: 244px;
 }
 body .content-wrapper .content .phone-wrapper .phone:after {
   padding-top: 209.96148272%;
@@ -405,4 +407,66 @@ body .content-wrapper .content .phone-wrapper .phone .inner-phone .button {
   height: 7.4%;
   -webkit-border-radius: 100%;
   border-radius: 100%;
+}
+body .content-wrapper .content .phone-wrapper .phone #game-screen {
+  overflow: hidden;
+}
+body .content-wrapper .content .phone-wrapper .phone #game-screen iframe {
+  -webkit-transform-origin: left top;
+  -moz-transform-origin: left top;
+  -o-transform-origin: left top;
+  -ms-transform-origin: left top;
+  transform-origin: left top;
+}
+@media screen and (min-width: 1440px) {
+  body .header {
+    height: 250px;
+  }
+  body .header .background-container {
+    max-width: 1440px;
+  }
+  body .header .background-container .logo {
+    width: 180px;
+    margin-top: 55px;
+  }
+  body .content-wrapper .content {
+    max-width: 1440px;
+  }
+  body .content-wrapper .content .examples {
+    font-size: 35px;
+  }
+  body .content-wrapper .content .examples .example-header {
+    margin-top: 40px;
+    margin-bottom: 25px;
+  }
+  body .content-wrapper .content .examples .example {
+    height: 110px;
+  }
+  body .content-wrapper .content .examples .example .left .icon {
+    width: 80px;
+    height: 80px;
+    margin-right: 20px;
+    margin-left: 15px;
+  }
+  body .content-wrapper .content .examples .example .left .game-info .subtitle {
+    font-size: 25px;
+  }
+  body .content-wrapper .content .examples .example .right .example-bg-img {
+    -webkit-box-shadow: 5px 0 5px 0 rgba(0,0,0,0.2);
+    box-shadow: 5px 0 5px 0 rgba(0,0,0,0.2);
+  }
+  body .content-wrapper .content .examples .example .right .source-btn {
+    width: 180px;
+    font-size: 27px;
+  }
+  body .content-wrapper .content .examples .example .right .source-btn .coming-soon {
+    font-size: 19px;
+  }
+  body .content-wrapper .content .examples .example.selected .right {
+    -webkit-transform: translate(-180px, 0);
+    -moz-transform: translate(-180px, 0);
+    -o-transform: translate(-180px, 0);
+    -ms-transform: translate(-180px, 0);
+    transform: translate(-180px, 0);
+  }
 }

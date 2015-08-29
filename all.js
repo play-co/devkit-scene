@@ -1,3 +1,47 @@
+function autoScaleIFrameToParent (frameQuery, parentQuery, iframeNativeWidth, iframeNativeHeight) {
+  function initAutoScale() {
+    var screen = document.querySelector(parentQuery);
+    if (screen == null) {
+      console.error('Element at query "' + parentQuery + '" not found. aborting');
+      return;
+    }
+    var frame = document.querySelector(frameQuery);
+    if (frame == null) {
+      console.error('Element at query "' + frameQuery + '" not found. aborting');
+      return;
+    }
+    if (frame.dataset['autoScaleTo'] != undefined) {
+      console.error('Element at query "' + frameQuery + '" already syncing to element at query "' +
+        frame.dataset['autoScaleTo'] + '". aborting');
+      return;
+    }
+    frame.dataset['autoScaleTo'] = parentQuery;
+    frame.style.width = iframeNativeWidth + 'px';
+    frame.style.height = iframeNativeHeight + 'px';
+    var transformPropNames = ['-webkit-transform', '-moz-transform', '-o-transform', '-ms-transform', 'transform'];
+    function updateFrameScale() {
+      if (frame.parentNode == null || screen.parentNode == null) {
+        window.removeEventListener('resize', updateFrameScale);
+        return;
+      }
+      var scaledWidth = screen.clientWidth / iframeNativeWidth;
+      var scaledHeight = screen.clientHeight / iframeNativeHeight;
+      var scale = 'scale(' + scaledWidth + ',' + scaledHeight + ')';
+      for (var i = transformPropNames.length - 1; i >= 0; i--) {
+        frame.style[transformPropNames[i]] = scale;
+      }
+    }
+    window.addEventListener('resize', updateFrameScale);
+    updateFrameScale();
+  }
+  if (document.readyState !== 'complete') {
+    window.addEventListener('load', initAutoScale);
+  } else {
+    initAutoScale();
+  }
+}
+autoScaleIFrameToParent('#game-screen iframe', '#game-screen', 640, 1136);
+
 var app = angular.module('scenejs.app', [
   'ngRoute'
 ]);
