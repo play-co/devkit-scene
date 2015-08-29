@@ -5,11 +5,13 @@ import entities.shapes.Rect as Rect;
 
 var _onTickHandlers = [];
 
-/** Use the get and set method
+/**
+ * Use the get and set method
  * @var {number} _score
  * @private
  * @see scene.getScore
- * @see scene.setScore */
+ * @see scene.setScore
+ */
 var _score = 0;
 
 var _using_score = false;
@@ -19,14 +21,14 @@ var _game_running = false;
 exports = {
 
   /**
-   * There can be only one player. {@link scene.gameOver} is automatically called when the player is destroyed.
+   * There can be only one player; {@link scene.gameOver} is automatically called when the player is destroyed
    * @type Actor
    * @see scene.addPlayer
    */
   player: null,
 
   /**
-   * The total number of milliseconds that have elapsed since the start of the game.
+   * The total number of milliseconds that have elapsed since the start of the game
    * @type number
    */
   totalDt: 0,
@@ -38,13 +40,8 @@ exports = {
   totalAppDt: 0,
 
   /**
-   * Called every tick with the dt in milliseconds since the last tick.
-   * @callback onTickCallback
-   * @param    {number} [dt] - Used to normalise game speed based on real time
-   */
-  /**
    * Register a new tick handler
-   * @param  {onTickCallback} callback
+   * @param {onTickCallback} callback
    */
   onTick: function (cb) {
     _onTickHandlers.push(cb);
@@ -104,15 +101,12 @@ exports = {
   },
 
   /**
-   * When called, this function will restart the game.
-   * If scene has been set to use Weeby, calling this will return the user to the Weeby UI.
-   * @method scene.gameOver
+   * Transitions to the 'gameOver' state, similar to calling <code>scene.state.enter('gameOver')</code>
+   * if scene has been set to use Weeby, calling this will return the user to the Weeby UI
    * @param  {object}  [opts]
-   * @param  {number}  [opts.delay] - A delay between when this function is called and when the endgame logic is run.
-   * @param  {boolean} [opts.noGameoverScreen] - Optionally skip the "Game Over" text.
+   * @param  {number}  [opts.delay] - Delay, in milliseconds, before transitioning states
    */
   gameOver: function (opts) {
-
     if (_game_running === false ) { return; }
 
     opts = opts || {};
@@ -203,3 +197,9 @@ exports = {
     }
   ]
 };
+
+/**
+ * Called every tick with the dt in milliseconds since the last tick
+ * @callback onTickCallback
+ * @param {number} dt - Milliseconds elapsed since last tick
+ */

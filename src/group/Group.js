@@ -97,7 +97,10 @@ exports = Class(EntityPool, function () {
     performance.stop('Group:update');
   };
 
-  /** @var {function} Group.updatePool - Cache a reference to make faster direct calls */
+  /**
+   * Cache a reference to make faster direct calls
+   * @method Group#updatePool
+   */
   this.updatePool = suprPrototype.update;
 
   /**
@@ -129,7 +132,8 @@ exports = Class(EntityPool, function () {
   };
 
   /**
-   * @var {function} Group.forEachActiveActor - Call a function on each active actor
+   * Call a function on each active actor
+   * @method Group#forEachActiveActor
    * @param {forEachCallback} fn - The function to call on each active actor
    * @param {object} [ctx] - The context with which to call the callback
    */
