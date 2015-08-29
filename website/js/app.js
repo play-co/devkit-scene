@@ -45,7 +45,6 @@ function($scope, $location, $rootScope, $sce, $route, $routeParams) {
   $scope.$on('$routeChangeStart', function routeChanging(events, next, current) {
     if (next.params.exampleId !== undefined) {
       $scope.selectedExample = parseInt(next.params.exampleId);
-      $scope.showCode = next.params.code;
     }
   });
 

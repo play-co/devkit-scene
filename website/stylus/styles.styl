@@ -1,5 +1,5 @@
 $headerLinkHeightWithPadding = 60px
-$exampleHeight = 90px
+$exampleHeight = 60px
 $examplePadding = 10px
 $darkBGColor = #343F4D
 $offWhiteBGColor = #F5F5F5
@@ -10,7 +10,7 @@ $subtitleTextColor = #68D44B
 $sourceBtnColor = #2383E8
 $sourceBtnDisabledColor = #0D4983
 $sourceBtnComingSoonTextColor = #3393EA
-$sourceBtnWidth = 150px
+$sourceBtnWidth = 120px
 $footerHeight = 50px
 
 phone(phone-width = 100%, class-prefix = '')
@@ -72,19 +72,25 @@ body
   background-color $offWhiteBGColor
   margin 0
   font-family 'Roboto', sans-serif
-  font-weight 100
-  min-width 1240px
-  min-height 1070
+  font-weight 300
+  font-smoothing antialiased
+  min-width 960px
   width 100%
   height 100%
+
+  .shadow
+    box-shadow 0px 2px 5px 0px rgba(0,0,0,0.3)
+
 
   .header
     position relative
     background-color $darkBGColor
-    height 250px
+    height 160px
+    display flex
+    justify-content center
 
     .background-container
-      position absolute
+      max-width 960px
       display flex
       left 0
       top 0
@@ -97,164 +103,158 @@ body
 
       .logo
         align-self flex-start
-        width 180px
+        width 120px
         height auto
         margin-left 5%
-        margin-top 75px
+        margin-top 35px
 
-  .content
+  .content-wrapper
     display flex
-    justify-content space-between
+    justify-content center
+    .content
+      width 960px
+      display flex
+      justify-content space-between
 
-    .examples
-      width 100%
-      align-self stretch
-      padding-right 5%
-      padding-left 5%
-
-      .example-header
-        margin-top 40px
-        margin-bottom 25px
-        font-size 42px
-        color $lightBGTextColor
-
-      .example
-        height $exampleHeight + ($examplePadding * 2)
-        margin-bottom 12px
+      .examples
+        width 100%
         position relative
-        align-content center
-        box-shadow 0px 0px 8px 1px rgba(0.0, 0.0, 0.0, 0.3)
-        background-size auto 100%
-        background-position right
-        background-repeat no-repeat
-        background-color $whiteBGColor
-        overflow hidden
+        align-self stretch
+        padding-right 5%
+        padding-left 5%
 
-        .left
-          width 100%
-          height 100%
-          position absolute
-          display flex
-          flex-flow row
-          justify-content flex-start
-          align-items center
+        .example-header
+          margin-top 40px
+          margin-bottom 25px
+          font-size 25px
+          color $lightBGTextColor
+
+        .example
+          height $exampleHeight + ($examplePadding * 2)
+          margin-bottom 12px
+          position relative
           align-content center
-          z-index 2
-          pointer-events none
+          background-size auto 100%
+          background-position right
+          background-repeat no-repeat
+          background-color $whiteBGColor
+          overflow hidden
 
-          .icon
-            width $exampleHeight
-            height $exampleHeight
-            margin-right 20px
-            margin-left $examplePadding
-
-          .game-info
-            display flex
-            flex-flow column
-            justify-content center
-            align-content flex-start
-
-            .title
-              font-size 30px
-
-            .subtitle
-              color $subtitleTextColor
-              font-style italic
-              font-size 20px
-
-        .right
-          width 100%
-          height 100%
-          position absolute
-          display flex
-          flex-flow row
-          justify-content flex-end
-          align-content center
-
-
-          .example-bg-img
+          .left
+            width 100%
             height 100%
-            width auto
-            z-index 1
-            box-shadow 5px 0 5px 0 rgba(0,0,0,0.2)
-
-
-          .source-btn
-            z-index 0
             position absolute
-            text-decoration none
-            height 100%
-            width $sourceBtnWidth
             display flex
-            flex-flow column
-            justify-content center
-            align-content center
-            text-align center
+            flex-flow row
+            justify-content flex-start
             align-items center
-            background $sourceBtnColor
-            font-size 22px
-            color $darkBGTextColor
+            align-content center
+            z-index 2
+            pointer-events none
 
+            .icon
+              width $exampleHeight
+              height $exampleHeight
+              margin-right 20px
+              margin-left $examplePadding
 
-            .coming-soon
-              display none
-              font-size 16px
-              color $sourceBtnComingSoonTextColor
+            .game-info
+              display flex
+              flex-flow column
+              justify-content center
+              align-content flex-start
 
+              .title
+                font-size 25px
 
-            &.disabled
-              background $sourceBtnDisabledColor
-              .arrow
-                display none
-              .coming-soon
-                display block
+              .subtitle
+                color $subtitleTextColor
+                font-style italic
+                font-size 20px
 
-
-
-        &.selected
-          background-color $darkBGColor
-          color $darkBGTextColor
           .right
-            transform  translate(-($sourceBtnWidth), 0)
+            width 100%
+            height 100%
+            position absolute
+            display flex
+            flex-flow row
+            justify-content flex-end
+            align-content center
+
+
+            .example-bg-img
+              height 100%
+              width auto
+              z-index 1
+              box-shadow 5px 0 5px 0 rgba(0,0,0,0.2)
+
+
+            .source-btn
+              z-index 0
+              position absolute
+              text-decoration none
+              height 100%
+              width $sourceBtnWidth
+              display flex
+              flex-flow column
+              justify-content center
+              align-content center
+              text-align center
+              align-items center
+              background $sourceBtnColor
+              font-size 22px
+              color $darkBGTextColor
+
+
+              .coming-soon
+                display none
+                font-size 16px
+                color $sourceBtnComingSoonTextColor
+
+
+              &.disabled
+                background $sourceBtnDisabledColor
+                .arrow
+                  display none
+                .coming-soon
+                  display block
 
 
 
-      .docs
-        text-decoration none
-        border-radius 10px
-        background-color #f3f3f3
-        margin-bottom 12px
-        padding 10px
-        position relative
-        display flex
-        flex-flow row
-        justify-content space-between
-        align-content center
+          &.selected
+            background-color $darkBGColor
+            color $darkBGTextColor
+            .right
+              transform  translate(-($sourceBtnWidth), 0)
 
-        iframe
-          width 100%
-          height 100%
+        .example-footer
+          position absolute
+          bottom 0
+          font-weight 400
+          opacity 0.3
 
 
-    .phone-wrapper
-      padding-right 5%
-      margin-top -50px
-      .phone
-        phone(350px)
-        box-shadow 0px 0px 5px 1px rgba(0.0, 0.0, 0.0, 0.3)
+        .docs
+          text-decoration none
+          border-radius 10px
+          background-color #f3f3f3
+          margin-bottom 12px
+          padding 10px
+          position relative
+          display flex
+          flex-flow row
+          justify-content space-between
+          align-content center
 
-  .wrapper
-    min-height 100%
-    // the bottom margin is the negative value of the footer's height
-    margin 0 auto -($footerHeight)
+          iframe
+            width 100%
+            height 100%
 
 
-
-  footer, .push
-    margin-left 5%
-    // '.push' must be the same height as 'footer'
-    height $footerHeight
-    font-size 22px
-    opacity 0.5
+      .phone-wrapper
+        padding-right 5%
+        margin-top -65px
+        .phone
+          phone(250px)
 
 
