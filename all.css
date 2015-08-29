@@ -469,4 +469,10 @@ body .content-wrapper .content .phone-wrapper .phone #game-screen iframe {
     -ms-transform: translate(-180px, 0);
     transform: translate(-180px, 0);
   }
+  body .content-wrapper .content .phone-wrapper {
+    margin-top: -90px;
+  }
+  body .content-wrapper .content .phone-wrapper .phone {
+    min-width: 360px;
+  }
 }
