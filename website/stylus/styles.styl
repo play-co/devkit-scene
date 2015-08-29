@@ -85,12 +85,12 @@ body
   .header
     position relative
     background-color $darkBGColor
-    height 160px
+    height 30%
     display flex
     justify-content center
 
     .background-container
-      max-width 960px
+      min-width 960px
       display flex
       left 0
       top 0
@@ -112,7 +112,8 @@ body
     display flex
     justify-content center
     .content
-      width 960px
+      min-width 960px
+      width 100%
       display flex
       justify-content space-between
 
@@ -130,7 +131,7 @@ body
           color $lightBGTextColor
 
         .example
-          height $exampleHeight + ($examplePadding * 2)
+          height 14%
           margin-bottom 12px
           position relative
           align-content center
@@ -230,6 +231,7 @@ body
         .example-footer
           position absolute
           bottom 0
+          margin-top 40px
           font-weight 400
           opacity 0.3
 
@@ -254,7 +256,10 @@ body
       .phone-wrapper
         padding-right 5%
         margin-top -65px
+        width 30%
+
         .phone
-          phone(250px)
+          phone(100%)
+          min-width 244px
 
 
