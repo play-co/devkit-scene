@@ -1,27 +1,17 @@
 {
-  "tags": {
-    "allowUnknownTags": true
-  },
-  "source": {
-    "include": ["src"]
-  },
-  "plugins": [],
-  "templates": {
-    "applicationName": "Devkit Scene",
-    "disqus": "",
-    "googleAnalytics": "",
-    "openGraph": {
-      "title": "",
-      "type": "website",
-      "image": "",
-      "site_name": "",
-      "url": ""
+    "tags": {
+        "allowUnknownTags": true,
+        "dictionaries": ["jsdoc","closure"]
     },
-    "meta": {
-      "title": "",
-      "description": "",
-      "keyword": ""
+    "source": {
+        "include": ["src", "node_modules/devkit-entities/src"],
+        "includePattern": ".+\\.js(doc)?$",
+        "excludePattern": "(^|\\/|\\\\)_"
     },
-    "linenums": true
-  }
+    "plugins": [],
+    "templates": {
+        "applicationName": "Devkit Scene",
+        "cleverLinks": false,
+        "monospaceLinks": false
+    }
 }

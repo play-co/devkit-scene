@@ -1,4 +1,3 @@
-import communityart;
 import effects;
 import ui.resource.loader as loader;
 import entities.shapes.Line as Line;
@@ -6,11 +5,13 @@ import entities.shapes.Rect as Rect;
 
 var _onTickHandlers = [];
 
-/** Use the get and set method
+/**
+ * Use the get and set method
  * @var {number} _score
  * @private
  * @see scene.getScore
- * @see scene.setScore */
+ * @see scene.setScore
+ */
 var _score = 0;
 
 var _using_score = false;
@@ -20,14 +21,14 @@ var _game_running = false;
 exports = {
 
   /**
-   * There can be only one player. {@link scene.gameOver} is automatically called when the player is destroyed.
+   * There can be only one player; {@link scene.gameOver} is automatically called when the player is destroyed
    * @type Actor
    * @see scene.addPlayer
    */
   player: null,
 
   /**
-   * The total number of milliseconds that have elapsed since the start of the game.
+   * The total number of milliseconds that have elapsed since the start of the game
    * @type number
    */
   totalDt: 0,
@@ -39,15 +40,10 @@ exports = {
   totalAppDt: 0,
 
   /**
-   * Called every tick with the dt in milliseconds since the last tick.
-   * @callback onTickCallback
-   * @param    {number} [dt] - Used to normalise game speed based on real time
-   */
-  /**
    * Register a new tick handler
-   * @param  {onTickCallback} callback
+   * @param {onTickCallback} callback
    */
-  onTick: function(cb) {
+  onTick: function (cb) {
     _onTickHandlers.push(cb);
   },
 
@@ -58,15 +54,15 @@ exports = {
    * @param {object} [opts] - A few options to modify preloading behavior
    * @param {number} [opts.minDelay] - Allow a minimum amount of time to pass before the callback fires
    */
-  preload: function(resources, cb, opts) {
+  preload: function (resources, cb, opts) {
     opts = opts || {};
 
     // wrap in setTimeouts for safest preloading, new images render a tick etc
     var start = Date.now();
-    setTimeout(function() {
-      loader.preload(resources, function() {
+    setTimeout(function () {
+      loader.preload(resources, function () {
         var elapsed = Date.now() - start;
-        setTimeout(function() {
+        setTimeout(function () {
           cb && cb();
         }, Math.max(0, (opts.minDelay || 0) - elapsed));
       });
@@ -77,7 +73,7 @@ exports = {
    * Calling this function will set the score and update the score view.
    * @param {number} newScore
    */
-  setScore: function(score) {
+  setScore: function (score) {
     if (_game_running) {
       _score = score;
       _using_score = true;
@@ -92,28 +88,25 @@ exports = {
    * @param {number} amount
    * @see scene.setScore
    */
-  addScore: function(add) {
+  addScore: function (add) {
     this.setScore(this.getScore() + add);
   },
 
   /**
    * @returns {number}
    */
-  getScore: function() {
+  getScore: function () {
     _using_score = true;
     return _score;
   },
 
   /**
-   * When called, this function will restart the game.
-   * If scene has been set to use Weeby, calling this will return the user to the Weeby UI.
-   * @method scene.gameOver
+   * Transitions to the 'gameOver' state, similar to calling <code>scene.state.enter('gameOver')</code>
+   * if scene has been set to use Weeby, calling this will return the user to the Weeby UI
    * @param  {object}  [opts]
-   * @param  {number}  [opts.delay] - A delay between when this function is called and when the endgame logic is run.
-   * @param  {boolean} [opts.noGameoverScreen] - Optionally skip the "Game Over" text.
+   * @param  {number}  [opts.delay] - Delay, in milliseconds, before transitioning states
    */
-  gameOver: function(opts) {
-
+  gameOver: function (opts) {
     if (_game_running === false ) { return; }
 
     opts = opts || {};
@@ -131,21 +124,16 @@ exports = {
   },
 
   /**
-   * Sets the scene player, makes sure not to override an existing player.
-   * @param   {string|object} resource - resource key to be resolved by community art, or opts
-   * @param   {object}        [opts]   - contains options to be applied to the underlying {@link Actor}
-   * @returns {View}                   - The newly set player
+   * Sets the scene player, makes sure not to override an existing player
+   * @param {object} [opts] - options applied to the {@link Actor}
+   * @returns {Actor} - A special instance of Actor representing the player
    * @see scene.addActor
    */
-  addPlayer: function(resource, opts) {
-    if (this.player) {
-      throw new Error('You can only add one player!');
-    }
+  addPlayer: function (opts) {
+    if (this.player) { throw new Error('You can only add one player!'); }
 
-    this.player = this.addActor(resource, opts);
-    this.player.onDestroy(function() {
-      scene.gameOver();
-    });
+    this.player = this.addActor(opts);
+    this.player.onDestroy(function () { scene.gameOver(); });
     return this.player;
   },
 
@@ -166,20 +154,20 @@ exports = {
    * Reset and restart the entire game.
    * @method scene.reset
    */
-  reset: function() {
+  reset: function () {
     GC.app.reset();
   },
 
   __listeners__: [
     {
       event: 'restartUI',
-      cb: function() {
+      cb: function () {
         effects.commit();
       }
     },
     {
       event: 'restartGame',
-      cb: function() {
+      cb: function () {
         _onTickHandlers = [];
 
         this.player = null;
@@ -190,16 +178,16 @@ exports = {
     },
     {
       event: 'restartState',
-      cb: function(mode) {
+      cb: function (mode) {
         _game_running = true;
       }
     },
     // Tick
     {
       event: 'tickMSec',
-      cb: function(dt) {
+      cb: function (dt) {
         //  TODO: fix ontick so that it isnt bad
-        _onTickHandlers.forEach(function(handler) {
+        _onTickHandlers.forEach(function (handler) {
           handler(dt);
         });
 
@@ -209,3 +197,9 @@ exports = {
     }
   ]
 };
+
+/**
+ * Called every tick with the dt in milliseconds since the last tick
+ * @callback onTickCallback
+ * @param {number} dt - Milliseconds elapsed since last tick
+ */

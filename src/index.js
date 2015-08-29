@@ -42,6 +42,7 @@ scene._appClass = Class(GC.Application, function(supr) {
 var SCENE_MODULES = [
   jsio('import .core.internal'),
   jsio('import .core'),
+  jsio('import .assetregistry'),
   jsio('import .state'),
   jsio('import .utils'),
   jsio('import .animation'),

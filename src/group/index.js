@@ -19,7 +19,7 @@ exports = {
    * Change the default class for actors
    * @param  {Class} actorCtor
    */
-  setActorCtor: function(actorCtor) {
+  setActorCtor: function (actorCtor) {
     this.groupConfig._actorCtor = actorCtor;
   },
 
@@ -27,8 +27,8 @@ exports = {
    * Create a new actor in the defualt scene group
    * @see Group#addActor
    */
-  addActor: function(resource, opts) {
-    return this.group.addActor(resource, opts);
+  addActor: function (opts) {
+    return this.group.addActor(opts);
   },
 
   /**
@@ -36,7 +36,7 @@ exports = {
    * @param   {object} [opts]
    * @returns {Group}
    */
-  addGroup: function(opts) {
+  addGroup: function (opts) {
     opts = opts || {};
     opts.superview = this.stage;
     var result = new Group(opts);
@@ -51,7 +51,7 @@ exports = {
    * @param   {object} [opts]
    * @returns {Actor}  newInstance
    */
-  addCustomActor: function(ctor, opts) {
+  addCustomActor: function (ctor, opts) {
     var lookupName = ctor.name || ctor.__groupUID;
     if (!lookupName) {
       ctor.__groupUID = _groupUID++;
@@ -62,7 +62,7 @@ exports = {
       _customActorGroups[lookupName] = group = scene.addGroup({ ctor: ctor });
     }
 
-    return group.addActor(null, opts);
+    return group.addActor(opts);
   },
 
   /**
@@ -87,7 +87,7 @@ exports = {
     // Restart
     {
       event: 'restartGame',
-      cb: function() {
+      cb: function () {
         this.group.destroy(false);
 
         for (var i in this.groups) {
@@ -101,7 +101,7 @@ exports = {
     // Tick
     {
       event: 'tickSec',
-      cb: function(dt) {
+      cb: function (dt) {
         this.group.update(dt);
         for (var i = 0; i < this.groups.length; i++) {
           this.groups[i].update(dt);

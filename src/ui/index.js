@@ -6,8 +6,6 @@ import ui.SpriteView as SpriteView;
 import ui.ScoreView as ScoreView;
 import ui.TextView as TextView;
 
-import communityart;
-
 import scene.ui.BaseView as BaseView;
 import scene.ui.Background as Background;
 import scene.ui.UIView as UIView;
@@ -40,13 +38,12 @@ exports = {
   },
 
   /**
-   * Add a background layer to your game.
-   * @param  {object} resource
-   * @param  {object} [opts]
+   * Add a background layer to your game
+   * @param {object} opts
    * @see Background#addLayer
    */
-  addBackground: function(art, opts) {
-    return this.background.addLayer(art, opts);
+  addBackground: function (opts) {
+    return this.background.addLayer(opts);
   },
 
   /**
@@ -64,7 +61,7 @@ exports = {
    * @arg {object} [opts] contains options to be applied to {@link SceneText}
    * @returns {SceneText}
    */
-  addText: function(text, x, y, opts) {
+  addText: function (text, x, y, opts) {
     opts = opts || {};
 
     if (typeof x === 'object') {
@@ -102,7 +99,7 @@ exports = {
    * Remove a text view from the scene.
    * @param {SceneText} sceneText The instance to be removed
    */
-  removeText: function(sceneText) {
+  removeText: function (sceneText) {
     var extraViews = this.extraViews;
     var index = extraViews.indexOf(sceneText);
     if (index !== -1) {
@@ -118,7 +115,7 @@ exports = {
    * Set the default text color to be applied to any new text view created using {@link scene.addText}
    * @param {string} color
    */
-  setTextColor: function(color) {
+  setTextColor: function (color) {
     // TODO validate?
     this.text.color = color;
   },
@@ -127,7 +124,7 @@ exports = {
    * Set the default text font to be applied to any new text view created using {@link scene.addText}
    * @param {string} font
    */
-  setTextFont: function(font) {
+  setTextFont: function (font) {
     // TODO validate?
     this.text.font = font;
   },
@@ -146,13 +143,13 @@ exports = {
   /**
    * If a resource is specified, a {@link ScoreView} will be used (because they look great).
    * @method scene.showScore(2)
-   * @param   {string|object} resource - resource key to be resolved by community art, or opts
+   * @param   {string|object} resource - resource object, or opts
    * @param   {number}        x
    * @param   {number}        y
    * @param   {object}        [opts]
    * @returns {SceneScoreView}
    */
-  showScore: function(resource, x, y, opts) {
+  showScore: function (resource, x, y, opts) {
     var scoreView;
 
     // function type (1)
@@ -188,7 +185,7 @@ exports = {
     // function type (2)
     else {
       // Make a new ScoreView
-      var resourceOpts = communityart.getConfig(resource, 'ScoreView');
+      var resourceOpts = resource;
       opts = opts || {};
 
       opts.superview = opts.superview || this.textContainer;
@@ -227,7 +224,7 @@ exports = {
    * @see ScaleManager#resize
    * @see scene.updateScreenDimensions
    */
-  setScaleOptions: function(width, height, scaleMode) {
+  setScaleOptions: function (width, height, scaleMode) {
     this.scaleManager.resize(width, height, scaleMode);
     this.updateScreenDimensions();
   },
@@ -235,7 +232,7 @@ exports = {
   /**
    * Updates the internal scene variables relying on the scaleManager sizes
    */
-  updateScreenDimensions: function() {
+  updateScreenDimensions: function () {
     var scaleManager = this.scaleManager;
 
     this.internal.fire('updateScreenDimensions');
@@ -245,6 +242,7 @@ exports = {
     if (!this.view) { return; }
 
     scaleManager.scaleView(this.view);
+    this.updateLetterBox();
 
     var vs = this.view.style;
     vs.x = (scene.app.style.width - vs.width) / 2;
@@ -258,6 +256,26 @@ exports = {
       ts.width = bs.width = vs.width;
       ts.height = bs.height = vs.height;
     }
+  },
+
+  updateLetterBox: function() {
+    var pls = this.paddingLeft.style;
+    var prs = this.paddingRight.style;
+    var pts = this.paddingTop.style;
+    var pbs = this.paddingBottom.style;
+    var sm = this.scaleManager;
+
+    pts.y = -sm.paddingY;
+    pbs.y = sm.height;
+    pts.width = pbs.width = sm.width;
+    pts.height = pbs.height = sm.paddingY;
+    pts.visible = sm.paddingY > 0;
+
+    pls.x = -sm.paddingX;
+    prs.x = sm.width;
+    pls.width = prs.width = sm.paddingX;
+    pls.height = prs.height = sm.height;
+    pls.visible = prs.visible = sm.paddingX > 0;
   },
 
   /**
@@ -325,6 +343,17 @@ exports = {
       event: 'initUI',
       cb: function (app) {
 
+        this.inputOverlay = new View({ parent: this.view, infinite: true, zIndex: 999999 });
+        var touchManager = this.screen.touchManager;
+        // forward input events
+        this.inputOverlay.onInputStart = bind(touchManager, touchManager.downHandler);
+        this.inputOverlay.onInputSelect = bind(touchManager, touchManager.upHandler);
+        this.inputOverlay.onInputMove = bind(touchManager, touchManager.moveHandler);
+
+        this.paddingLeft = new View({ backgroundColor: "#000000", parent: this.inputOverlay });
+        this.paddingRight = new View({ backgroundColor: "#000000", parent: this.inputOverlay });
+        this.paddingTop = new View({ backgroundColor: "#000000", parent: this.inputOverlay });
+        this.paddingBottom = new View({ backgroundColor: "#000000", parent: this.inputOverlay });
         this.updateScreenDimensions();
 
         this.background = new Background({
@@ -349,13 +378,6 @@ exports = {
           zIndex: 100000
         });
 
-        this.inputOverlay = new View({ parent: this.view, infinite: true, zIndex: 999999 });
-        var touchManager = this.screen.touchManager;
-        // forward input events
-        this.inputOverlay.onInputStart = bind(touchManager, touchManager.downHandler);
-        this.inputOverlay.onInputSelect = bind(touchManager, touchManager.upHandler);
-        this.inputOverlay.onInputMove = bind(touchManager, touchManager.moveHandler);
-
         this.ui = new UIView({
           parent: this.inputOverlay,
           infinite: true
@@ -365,7 +387,7 @@ exports = {
     // Restart
     {
       event: 'restartUI',
-      cb: function(mode) {
+      cb: function (mode) {
         this.ui.reset();
 
         // TODO: Why is there an updatescreendimensions called at reset and init?
@@ -386,14 +408,14 @@ exports = {
     },
     {
       event: 'restartGame',
-      cb: function() {
+      cb: function () {
         this.background.reloadConfig();
       }
     },
     // Tick
     {
       event: 'tickSec',
-      cb: function(dt) {
+      cb: function (dt) {
         this.background.update(dt);
       }
     }
