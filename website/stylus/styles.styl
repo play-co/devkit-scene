@@ -1,6 +1,8 @@
 $headerLinkHeightWithPadding = 60px
-$exampleHeight = 60px
-$examplePadding = 10px
+$smallExampleHeight = 60px
+$smallExamplePadding = 10px
+$largeExampleHeight = 80px
+$largeExamplePadding = 15px
 $darkBGColor = #343F4D
 $offWhiteBGColor = #F5F5F5
 $whiteBGColor = #FFFFFF
@@ -10,8 +12,14 @@ $subtitleTextColor = #68D44B
 $sourceBtnColor = #2383E8
 $sourceBtnDisabledColor = #0D4983
 $sourceBtnComingSoonTextColor = #3393EA
-$sourceBtnWidth = 120px
+$smallSourceBtnWidth = 120px
+$largeSourceBtnWidth = 180px
 $footerHeight = 50px
+$smallPageWidth = 960px
+$largePageWidth = 1440px
+$largeHeaderHeight = 250px
+$smallHeaderHeight = 200px
+
 
 phone(phone-width = 100%, class-prefix = '')
   $dark-grey = #58595B
@@ -74,7 +82,7 @@ body
   font-family 'Roboto', sans-serif
   font-weight 300
   font-smoothing antialiased
-  min-width 960px
+  min-width $smallPageWidth
   width 100%
   height 100%
 
@@ -85,12 +93,12 @@ body
   .header
     position relative
     background-color $darkBGColor
-    height 30%
+    height $smallHeaderHeight
     display flex
     justify-content center
 
     .background-container
-      min-width 960px
+      max-width $smallPageWidth
       display flex
       left 0
       top 0
@@ -106,13 +114,14 @@ body
         width 120px
         height auto
         margin-left 5%
-        margin-top 35px
+        margin-top 55px
+
 
   .content-wrapper
     display flex
     justify-content center
     .content
-      min-width 960px
+      max-width $smallPageWidth
       width 100%
       display flex
       justify-content space-between
@@ -123,15 +132,16 @@ body
         align-self stretch
         padding-right 5%
         padding-left 5%
+        font-size 25px
 
         .example-header
           margin-top 40px
           margin-bottom 25px
-          font-size 25px
+
           color $lightBGTextColor
 
         .example
-          height 14%
+          height $smallExampleHeight + ($smallExamplePadding * 2)
           margin-bottom 12px
           position relative
           align-content center
@@ -154,19 +164,16 @@ body
             pointer-events none
 
             .icon
-              width $exampleHeight
-              height $exampleHeight
+              width $smallExampleHeight
+              height $smallExampleHeight
               margin-right 20px
-              margin-left $examplePadding
+              margin-left $smallExamplePadding
 
             .game-info
               display flex
               flex-flow column
               justify-content center
               align-content flex-start
-
-              .title
-                font-size 25px
 
               .subtitle
                 color $subtitleTextColor
@@ -195,7 +202,7 @@ body
               position absolute
               text-decoration none
               height 100%
-              width $sourceBtnWidth
+              width $smallSourceBtnWidth
               display flex
               flex-flow column
               justify-content center
@@ -226,7 +233,7 @@ body
             background-color $darkBGColor
             color $darkBGTextColor
             .right
-              transform  translate(-($sourceBtnWidth), 0)
+              transform  translate(-($smallSourceBtnWidth), 0)
 
         .example-footer
           position absolute
@@ -234,6 +241,7 @@ body
           margin-top 40px
           font-weight 400
           opacity 0.3
+          font-size 20px
 
 
         .docs
@@ -261,5 +269,62 @@ body
         .phone
           phone(100%)
           min-width 244px
+
+          #game-screen
+            overflow hidden
+            iframe
+              transform-origin left top
+
+  @media screen and (min-width: 1440px)
+    .header
+      height $largeHeaderHeight
+      .background-container
+        max-width $largePageWidth
+        .logo
+          width 180px
+          margin-top 55px
+
+    .content-wrapper
+      .content
+        max-width $largePageWidth
+        .examples
+          font-size 35px
+          .example-header
+            margin-top 40px
+            margin-bottom 25px
+
+          .example
+            height $largeExampleHeight + ($largeExamplePadding * 2)
+            .left
+
+              .icon
+                width $largeExampleHeight
+                height $largeExampleHeight
+                margin-right 20px
+                margin-left $largeExamplePadding
+
+              .game-info
+
+                .subtitle
+                  font-size 25px
+
+            .right
+
+              .example-bg-img
+                box-shadow 5px 0 5px 0 rgba(0,0,0,0.2)
+
+
+              .source-btn
+                width $largeSourceBtnWidth
+                font-size 27px
+
+
+                .coming-soon
+                  font-size 19px
+
+
+            &.selected
+              .right
+                transform  translate(-($largeSourceBtnWidth), 0)
 
 
