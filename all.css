@@ -65,7 +65,7 @@ body .header .background-container .logo {
 }
 body .header .background-container .dev-docs {
   position: relative;
-  top: 30px;
+  top: 20px;
   margin-left: 5%;
   color: #fff;
   text-decoration: none;
@@ -449,7 +449,7 @@ body .content-wrapper .content .phone-wrapper .phone #game-screen iframe {
     margin-top: 55px;
   }
   body .header .background-container .dev-docs {
-    top: 40px;
+    top: 25px;
     font-size: 28px;
   }
   body .content-wrapper .content {
