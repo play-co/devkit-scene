@@ -18,7 +18,6 @@ function autoScaleIFrameToParent (frameQuery, parentQuery) {
     frame.dataset['autoScaleTo'] = parentQuery;
     var iframeNativeWidth = frame.clientWidth;
     var iframeNativeHeight = frame.clientHeight;
-    console.log(iframeNativeWidth, iframeNativeHeight);
     var transformPropNames = ['-webkit-transform', '-moz-transform', '-o-transform', '-ms-transform', 'transform'];
     function updateFrameScale() {
       if (frame.parentNode == null || screen.parentNode == null) {
