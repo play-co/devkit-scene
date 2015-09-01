@@ -1,4 +1,4 @@
-function autoScaleIFrameToParent (frameQuery, parentQuery, iframeNativeWidth, iframeNativeHeight) {
+function autoScaleIFrameToParent (frameQuery, parentQuery) {
   function initAutoScale() {
     var screen = document.querySelector(parentQuery);
     if (screen == null) {
@@ -16,8 +16,9 @@ function autoScaleIFrameToParent (frameQuery, parentQuery, iframeNativeWidth, if
       return;
     }
     frame.dataset['autoScaleTo'] = parentQuery;
-    frame.style.width = iframeNativeWidth + 'px';
-    frame.style.height = iframeNativeHeight + 'px';
+    var iframeNativeWidth = frame.clientWidth;
+    var iframeNativeHeight = frame.clientHeight;
+    console.log(iframeNativeWidth, iframeNativeHeight);
     var transformPropNames = ['-webkit-transform', '-moz-transform', '-o-transform', '-ms-transform', 'transform'];
     function updateFrameScale() {
       if (frame.parentNode == null || screen.parentNode == null) {
@@ -40,7 +41,7 @@ function autoScaleIFrameToParent (frameQuery, parentQuery, iframeNativeWidth, if
     initAutoScale();
   }
 }
-autoScaleIFrameToParent('#game-screen iframe', '#game-screen', 640, 1136);
+autoScaleIFrameToParent('#game-screen iframe', '#game-screen');
 
 var app = angular.module('scenejs.app', [
   'ngRoute'
