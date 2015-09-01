@@ -37,6 +37,12 @@ body .header .background-container {
   display: -ms-flexbox;
   display: box;
   display: flex;
+  -webkit-box-orient: vertical;
+  -moz-box-orient: vertical;
+  -o-box-orient: vertical;
+  -webkit-flex-flow: column;
+  -ms-flex-flow: column;
+  flex-flow: column;
   left: 0;
   top: 0;
   width: 100%;
@@ -56,6 +62,14 @@ body .header .background-container .logo {
   height: auto;
   margin-left: 5%;
   margin-top: 55px;
+}
+body .header .background-container .dev-docs {
+  position: relative;
+  top: 30px;
+  margin-left: 5%;
+  color: #fff;
+  text-decoration: none;
+  font-size: 18px;
 }
 body .content-wrapper {
   display: -webkit-box;
@@ -433,6 +447,10 @@ body .content-wrapper .content .phone-wrapper .phone #game-screen iframe {
   body .header .background-container .logo {
     width: 180px;
     margin-top: 55px;
+  }
+  body .header .background-container .dev-docs {
+    top: 40px;
+    font-size: 28px;
   }
   body .content-wrapper .content {
     max-width: 1440px;
