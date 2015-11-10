@@ -42,6 +42,9 @@ exports = Class(function() {
    * Reset all valid callbacks to empty arrays
    */
   this.reset = function() {
+    // If a finger was previously down, we might've missed the end event
+    this._isDown = false;
+
     // Reset the callbacks
     this._callbacks = {};
     for (var i = 0; i < VALID_CALLBACKS.length; i++) {
