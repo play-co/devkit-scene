@@ -3,12 +3,11 @@
   * @see https://play.google.com/store/apps/details?id=au.com.phil&hl=en
   * @requires scene 0.1.9
   */
-import scene;
-import communityart as art;
+import scene, communityart;
 
 exports = scene(function () {
-  var background = scene.addBackground(art('abduction/bg'));
-  var player = scene.addPlayer(art('abduction/player'), {
+  var background = scene.addBackground(scene.getConfig('abduction/bg'));
+  var player = scene.addPlayer(scene.getConfig('abduction/player'), {
     ay: 2000,
     vy: -2400,
     followTouches: { x: true },
@@ -23,7 +22,7 @@ exports = scene(function () {
 
   var platforms = scene.addGroup();
   var platformSpawnFunction = function (x, y, index) {
-    var platform = platforms.addActor(art('abduction/platform'), { x: x, y: y, fixed: true });
+    var platform = platforms.addActor(scene.getConfig('abduction/platform'), { x: x, y: y, fixed: true });
     platform.onEntered(scene.camera.bottomWall, function () {
       platform.destroy();
     });

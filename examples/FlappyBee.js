@@ -5,22 +5,24 @@ var PARALLAX_THEME = 'flappybee/parallax/forest';
 scene.setTextColor("#FFFFFF");
 
 scene.state.add('splash', function() {
-  scene.addImage(communityart('flappybee/instructions'), scene.screen.centerX, scene.screen.centerY);
-  scene.addBackground(communityart(PARALLAX_THEME));
-}, { tapToContinue: true });
+  var splash = scene.addImage(scene.getConfig('flappybee/instructions'));
+  splash.x = scene.screen.centerX;
+  splash.y = scene.screen.centerY;
+  scene.addBackground(scene.getConfig(PARALLAX_THEME));
+}, { tapToContinue: true, clearOnTransition: true });
 
 /**
   * @requires scene master
   */
 exports = scene(function() {
   // Add backgrounds
-  scene.addBackground(communityart(PARALLAX_THEME));
+  scene.addBackground(scene.getConfig(PARALLAX_THEME));
 
-  // Show the score
-  scene.showScore(communityart('flappybee/scoreText'), scene.screen.centerX, 50);
+  // Show the scoreText
+  scene.showScore(scene.getConfig('flappybee/scoreText'), scene.screen.centerX, 50);
 
   // Add the player
-  var player = scene.addPlayer(communityart('flappybee/bee/yellow'), {
+  var player = scene.addPlayer(scene.getConfig('flappybee/bee/yellow'), {
     zIndex: 1000,
     vx: 200,
     ay: 2000
@@ -53,7 +55,7 @@ exports = scene(function() {
       y2: scene.screen.height * 0.75
     }),
     function (x, y, index) {
-      var logArt = communityart('flappybee/log');
+      var logArt = scene.getConfig('flappybee/log');
       var topLog = obstacles.addActor(logArt, { x: x, y: y - 150 - logArt.height, flipY: true });
       var bottomLog = obstacles.addActor(logArt, { x: x, y: y + 150 });
 
@@ -65,7 +67,7 @@ exports = scene(function() {
 
       // EXTRA: Honey for a point
       if (Math.random() < 0.5) {
-        var honey = scene.addActor(communityart('flappybee/honeyDrop'), { x: x + logArt.width / 2, y: y });
+        var honey = scene.addActor(scene.getConfig('flappybee/honeyDrop'), { x: x + logArt.width / 2, y: y });
         effects.hover(honey, { loop: true });
         effects.squish(honey, { loop: true });
         scene.onCollision(player, honey, function() {

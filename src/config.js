@@ -5,7 +5,8 @@ var DEFAULT_CONFIG = {
     scene: false,
     touchManager: false
   },
-  performance: false
+  performance: false,
+  safeActorOpts: true
 };
 
 /**

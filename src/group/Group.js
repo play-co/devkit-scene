@@ -9,7 +9,7 @@ exports = Class(EntityPool, function () {
   /**
    * A group of {@link Actor}s, with various functionality for operating on the group as a whole.
    * @constructs
-   * @arg {object} [opts]
+   * @arg {Object} [opts]
    * @extends EntityPool
    */
   this.init = function (opts) {
@@ -22,17 +22,29 @@ exports = Class(EntityPool, function () {
     this._spawnerManager = new SpawnerManager();
   };
 
+  // Local copies of a couple things because speed
+  var deepClone = GLOBAL.deepClone;
+  var safeActorOpts = SCENE_CONFIG.safeActorOpts;
   /**
    * A function which adds an actor to the scene, using this group.
-   * @param {object} [opts] - Contains options to be applied to the underlying {@link Actor}
+   * @param {Object} [opts] - Contains options to be applied to the underlying {@link Actor}
+   * @param {Object} [instanceOpts] - Deprecated.  Merged in to the first object.  Note: this will pollute opts object with any shared values.
    * @see Actor#reset
    */
-  this.addActor = function (opts) {
+  this.addActor = function (opts, instanceOpts) {
     performance.start('Group:addActor');
     // set some defaults
-    opts = opts || {};
+    if (opts && safeActorOpts) {
+      opts = deepClone(opts);
+    } else {
+      opts = {};
+    }
     opts.x = opts.x === void 0 ? scene.camera.x + scene.camera.width / 2 : opts.x;
     opts.y = opts.y === void 0 ? scene.camera.y + scene.camera.height / 2 : opts.y;
+
+    if (instanceOpts) {
+      combine(opts, instanceOpts);
+    }
 
     // obtain a new actor
     var result = this.obtain(opts);

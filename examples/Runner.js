@@ -13,9 +13,9 @@ scene.setTextColor('#222');
 
 exports = scene(function() {
   // Add the background and the player
-  var background = scene.addBackground(communityart('runner/bg'));
+  var background = scene.addBackground(scene.getConfig('runner/bg'));
 
-  var player = scene.addPlayer(communityart('runner/player'), {
+  var player = scene.addPlayer(scene.getConfig('runner/player'), {
     x: 50,
     y: 100,
     ay: 2800,
@@ -30,7 +30,7 @@ exports = scene(function() {
   scene.showScore(10, 10);
 
   var platforms = scene.addGroup();
-  var platformArt = communityart('runner/platform');
+  var platformArt = scene.getConfig('runner/platform');
   var platformSpacing = platformArt.hitBounds.width * 1.2;
 
   var platformSpawnFunction = function(x, y, index) {

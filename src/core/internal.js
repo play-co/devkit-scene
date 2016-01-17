@@ -85,7 +85,13 @@ var startGame = function() {
   scene.internal.game.reset();
 };
 
-var resetGame = function(mode) {
+/**
+ * @param  mode
+ * @param  {Object}  [opts]
+ * @param  {Boolean} [opts.skipState] - Don't reset the state mechanisms, only the visual stuff
+ */
+var resetGame = function(mode, opts) {
+  opts = opts || {};
   // Avoid state loops
   if (_isResetting) {
     console.error('Already resetting (call to scene.game.reset while in a reset)');
@@ -97,7 +103,9 @@ var resetGame = function(mode) {
 
   fire('restartUI', mode);
   fire('restartGame', mode);
-  fire('restartState', mode);
+  if (!opts.skipState) {
+    fire('restartState', mode);
+  }
 
   performance.stop('reset');
   _isResetting = false;

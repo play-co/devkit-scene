@@ -9,9 +9,9 @@ var SHIELD_COUNT = 6;
 
 exports = scene(function() {
   // Add the background and the player
-  var background = scene.addBackground(communityart('geom/bg'));
+  var background = scene.addBackground(scene.getConfig('geom/bg'));
 
-  var playerArt = communityart('geom/player');
+  var playerArt = scene.getConfig('geom/player');
   var player = scene.addPlayer(playerArt, {
     followTouches: { x: true, y: true },
     health: SHIELD_COUNT,
@@ -31,7 +31,7 @@ exports = scene(function() {
   var bullets = scene.addGroup();
   var MAX_BULLET_BOUNCES = 3;
 
-  var bulletArt = communityart('geom/laser');
+  var bulletArt = scene.getConfig('geom/laser');
   var bulletSpawnFunction = function(x, y, index) {
     var bullet = bullets.addActor(bulletArt, { x: x, y: y });
     var targX = player.x + player.vx;
@@ -104,13 +104,13 @@ exports = scene(function() {
     }
 
     var enemyType = randRangeI(0, 3);
-    var enemy = enemies.addActor(communityart('geom/enemy_' + enemyType), { x: x, y: y });
+    var enemy = enemies.addActor(scene.getConfig('geom/enemy_' + enemyType), { x: x, y: y });
 
     enemy.onTick(enemnyAIs[enemyType]);
 
     enemy.onDestroy(function() {
       effects.explode(enemy, {
-        images: communityart('geom/smokeParticles'),
+        images: scene.getConfig('geom/smokeParticles'),
         scale: 0.75,
         speed: 2
       });
@@ -148,10 +148,12 @@ exports = scene(function() {
   // ---- UI ---- //
 
   var shieldImages = [];
-  var shieldArt = communityart('geom/shieldUI');
+  var shieldArt = scene.getConfig('geom/shieldUI');
   var shieldImageStartX = (scene.screen.width - SHIELD_COUNT * shieldArt.width) / 2;
   for (var i = 0; i < SHIELD_COUNT; i++) {
-    var image = scene.addImage(shieldArt, shieldImageStartX + i * shieldArt.width, scene.screen.height - 100);
+    var image = scene.addImage(shieldArt);
+    image.x = shieldImageStartX + i * shieldArt.width;
+    image.y = scene.screen.height - 100;
     shieldImages.push(image);
   }
 

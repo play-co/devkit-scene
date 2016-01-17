@@ -2,14 +2,14 @@ import scene, effects, communityart;
 
 scene.state.add('splash', function() {
   var text = scene.addText('Avoider: Tap to start!');
-  scene.addBackground(communityart('avoider/starscape'));
+  scene.addBackground(scene.getConfig('avoider/starscape'));
   scene.state.onExit(function () { text.destroy(); });
 }, { tapToContinue: true });
 
 exports = scene(function() {
   scene.showScore(10, 10);
 
-  var player = scene.addPlayer(communityart('avoider/rocket_ship'), {
+  var player = scene.addPlayer(scene.getConfig('avoider/rocket_ship'), {
     followTouches: true
   });
 
@@ -22,7 +22,7 @@ exports = scene(function() {
       new scene.shape.Line({ x: scene.screen.width, y: 0, y2: scene.screen.height })
     ],
     function (x, y, index) {
-      var enemy = enemies.addActor(communityart('avoider/enemy_ship'), { x: x, y: y });
+      var enemy = enemies.addActor(scene.getConfig('avoider/enemy_ship'), { x: x, y: y });
       enemy.onExited(scene.camera, function() { enemy.destroy(); });
       enemy.headToward(player.x, player.y, randRange(100, 200));
     }, 750

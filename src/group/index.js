@@ -27,8 +27,8 @@ exports = {
    * Create a new actor in the defualt scene group
    * @see Group#addActor
    */
-  addActor: function (opts) {
-    return this.group.addActor(opts);
+  addActor: function (opts, instOpts) {
+    return this.group.addActor(opts, instOpts);
   },
 
   /**
@@ -48,10 +48,10 @@ exports = {
    * Automatically obtain a group for this class, and return an actor instance from that group.
    * This function provides an easy way to add custom actors to scene.
    * @param   {Actor}  ctor
-   * @param   {object} [opts]
+   * @param   {object} [opts] see Group#addActor
    * @returns {Actor}  newInstance
    */
-  addCustomActor: function (ctor, opts) {
+  addCustomActor: function (ctor, opts, instOpts) {
     var lookupName = ctor.name || ctor.__groupUID;
     if (!lookupName) {
       ctor.__groupUID = _groupUID++;
@@ -62,7 +62,7 @@ exports = {
       _customActorGroups[lookupName] = group = scene.addGroup({ ctor: ctor });
     }
 
-    return group.addActor(opts);
+    return group.addActor(opts, instOpts);
   },
 
   /**

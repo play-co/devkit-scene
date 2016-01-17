@@ -6,13 +6,13 @@ import scene, effects, communityart;
 exports = scene(function() {
 
   // Add the background
-  scene.addBackground(communityart('swarm/bg'));
+  scene.addBackground(scene.getConfig('swarm/bg'));
 
   // Show the game score
   scene.showScore(10, 10);
 
   // Add the player
-  var player = scene.addPlayer(communityart('swarm/spaceship'), {
+  var player = scene.addPlayer(scene.getConfig('swarm/spaceship'), {
     zIndex: 50,
     vy: -250,
     followTouches: { x: true, xMultiplier: 0.3 },
@@ -43,7 +43,7 @@ exports = scene(function() {
     new scene.shape.Line({ x: 30, y: -100, x2: scene.screen.width - 30 }),
     function(x, y, index, spawner) {
       var enemyType = randRangeI(3);
-      var enemy = enemies.addActor(communityart('swarm/enemy_type' + enemyType), {
+      var enemy = enemies.addActor(scene.getConfig('swarm/enemy_type' + enemyType), {
         x: x, y: y, vy: enemySpeeds[enemyType]
       });
       enemy.onEntered(scene.camera.bottomWall, function() { enemy.destroy(); });
@@ -54,7 +54,7 @@ exports = scene(function() {
   var bullets = scene.addGroup();
   bullets.addSpawner(new scene.spawner.Timed(player,
     function (x, y, index) {
-      var bullet = bullets.addActor(communityart('swarm/laser'), { x: x, y: y, vy: -2500 });
+      var bullet = bullets.addActor(scene.getConfig('swarm/laser'), { x: x, y: y, vy: -2500 });
       bullet.onEntered(scene.camera.topWall, function() { bullet.destroy(); });
     }, 75, true
   ));
@@ -91,7 +91,7 @@ exports = scene(function() {
   var triggerBoss = function() {
     enemySpawner.active = false;
 
-    var boss = scene.addActor(communityart('swarm/enemy_boss'), {
+    var boss = scene.addActor(scene.getConfig('swarm/enemy_boss'), {
       x: scene.camera.x + scene.camera.width / 2 - 100,
       y: scene.camera.y - 200,
       vy: player.vy / 2,
@@ -99,7 +99,7 @@ exports = scene(function() {
     });
 
     var bossBullets = scene.addSpawner(new scene.spawner.Timed(boss, function(x, y) {
-      var bullet = scene.addActor(communityart('swarm/particleCircle'), { x: x, y: y });
+      var bullet = scene.addActor(scene.getConfig('swarm/particleCircle'), { x: x, y: y });
       bullet.headToward(player.x, player.y, 100);
       bullet.onExited(scene.camera, function() { bullet.destroy(); });
       scene.onCollision(bullet, player, function() { player.destroy(); });

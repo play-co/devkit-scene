@@ -188,9 +188,15 @@ exports = Class(View, function () {
     } else if (opts.scrollX === void 0 && opts.scrollY === void 0) {
       // Static image - auto-fits, centered, maintains aspect ratio
       var img = new Image({ url: opts.url || opts.image });
-      var map = img.getMap();
-      var w = opts.width || map.width || this.style.width;
-      var h = opts.height || map.height || this.style.height;
+      var w, h;
+      if (opts.autoSize) {
+        var map = img.getMap();
+        w = map.width;
+        h = map.height;
+      } else {
+        w = opts.width || this.style.width;
+        h = opts.height || this.style.height;
+      }
       var scale = 1;
       var scaleMode = scene.scaleManager.scaleMode;
       if (scaleMode === scene.SCALE_MODE.LOCK_WIDTH) {

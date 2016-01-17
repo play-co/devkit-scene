@@ -120,5 +120,24 @@ pickRandomProperty = function(obj) {
   return obj[result];
 };
 
+/**
+ * @see https://github.com/petkaantonov/bluebird/wiki/Optimization-killers#3-managing-arguments
+ * @global
+ * @param  argumentsObject
+ * @return {Array}
+ */
+argumentsToArray = function(argumentsObject) {
+  var args = new Array(argumentsObject.length);
+  for(var i = 0, j = args.length; i < j; ++i) {
+    // i is always valid index in the arguments object
+    args[i] = argumentsObject[i];
+  }
+  return args;
+};
+
+deepClone = function(obj) {
+  return JSON.parse(JSON.stringify(obj));
+};
+
 DEG_TO_RAD = Math.PI / 180;
 RAD_TO_DEG = 180 / Math.PI;

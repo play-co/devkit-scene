@@ -129,10 +129,10 @@ exports = {
    * @returns {Actor} - A special instance of Actor representing the player
    * @see scene.addActor
    */
-  addPlayer: function (opts) {
+  addPlayer: function (opts, isntOpts) {
     if (this.player) { throw new Error('You can only add one player!'); }
 
-    this.player = this.addActor(opts);
+    this.player = this.addActor(opts, isntOpts);
     this.player.onDestroy(function () { scene.gameOver(); });
     return this.player;
   },
