@@ -113,12 +113,6 @@ exports = Class(function() {
 
     this._enteringState = true;
 
-    var args = [ this.gameData ];
-    // Store extra arguments to pass to state function.
-    for (var i = 3; i < arguments.length; i++) {
-      args.push(arguments[i]);
-    }
-
     this._runStateExitFunctions();
 
     if (clearScene) {
@@ -129,7 +123,15 @@ exports = Class(function() {
 
     if (runInitializer) {
       var onEnter = data.onEnter;
-      onEnter && onEnter.apply(null, args);
+      if (onEnter) {
+        var args = [ this.gameData ];
+        // Store extra arguments to pass to state function.
+        for (var i = 3; i < arguments.length; i++) {
+          args.push(arguments[i]);
+        }
+
+        onEnter.apply(null, args);
+      };
     }
 
     data.tapToContinue && this.tapToContinue();
