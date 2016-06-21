@@ -116,7 +116,7 @@ exports = {
 
     setTimeout(function () {
       if (this.weebyData) {
-        weeby.finishGame({ score: this.getScore() });
+        scene.weebyGameOver();
       } else {
         scene.state.enter('gameOver');
       }

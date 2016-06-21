@@ -7,6 +7,7 @@ exports = {
    * @default null
    */
   weebyData: null,
+  weeby: null,
 
   /**
    * Use a Weeby loop!
@@ -14,13 +15,11 @@ exports = {
    */
   useWeeby: function() {
     import weeby;
-
-    var _gameView;
-    function getGameView() {
-      return _gameView || (_gameView = weeby.createGameView(GC.app));
-    }
+    scene.weeby = weeby;
 
     this.mode('weeby', function () {
+      weeby.setGameView(scene.view);
+
       weeby.launchUI();
       weeby.onStartGame = function (data) {
         scene.weebyData = data;
@@ -31,8 +30,10 @@ exports = {
     GC.on('app', function () {
       scene.mode('weeby');
     });
+  },
 
-    Object.defineProperty(scene._appClass.prototype, 'rootView', { get: getGameView });
+  weebyGameOver: function() {
+    scene.weeby.finishGame({ score: this.getScore() });
   }
 
 };
